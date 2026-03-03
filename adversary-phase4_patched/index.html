@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ADVERSARY</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Pixelated rendering so scaled NES pixels stay crisp */
+    canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+  </style>
+</head>
+<body>
+  <!--
+    Phaser 3 via CDN.
+    Phase 8+: Replace with a local bundled copy (Vite/Webpack) to support
+    tree-shaking, faster loads, and offline use.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+
+  <!-- ── Core systems (must load before scenes) ── -->
+  <script src="src/systems/GameState.js"></script>
+  <script src="src/systems/SaveManager.js"></script>
+  <script src="src/systems/InputManager.js"></script>
+
+  <!-- ── Shared scene utilities (must load before scene classes) ── -->
+  <script src="src/scenes/sceneUtils.js"></script>
+
+  <!-- ── Phase 2: Entities & UI (must load before GameScene) ── -->
+  <script src="src/entities/PlayerEntity.js"></script>
+  <script src="src/ui/HUD.js"></script>
+
+  <!-- ── Phase 3: Level data & systems (must load before GameScene) ── -->
+  <script src="src/levels/Level1.js"></script>
+  <script src="src/levels/Level2.js"></script>
+  <script src="src/levels/Level3.js"></script>
+  <script src="src/levels/Level4.js"></script>
+  <script src="src/levels/LevelRegistry.js"></script>
+  <script src="src/systems/LadderSystem.js"></script>
+
+  <!-- ── Phase 4: Enemy & Item systems (must load before GameScene) ── -->
+  <script src="src/entities/EnemyEntity.js"></script>
+  <script src="src/entities/enemies/HollowSoldier.js"></script>
+  <script src="src/entities/enemies/HollowArcher.js"></script>
+  <script src="src/entities/enemies/HollowKnight.js"></script>
+  <script src="src/entities/enemies/Skeleton.js"></script>
+  <script src="src/entities/enemies/Gargoyle.js"></script>
+  <script src="src/entities/enemies/HollowKingBoss.js"></script>
+  <script src="src/systems/EnemyManager.js"></script>
+  <script src="src/systems/ItemSystem.js"></script>
+  <script src="src/systems/PhantomSystem.js"></script>
+
+  <!-- ── Scenes ── -->
+  <script src="src/scenes/BootScene.js"></script>
+  <script src="src/scenes/PreloadScene.js"></script>
+  <script src="src/scenes/TitleScene.js"></script>
+  <script src="src/scenes/GameScene.js"></script>
+  <script src="src/scenes/PauseScene.js"></script>
+  <script src="src/scenes/InterludeScene.js"></script>
+  <script src="src/scenes/LoopCompleteScene.js"></script>
+  <script src="src/scenes/GameOverScene.js"></script>
+  <script src="src/scenes/HighScoreScene.js"></script>
+
+  <!-- ── Game entry point ── -->
+  <script src="src/main.js"></script>
+</body>
+</html>
