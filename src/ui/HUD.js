@@ -44,13 +44,19 @@ class HUD {
 
     const TEXT_STYLE = {
       fontFamily: 'monospace',
-      fontSize:   '7px',
+      fontSize:   '8px',
       color:      '#ffffff',
+      stroke:     '#000000',
+      strokeThickness: 2,
+      shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
     };
     const SMALL_STYLE = {
       fontFamily: 'monospace',
-      fontSize:   '6px',
-      color:      '#aaaaaa',
+      fontSize:   '7px',
+      color:      '#cccccc',
+      stroke:     '#000000',
+      strokeThickness: 2,
+      shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
     };
 
     // ── Background strip at top (subtle dark bar) ──────────────────────
@@ -90,7 +96,7 @@ class HUD {
       .setScrollFactor(0).setDepth(11);
 
     // ── Soul directional arrow (hidden by default) ────────────────────
-    this.soulArrow = s.add.text(0, 0, '', { fontFamily: 'monospace', fontSize: '8px', color: '#ffdd44' })
+    this.soulArrow = s.add.text(0, 0, '', { fontFamily: 'monospace', fontSize: '9px', color: '#ffdd44', stroke: '#000000', strokeThickness: 2 })
       .setScrollFactor(0).setDepth(11)
       .setVisible(false);
 
@@ -108,7 +114,8 @@ class HUD {
     this._bossBarBorderGfx = borderGfx;
 
     this._bossLabel = s.add.text(W / 2, H - 22, 'THE DARK KNIGHT', {
-      fontFamily: 'monospace', fontSize: '6px', color: '#ff6666',
+      fontFamily: 'monospace', fontSize: '7px', color: '#ff6666',
+      stroke: '#000000', strokeThickness: 2,
     }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(11).setVisible(false);
 
     this._bossBarVisible = false;

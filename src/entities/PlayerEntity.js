@@ -37,7 +37,7 @@ const JUMP_HOLD_MAX_FRAMES = 3;
 const PLAYER_GRAVITY      = 650;
 
 /** Plunging attack downward velocity. */
-const PLUNGE_VELOCITY     = 240;
+const PLUNGE_VELOCITY     = 160;
 
 /** Knockback velocities on taking a hit. X is in the away-direction. */
 const KNOCKBACK_VX        = 120;

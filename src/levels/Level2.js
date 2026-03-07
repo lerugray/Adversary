@@ -31,6 +31,7 @@
  */
 
 const Level2Data = {
+  name: 'Cresthollow',
 
   // ── World dimensions ───────────────────────────────────────────────────
   worldWidth:  256,

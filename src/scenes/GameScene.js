@@ -104,6 +104,71 @@ class GameScene extends Phaser.Scene {
       this._buildWeakPoints(data.weakPoints);
       this._bossThresholdY = data.bossThreshold.y;
     }
+
+    // ── Dark Souls-style level name overlay ─────────────────────────────
+    this._showLevelName(data.name || `Level ${levelNum}`, levelNum);
+  }
+
+  /**
+   * Show the level name centered on screen, fade in then fade out.
+   * Styled like Dark Souls area discovery text.
+   */
+  _showLevelName(name, levelNum) {
+    const W = this.cameras.main.width;
+    const H = this.cameras.main.height;
+
+    // Thin horizontal rule lines above and below the text
+    const lineW = 100;
+    const lineY1 = H * 0.38;
+    const lineY2 = H * 0.58;
+
+    const topLine = this.add.rectangle(W / 2, lineY1, lineW, 1, 0xaaaaaa, 0.6)
+      .setScrollFactor(0).setDepth(50).setAlpha(0);
+    const bottomLine = this.add.rectangle(W / 2, lineY2, lineW, 1, 0xaaaaaa, 0.6)
+      .setScrollFactor(0).setDepth(50).setAlpha(0);
+
+    // Level name text (large)
+    const nameText = this.add.text(W / 2, H * 0.46, name, {
+      fontFamily: 'monospace',
+      fontSize: '10px',
+      color: '#ffffff',
+      stroke: '#000000',
+      strokeThickness: 3,
+      shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true },
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(50).setAlpha(0);
+
+    // Subtitle (smaller)
+    const subText = this.add.text(W / 2, H * 0.53, `— Level ${levelNum} —`, {
+      fontFamily: 'monospace',
+      fontSize: '6px',
+      color: '#999999',
+      stroke: '#000000',
+      strokeThickness: 2,
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(50).setAlpha(0);
+
+    const elements = [topLine, bottomLine, nameText, subText];
+
+    // Fade in
+    this.tweens.add({
+      targets: elements,
+      alpha: 1,
+      duration: 800,
+      ease: 'Sine.easeIn',
+      onComplete: () => {
+        // Hold for 2 seconds, then fade out
+        this.time.delayedCall(2000, () => {
+          this.tweens.add({
+            targets: elements,
+            alpha: 0,
+            duration: 1000,
+            ease: 'Sine.easeOut',
+            onComplete: () => {
+              elements.forEach(el => el.destroy());
+            }
+          });
+        });
+      }
+    });
   }
 
   // ── Level geometry builders ───────────────────────────────────────────────

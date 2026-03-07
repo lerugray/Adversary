@@ -29,6 +29,7 @@
  */
 
 const Level4Data = {
+  name: 'The Pale Spire',
 
   // ── World dimensions ───────────────────────────────────────────────────
   worldWidth:  256,

@@ -32,6 +32,7 @@
  */
 
 const Level3Data = {
+  name: 'The Iron Passage',
 
   // ── World dimensions ───────────────────────────────────────────────────
   worldWidth:  256,

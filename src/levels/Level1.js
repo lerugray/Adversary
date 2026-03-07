@@ -36,6 +36,7 @@
 const Level1Data = {
 
   // ── World dimensions ───────────────────────────────────────────────────
+  name: 'The Ashen Hearth',
   worldWidth:  256,
   worldHeight: 320,
 
