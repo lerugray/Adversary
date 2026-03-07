@@ -88,6 +88,9 @@ class GameScene extends Phaser.Scene {
     // ── Mana regen timer (for Chloranthy Ring) ─────────────────────
     this._manaRegenTimer = 0;
 
+    // ── Hazard System (rolling skulls — Donkey Kong style) ────────────
+    this.hazardSystem = new HazardSystem(this);
+
     // ── Phantom System (anti-grinding ghost — skips Level 4) ─────────
     this.phantomSystem = new PhantomSystem(this);
 
@@ -620,6 +623,9 @@ class GameScene extends Phaser.Scene {
 
     // Chests & Mimics
     this.chestSystem.update(delta, this.player);
+
+    // Rolling hazards
+    this.hazardSystem.update(delta, this.player);
 
     // Phantom
     this.phantomSystem.update(delta, this.player);

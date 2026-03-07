@@ -24,8 +24,8 @@
  */
 
 // ── Constants ───────────────────────────────────────────────────────────────
-const PHANTOM_BASE_TRIGGER_TIME  = 20000; // ms before Phantom spawns
-const PHANTOM_MIN_TRIGGER_TIME   = 8000;  // minimum trigger time
+const PHANTOM_BASE_TRIGGER_TIME  = 35000; // ms before Phantom spawns
+const PHANTOM_MIN_TRIGGER_TIME   = 15000; // minimum trigger time
 const PHANTOM_LOOP_REDUCTION     = 3000;  // ms reduced per loop after first
 const PHANTOM_SPEED              = 40;    // px/s movement toward player
 const PHANTOM_DAMAGE             = 2;     // damage on contact

@@ -96,7 +96,10 @@ class LevelUpSystem {
     this._selectedIndex = 0;
     GameState.player.level += 1;
 
-    // Freeze the player so they stop moving during the menu
+    // Freeze everything — pause physics so enemies stop mid-stride
+    this.scene.physics.world.pause();
+
+    // Also zero out the player so they don't drift when physics resumes
     if (this.scene.player && this.scene.player.sprite) {
       this.scene.player.sprite.body.setVelocity(0, 0);
       this.scene.player.sprite.body.setAllowGravity(false);
@@ -338,7 +341,9 @@ class LevelUpSystem {
     this.isActive = false;
     this._phase = LVLUP_PHASE.NONE;
 
-    // Unfreeze the player
+    // Unfreeze everything — resume physics
+    this.scene.physics.world.resume();
+
     if (this.scene.player && this.scene.player.sprite) {
       this.scene.player.sprite.body.setAllowGravity(true);
     }
