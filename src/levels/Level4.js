@@ -59,8 +59,10 @@ const Level4Data = {
     // Tier 1 — Approach ledge left
     { x: 0,   y: 190, w: 100, h: 10,  tier: 1 },
 
-    // Tier 2 — Approach ledge right (staggered for climbing)
-    { x: 130, y: 155, w: 90,  h: 10,  tier: 2 },
+    // Tier 2 — Approach ledge right (with stepping stones for short jump)
+    { x: 105, y: 178, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 130, y: 165, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 155, y: 155, w: 90,  h: 10,  tier: 2 },
 
     // Tier 3 — Approach ledge, leads to arena
     { x: 0,   y: 120, w: 110, h: 10,  tier: 3 },

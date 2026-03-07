@@ -153,7 +153,7 @@ class HollowSoldier extends EnemyEntity {
     for (const plat of platforms) {
       if (frontX >= plat.x && frontX <= plat.x + plat.w) {
         const dist = plat.y - feetY;
-        if (dist >= 0 && dist < 12) {
+        if (dist >= -4 && dist < 12) {
           return false; // ground exists ahead
         }
       }

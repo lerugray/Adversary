@@ -120,8 +120,8 @@ const Level1Data = {
     { x: 60,  y: 232, type: 'hollow_soldier' },   // Tier 1 left ledge
     { x: 200, y: 232, type: 'hollow_archer'  },   // Tier 1 right ledge
     { x: 90,  y: 187, type: 'hollow_soldier' },   // Tier 2 mid
-    { x: 155, y: 140, type: 'hollow_knight'  },   // Tier 3 right mid
-    { x: 130, y: 97,  type: 'hollow_knight'  },   // Tier 4 centre (far from ladders)
+    { x: 160, y: 140, type: 'hollow_knight'  },   // Tier 3 right mid (ladder D is at x:188)
+    { x: 120, y: 97,  type: 'hollow_knight'  },   // Tier 4 center (ladders at x:80 and x:188)
   ],
 
   // ── Decorative elements ────────────────────────────────────────────────

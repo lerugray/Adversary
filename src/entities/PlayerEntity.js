@@ -21,27 +21,27 @@
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-/** Horizontal walk speed (px/s). Castlevania 1 feel — deliberate, not floaty. */
-const PLAYER_SPEED        = 80;
+/** Horizontal walk speed (px/s). Donkey Kong feel — slow, deliberate. */
+const PLAYER_SPEED        = 50;
 
 /** Jump impulse (initial upward velocity). Donkey Kong — barely a hop. */
 const JUMP_VELOCITY       = -155;
 
 /** Extra upward boost per frame while holding jump (variable jump). */
-const JUMP_HOLD_FORCE     = -6;
+const JUMP_HOLD_FORCE     = -4;
 
 /** Max frames the jump-hold boost is applied. */
-const JUMP_HOLD_MAX_FRAMES = 5;
+const JUMP_HOLD_MAX_FRAMES = 3;
 
 /** Gravity applied to the player body (px/s²). */
-const PLAYER_GRAVITY      = 600;
+const PLAYER_GRAVITY      = 650;
 
 /** Plunging attack downward velocity. */
-const PLUNGE_VELOCITY     = 380;
+const PLUNGE_VELOCITY     = 240;
 
 /** Knockback velocities on taking a hit. X is in the away-direction. */
-const KNOCKBACK_VX        = 160;
-const KNOCKBACK_VY        = -200;
+const KNOCKBACK_VX        = 120;
+const KNOCKBACK_VY        = -160;
 
 /** Invincibility frame duration in milliseconds (~1.5 s). */
 const IFRAME_DURATION     = 1500;
@@ -279,9 +279,9 @@ class PlayerEntity {
     }
 
     // ── Horizontal movement ───────────────────────────────────────────
-    const speedBonus = (GameState.player.speedBonus || 0) * 8;
+    const speedBonus = (GameState.player.speedBonus || 0) * 5;
     const acc = GameState.player.accessory;
-    const ringSpeed = (acc && acc.effect === 'speed') ? 10 : 0;
+    const ringSpeed = (acc && acc.effect === 'speed') ? 6 : 0;
     const moveSpeed = PLAYER_SPEED + speedBonus + ringSpeed;
 
     if (input.isLeftHeld()) {
@@ -428,11 +428,22 @@ class PlayerEntity {
     this.state       = STATE.PLUNGE;
     this.attackCooldownTimer = ATTACK_COOLDOWN;
 
-    // Slam downward
+    // Slam downward at fixed speed (disable gravity so it doesn't accelerate)
+    this.sprite.body.setAllowGravity(false);
     this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
 
-    // Activate hitbox below the player for the entire plunge
-    this._activateHitbox(10, 8);
+    // Activate hitbox below the player — stays active for entire plunge
+    this.hitbox.body.enable = true;
+    this.hitbox.body.setSize(10, 8);
+    this.hitboxTimer = 0; // don't use the auto-expire timer
+    this._positionHitbox();
+
+    // Show plunge slash visual (stays visible until landing)
+    if (this._slashVisual) {
+      this._slashVisual.setSize(10, 8);
+      this._slashVisual.setVisible(true);
+      this._slashVisual.setFillStyle(0xff8800, 0.9);
+    }
 
     // Tint orange to signal plunge
     this.sprite.setTint(0xff8800);
@@ -441,6 +452,7 @@ class PlayerEntity {
   _endPlunge() {
     this.isPlunging = false;
     this.state      = STATE.IDLE;
+    this.sprite.body.setAllowGravity(true);
     this.sprite.setTint(0x88ccff);
     this._deactivateHitbox();
 
@@ -719,11 +731,14 @@ class PlayerEntity {
 
     this.state           = STATE.IDLE;
     this.knockbackActive = false;
-    this.isInvincible    = false;
-    this.iframeTimer     = 0;
     this.isPlunging      = false;
     this._deactivateHitbox();
     this._exitDuck();
+
+    // Grant i-frames on respawn so enemies can't immediately kill you
+    this.isInvincible = true;
+    this.iframeTimer  = 2000; // 2 seconds of protection
+    this._startFlash();
   }
 
   /** Called when the player walks over the soul orb. */

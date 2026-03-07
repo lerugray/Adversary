@@ -53,22 +53,29 @@ const Level2Data = {
     // Tier 0 — Ground
     { x: 0,   y: 275, w: 256, h: 45,  tier: 0 },
 
-    // Tier 1 — Narrow city ledges
+    // Tier 1 — Narrow city ledges (with stepping stones for short jump)
     { x: 0,   y: 235, w: 70,  h: 10,  tier: 1 },
-    { x: 130, y: 228, w: 80,  h: 10,  tier: 1 },
+    { x: 82,  y: 233, w: 20,  h: 8,   tier: 1 },  // stepping stone
+    { x: 110, y: 230, w: 20,  h: 8,   tier: 1 },  // stepping stone
+    { x: 138, y: 228, w: 80,  h: 10,  tier: 1 },
     { x: 220, y: 240, w: 36,  h: 10,  tier: 1 },
 
-    // Tier 2 — Crumbling tower floors
+    // Tier 2 — Crumbling tower floors (with stepping stone)
     { x: 0,   y: 190, w: 100, h: 10,  tier: 2 },
-    { x: 170, y: 185, w: 50,  h: 10,  tier: 2 },
+    { x: 118, y: 188, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 148, y: 186, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 176, y: 185, w: 50,  h: 10,  tier: 2 },
 
-    // Tier 3 — Archer perch section (narrow ledges with sightlines)
+    // Tier 3 — Archer perch section (with stepping stones)
     { x: 0,   y: 148, w: 55,  h: 10,  tier: 3 },
-    { x: 110, y: 145, w: 70,  h: 10,  tier: 3 },
+    { x: 67,  y: 147, w: 20,  h: 8,   tier: 3 },  // stepping stone
+    { x: 95,  y: 146, w: 20,  h: 8,   tier: 3 },  // stepping stone
+    { x: 118, y: 145, w: 70,  h: 10,  tier: 3 },
     { x: 210, y: 150, w: 46,  h: 10,  tier: 3 },
 
-    // Tier 4 — Collapsed stairway
+    // Tier 4 — Collapsed stairway (with stepping stone)
     { x: 0,   y: 108, w: 60,  h: 10,  tier: 4 },
+    { x: 72,  y: 107, w: 20,  h: 8,   tier: 4 },  // stepping stone
     { x: 100, y: 105, w: 80,  h: 10,  tier: 4 },
 
     // Tier 5 — Upper tower remnants
@@ -103,9 +110,9 @@ const Level2Data = {
 
   // ── Enemy spawn markers ────────────────────────────────────────────────
   enemySpawns: [
-    // Ground patrol
-    { x: 160, y: 267, type: 'hollow_soldier' },
-    { x: 50,  y: 267, type: 'skeleton' },
+    // Ground patrol — spaced from player spawn (x:28)
+    { x: 170, y: 267, type: 'hollow_soldier' },
+    { x: 130, y: 267, type: 'skeleton' },
 
     // Tier 1 — soldier guards narrow ledge
     { x: 155, y: 220, type: 'hollow_soldier' },

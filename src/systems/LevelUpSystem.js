@@ -1,23 +1,19 @@
 /**
  * LevelUpSystem.js — Handles XP thresholds, level-up detection, and choice overlay.
  *
- * When the player's XP reaches the threshold for the next level, gameplay pauses
- * and a choice menu appears. The player picks one of four bonuses:
- *   1. Max HP +1
- *   2. Attack Power +1
- *   3. Max Mana +3
- *   4. Speed Boost
+ * Two-phase UI (Dark Souls style):
+ *   Phase 1: Big "LEVEL UP" announcement fills the screen, waits for any button press
+ *   Phase 2: Choice menu appears — pick a bonus, then confirm with a second press
  *
  * Usage:
  *   // In GameScene.create():
  *   this.levelUpSystem = new LevelUpSystem(this);
  *
  *   // In GameScene.update():
- *   this.levelUpSystem.update(inputManager);
+ *   this.levelUpSystem.update(inputManager, delta);
  */
 
 // XP required to reach each level (index = target level)
-// Level 2 = 80, Level 3 = 200, etc.
 const LEVEL_XP_THRESHOLDS = [
   0,     // level 0 (unused)
   0,     // level 1 (starting)
@@ -39,165 +35,283 @@ function xpForLevel(level) {
   if (level < LEVEL_XP_THRESHOLDS.length) {
     return LEVEL_XP_THRESHOLDS[level];
   }
-  // Beyond table: 3700 + 900 per level past 10
   return 3700 + (level - 10) * 900;
 }
 
 // The four level-up choices
 const LEVELUP_CHOICES = [
-  { key: 'hp',     label: 'MAX HP +1',       desc: 'Increase maximum health by 1' },
-  { key: 'attack', label: 'ATTACK POWER +1', desc: 'Deal more damage per hit' },
-  { key: 'mana',   label: 'MAX MANA +3',     desc: 'Increase maximum mana by 3' },
-  { key: 'speed',  label: 'SPEED BOOST',     desc: 'Move and attack slightly faster' },
+  { key: 'hp',     label: 'MAX HP +1',       desc: 'Increase maximum health' },
+  { key: 'attack', label: 'ATTACK +1',       desc: 'Deal more damage per hit' },
+  { key: 'mana',   label: 'MAX MANA +3',     desc: 'Increase maximum mana' },
+  { key: 'speed',  label: 'SPEED BOOST',     desc: 'Move and attack faster' },
 ];
 
+// UI phases
+const LVLUP_PHASE = {
+  NONE:       'none',
+  ANNOUNCE:   'announce',   // big "LEVEL UP" splash
+  CHOOSE:     'choose',     // selection menu
+  CONFIRM:    'confirm',    // "Are you sure?" prompt
+};
+
 class LevelUpSystem {
-  /**
-   * @param {Phaser.Scene} scene
-   */
   constructor(scene) {
     this.scene = scene;
-
-    /** True while the level-up menu is showing */
     this.isActive = false;
-
-    /** Currently highlighted choice index (0-3) */
+    this._phase = LVLUP_PHASE.NONE;
     this._selectedIndex = 0;
-
-    /** Overlay UI elements (created on demand, destroyed after choice) */
-    this._overlay = null;
-    this._choiceTexts = [];
-    this._titleText = null;
-    this._descText = null;
-
-    /** Debounce inputs so menu doesn't fly through options */
     this._inputCooldown = 0;
+    this._startupDelay = 1000;
+    this._elements = []; // all UI elements for easy cleanup
   }
 
-  /**
-   * Check if the player has enough XP to level up, and if so, show the menu.
-   * Called each frame from GameScene.update().
-   * @param {InputManager} input
-   * @param {number} delta
-   */
   update(input, delta) {
     if (this.isActive) {
-      this._updateMenu(input, delta);
+      this._inputCooldown -= delta;
+      if (this._inputCooldown > 0) return;
+
+      switch (this._phase) {
+        case LVLUP_PHASE.ANNOUNCE: this._updateAnnounce(input); break;
+        case LVLUP_PHASE.CHOOSE:   this._updateChoose(input, delta); break;
+        case LVLUP_PHASE.CONFIRM:  this._updateConfirm(input); break;
+      }
       return;
     }
 
-    // Check for level-up
-    const p = GameState.player;
-    const nextLevel = p.level + 1;
-    const needed = xpForLevel(nextLevel);
+    // Don't trigger during startup or if player is dead
+    if (this._startupDelay > 0) { this._startupDelay -= delta; return; }
+    if (this.scene.player && this.scene.player.state === STATE.DEAD) return;
 
+    const p = GameState.player;
+    const needed = xpForLevel(p.level + 1);
     if (p.xp >= needed) {
       this._triggerLevelUp();
     }
   }
 
-  // ── Trigger level-up ──────────────────────────────────────────────────────
+  // ── Phase 1: Trigger ────────────────────────────────────────────────────
 
   _triggerLevelUp() {
     this.isActive = true;
     this._selectedIndex = 0;
-    this._inputCooldown = 300; // brief delay before accepting input
-
     GameState.player.level += 1;
 
-    this._buildOverlay();
+    // Freeze the player so they stop moving during the menu
+    if (this.scene.player && this.scene.player.sprite) {
+      this.scene.player.sprite.body.setVelocity(0, 0);
+      this.scene.player.sprite.body.setAllowGravity(false);
+    }
+
+    this._showAnnounce();
   }
 
-  // ── Build the choice overlay ──────────────────────────────────────────────
+  // ── Phase 1: Big announcement screen ────────────────────────────────────
 
-  _buildOverlay() {
+  _showAnnounce() {
+    this._phase = LVLUP_PHASE.ANNOUNCE;
+    this._inputCooldown = 800; // hold on screen before accepting input
+    this._destroyAll();
+
     const s = this.scene;
-    const W = s.cameras.main.width;   // 256
-    const H = s.cameras.main.height;  // 240
+    const W = s.cameras.main.width;
+    const H = s.cameras.main.height;
 
-    // Dark background
-    this._overlay = s.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.75)
-      .setScrollFactor(0).setDepth(50);
+    // Full black overlay
+    this._add(s.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.85)
+      .setScrollFactor(0).setDepth(50));
 
-    // Title
-    this._titleText = s.add.text(W / 2, 40, `LEVEL UP!  LV ${GameState.player.level}`, {
-      fontFamily: 'monospace', fontSize: '8px', color: '#ffdd44',
-    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
+    // Decorative line above
+    this._add(s.add.rectangle(W / 2, H / 2 - 30, 160, 1, 0xffdd44, 0.6)
+      .setScrollFactor(0).setDepth(51));
 
-    // Subtitle
-    this._subtitleText = s.add.text(W / 2, 56, 'Choose one:', {
-      fontFamily: 'monospace', fontSize: '6px', color: '#aaaaaa',
-    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
+    // Big title
+    this._add(s.add.text(W / 2, H / 2 - 12, 'LEVEL UP', {
+      fontFamily: 'monospace', fontSize: '14px', color: '#ffdd44',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
-    // Choice texts
-    this._choiceTexts = [];
-    const startY = 80;
-    const gap = 28;
+    // Level number
+    this._add(s.add.text(W / 2, H / 2 + 8, `Level ${GameState.player.level}`, {
+      fontFamily: 'monospace', fontSize: '9px', color: '#ccaa33',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    // Decorative line below
+    this._add(s.add.rectangle(W / 2, H / 2 + 24, 160, 1, 0xffdd44, 0.6)
+      .setScrollFactor(0).setDepth(51));
+
+    // Prompt (fades in after cooldown via alpha tween)
+    const prompt = s.add.text(W / 2, H / 2 + 48, '- Press any button -', {
+      fontFamily: 'monospace', fontSize: '6px', color: '#888866',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51).setAlpha(0);
+    this._add(prompt);
+
+    // Fade in the prompt after the cooldown
+    s.time.delayedCall(800, () => {
+      if (prompt.active) {
+        s.tweens.add({
+          targets: prompt, alpha: 1, duration: 400, yoyo: true,
+          repeat: -1, ease: 'Sine.easeInOut',
+        });
+      }
+    });
+
+    // Screen flash
+    s.cameras.main.flash(500, 255, 220, 80, false);
+  }
+
+  _updateAnnounce(input) {
+    if (input.isAttackJustPressed() || input.isJumpJustPressed() || input.isStartJustPressed()) {
+      this._showChooseMenu();
+    }
+  }
+
+  // ── Phase 2: Choice menu ────────────────────────────────────────────────
+
+  _showChooseMenu() {
+    this._phase = LVLUP_PHASE.CHOOSE;
+    this._inputCooldown = 300;
+    this._selectedIndex = 0;
+    this._destroyAll();
+
+    const s = this.scene;
+    const W = s.cameras.main.width;
+    const H = s.cameras.main.height;
+
+    // Dark overlay
+    this._add(s.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.82)
+      .setScrollFactor(0).setDepth(50));
+
+    // Header
+    this._add(s.add.text(W / 2, 24, `LEVEL ${GameState.player.level}`, {
+      fontFamily: 'monospace', fontSize: '10px', color: '#ffdd44',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    this._add(s.add.text(W / 2, 40, 'Choose your reward', {
+      fontFamily: 'monospace', fontSize: '7px', color: '#aa9944',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    // Divider
+    this._add(s.add.rectangle(W / 2, 52, 180, 1, 0x665522, 0.8)
+      .setScrollFactor(0).setDepth(51));
+
+    // Choice items
+    this._choiceLabels = [];
+    this._choiceDescs = [];
+    const startY = 72;
+    const gap = 32;
 
     for (let i = 0; i < LEVELUP_CHOICES.length; i++) {
       const choice = LEVELUP_CHOICES[i];
       const y = startY + i * gap;
 
       const label = s.add.text(W / 2, y, choice.label, {
-        fontFamily: 'monospace', fontSize: '7px', color: '#ffffff',
+        fontFamily: 'monospace', fontSize: '9px', color: '#ffffff',
       }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
 
-      const desc = s.add.text(W / 2, y + 12, choice.desc, {
-        fontFamily: 'monospace', fontSize: '5px', color: '#888888',
+      const desc = s.add.text(W / 2, y + 14, choice.desc, {
+        fontFamily: 'monospace', fontSize: '6px', color: '#888888',
       }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
 
-      this._choiceTexts.push({ label, desc });
+      this._add(label);
+      this._add(desc);
+      this._choiceLabels.push(label);
+      this._choiceDescs.push(desc);
     }
 
-    // Cursor indicator
+    // Cursor arrow
     this._cursor = s.add.text(0, 0, '>', {
-      fontFamily: 'monospace', fontSize: '8px', color: '#ffdd44',
+      fontFamily: 'monospace', fontSize: '10px', color: '#ffdd44',
     }).setScrollFactor(0).setDepth(51);
+    this._add(this._cursor);
 
-    this._updateCursor();
+    // Footer hint
+    this._add(s.add.text(W / 2, H - 16, 'Up/Down to select, Attack to choose', {
+      fontFamily: 'monospace', fontSize: '5px', color: '#555544',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
-    // Flash to announce level-up
-    s.cameras.main.flash(300, 255, 220, 80, false);
+    this._updateChooseCursor();
   }
 
-  _updateCursor() {
+  _updateChooseCursor() {
     if (!this._cursor) return;
     const W = this.scene.cameras.main.width;
-    const startY = 80;
-    const gap = 28;
+    const startY = 72;
+    const gap = 32;
     const y = startY + this._selectedIndex * gap;
-    this._cursor.setPosition(W / 2 - 70, y - 4);
+    this._cursor.setPosition(W / 2 - 65, y - 4);
 
-    // Highlight selected, dim others
-    for (let i = 0; i < this._choiceTexts.length; i++) {
-      const selected = i === this._selectedIndex;
-      this._choiceTexts[i].label.setColor(selected ? '#ffdd44' : '#666666');
-      this._choiceTexts[i].desc.setColor(selected ? '#aaaaaa' : '#444444');
+    for (let i = 0; i < this._choiceLabels.length; i++) {
+      const sel = i === this._selectedIndex;
+      this._choiceLabels[i].setColor(sel ? '#ffdd44' : '#555555');
+      this._choiceDescs[i].setColor(sel ? '#aaaaaa' : '#333333');
     }
   }
 
-  // ── Menu input handling ─────────────────────────────────────────────────
-
-  _updateMenu(input, delta) {
-    this._inputCooldown -= delta;
-    if (this._inputCooldown > 0) return;
-
+  _updateChoose(input, delta) {
     if (input.isUpHeld()) {
-      this._selectedIndex = (this._selectedIndex + 3) % 4; // wrap up
-      this._updateCursor();
+      this._selectedIndex = (this._selectedIndex + 3) % 4;
+      this._updateChooseCursor();
       this._inputCooldown = 180;
     } else if (input.isDownHeld()) {
-      this._selectedIndex = (this._selectedIndex + 1) % 4; // wrap down
-      this._updateCursor();
+      this._selectedIndex = (this._selectedIndex + 1) % 4;
+      this._updateChooseCursor();
       this._inputCooldown = 180;
     }
 
     if (input.isAttackJustPressed() || input.isJumpJustPressed()) {
-      this._applyChoice(this._selectedIndex);
+      this._showConfirm(this._selectedIndex);
     }
   }
 
-  // ── Apply the chosen bonus ────────────────────────────────────────────────
+  // ── Phase 3: Confirmation ───────────────────────────────────────────────
+
+  _showConfirm(index) {
+    this._phase = LVLUP_PHASE.CONFIRM;
+    this._inputCooldown = 400; // prevent accidental double-tap
+    this._confirmIndex = index;
+    this._destroyAll();
+
+    const s = this.scene;
+    const W = s.cameras.main.width;
+    const H = s.cameras.main.height;
+    const choice = LEVELUP_CHOICES[index];
+
+    // Dark overlay
+    this._add(s.add.rectangle(W / 2, H / 2, W, H, 0x000000, 0.85)
+      .setScrollFactor(0).setDepth(50));
+
+    // Show what they picked
+    this._add(s.add.text(W / 2, H / 2 - 30, choice.label, {
+      fontFamily: 'monospace', fontSize: '12px', color: '#ffdd44',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    this._add(s.add.text(W / 2, H / 2 - 12, choice.desc, {
+      fontFamily: 'monospace', fontSize: '7px', color: '#aa9944',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    // Divider
+    this._add(s.add.rectangle(W / 2, H / 2 + 4, 140, 1, 0x665522, 0.6)
+      .setScrollFactor(0).setDepth(51));
+
+    // Confirm / Cancel
+    this._add(s.add.text(W / 2, H / 2 + 22, 'Attack = Confirm', {
+      fontFamily: 'monospace', fontSize: '7px', color: '#88cc88',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+
+    this._add(s.add.text(W / 2, H / 2 + 38, 'Jump = Go Back', {
+      fontFamily: 'monospace', fontSize: '7px', color: '#cc8888',
+    }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
+  }
+
+  _updateConfirm(input) {
+    if (input.isAttackJustPressed()) {
+      this._applyChoice(this._confirmIndex);
+    } else if (input.isJumpJustPressed()) {
+      // Go back to choice menu
+      this._showChooseMenu();
+    }
+  }
+
+  // ── Apply the chosen bonus ──────────────────────────────────────────────
 
   _applyChoice(index) {
     const choice = LEVELUP_CHOICES[index];
@@ -206,39 +320,46 @@ class LevelUpSystem {
     switch (choice.key) {
       case 'hp':
         p.maxHp += 1;
-        p.hp = p.maxHp; // full heal on HP upgrade
+        p.hp = p.maxHp;
         break;
       case 'attack':
         p.attackPowerBonus += 1;
         break;
       case 'mana':
         p.maxMana += 3;
-        p.mana = p.maxMana; // full mana restore on mana upgrade
+        p.mana = p.maxMana;
         break;
       case 'speed':
         p.speedBonus += 1;
         break;
     }
 
-    this._destroyOverlay();
+    this._destroyAll();
     this.isActive = false;
+    this._phase = LVLUP_PHASE.NONE;
 
-    // Brief celebratory flash
+    // Unfreeze the player
+    if (this.scene.player && this.scene.player.sprite) {
+      this.scene.player.sprite.body.setAllowGravity(true);
+    }
+
     this.scene.cameras.main.flash(200, 100, 255, 100, false);
   }
 
-  // ── Cleanup ───────────────────────────────────────────────────────────────
+  // ── Element tracking & cleanup ──────────────────────────────────────────
 
-  _destroyOverlay() {
-    if (this._overlay) { this._overlay.destroy(); this._overlay = null; }
-    if (this._titleText) { this._titleText.destroy(); this._titleText = null; }
-    if (this._subtitleText) { this._subtitleText.destroy(); this._subtitleText = null; }
-    if (this._cursor) { this._cursor.destroy(); this._cursor = null; }
+  _add(element) {
+    this._elements.push(element);
+    return element;
+  }
 
-    for (const ct of this._choiceTexts) {
-      if (ct.label) ct.label.destroy();
-      if (ct.desc) ct.desc.destroy();
+  _destroyAll() {
+    for (const el of this._elements) {
+      if (el && el.active) el.destroy();
     }
-    this._choiceTexts = [];
+    this._elements = [];
+    this._cursor = null;
+    this._choiceLabels = [];
+    this._choiceDescs = [];
   }
 }

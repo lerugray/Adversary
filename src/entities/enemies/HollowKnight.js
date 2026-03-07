@@ -45,11 +45,11 @@ class HollowKnight extends EnemyEntity {
     this.attackWindup     = 0;
     this.isAttacking      = false;
 
-    // Ladder climbing state
+    // Ladder climbing disabled — was causing enemies to freeze on ladders
     this._isClimbing      = false;
     this._climbZone       = null;
-    this._climbDirection  = 0;   // -1 = up, 1 = down
-    this._ladderCooldown  = 2000; // don't re-check ladder immediately
+    this._climbDirection  = 0;
+    this._canUseLadders   = false; // disabled until ladder AI is more robust
   }
 
   getDropTable() {
@@ -73,9 +73,8 @@ class HollowKnight extends EnemyEntity {
 
     // Tick timers
     if (this.attackCooldown > 0) this.attackCooldown -= delta;
-    if (this._ladderCooldown > 0) this._ladderCooldown -= delta;
 
-    // Climbing takes priority
+    // Climbing takes priority (currently disabled)
     if (this._isClimbing) {
       this._updateClimbing(delta, player);
       return;
@@ -119,10 +118,10 @@ class HollowKnight extends EnemyEntity {
       this.patrolDir *= -1;
     }
 
-    // Check for ladders while patrolling (only when grounded)
-    if (this.sprite.body.blocked.down && this._ladderCooldown <= 0) {
-      this._tryLadder();
-    }
+    // Ladder climbing disabled for now
+    // if (this._canUseLadders && this.sprite.body.blocked.down) {
+    //   this._tryLadder();
+    // }
   }
 
   _chase(delta, player) {
@@ -251,7 +250,8 @@ class HollowKnight extends EnemyEntity {
     for (const plat of platforms) {
       if (frontX >= plat.x && frontX <= plat.x + plat.w) {
         const dist = plat.y - feetY;
-        if (dist >= 0 && dist < 12) return false;
+        // Allow small tolerance below surface (physics can push feet 1-2px into platform)
+        if (dist >= -4 && dist < 12) return false;
       }
     }
     return true;

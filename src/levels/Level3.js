@@ -54,22 +54,28 @@ const Level3Data = {
     // Tier 0 — Ground (iron floor)
     { x: 0,   y: 318, w: 256, h: 42,  tier: 0 },
 
-    // Tier 1 — Entry ledges
+    // Tier 1 — Entry ledges (with stepping stones)
     { x: 0,   y: 278, w: 90,  h: 10,  tier: 1 },
-    { x: 140, y: 275, w: 80,  h: 10,  tier: 1 },
+    { x: 102, y: 277, w: 20,  h: 8,   tier: 1 },  // stepping stone
+    { x: 128, y: 276, w: 20,  h: 8,   tier: 1 },  // stepping stone
+    { x: 152, y: 275, w: 80,  h: 10,  tier: 1 },
     { x: 230, y: 280, w: 26,  h: 10,  tier: 1 },
 
-    // Tier 2 — Narrow iron grating
+    // Tier 2 — Narrow iron grating (with stepping stones)
     { x: 0,   y: 235, w: 70,  h: 10,  tier: 2 },
-    { x: 130, y: 230, w: 70,  h: 10,  tier: 2 },
+    { x: 82,  y: 233, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 110, y: 231, w: 20,  h: 8,   tier: 2 },  // stepping stone
+    { x: 138, y: 230, w: 70,  h: 10,  tier: 2 },
     { x: 218, y: 238, w: 38,  h: 10,  tier: 2 },
 
     // Tier 3 — GAUNTLET SECTION: wide connected platforms forcing combat
     { x: 0,   y: 192, w: 256, h: 10,  tier: 3 },
 
-    // Tier 4 — Tight climb continues
+    // Tier 4 — Tight climb continues (with stepping stone)
     { x: 0,   y: 155, w: 55,  h: 10,  tier: 4 },
-    { x: 110, y: 148, w: 90,  h: 10,  tier: 4 },
+    { x: 67,  y: 153, w: 20,  h: 8,   tier: 4 },  // stepping stone
+    { x: 93,  y: 150, w: 20,  h: 8,   tier: 4 },  // stepping stone
+    { x: 118, y: 148, w: 90,  h: 10,  tier: 4 },
     { x: 220, y: 155, w: 36,  h: 10,  tier: 4 },
 
     // Tier 5 — More gauntlet: wide platform with enemies

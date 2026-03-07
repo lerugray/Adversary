@@ -279,7 +279,7 @@ class Mimic extends EnemyEntity {
     for (const plat of platforms) {
       if (frontX >= plat.x && frontX <= plat.x + plat.w) {
         const dist = plat.y - feetY;
-        if (dist >= 0 && dist < 12) return false;
+        if (dist >= -4 && dist < 12) return false;
       }
     }
     return true;
