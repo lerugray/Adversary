@@ -79,6 +79,9 @@ class GameScene extends Phaser.Scene {
     this.enemyManager = new EnemyManager(this);
     this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
 
+    // ── Chest System (Phase 6 — active after loop 1) ────────────────
+    this.chestSystem = new ChestSystem(this);
+
     // ── Phantom System (anti-grinding ghost — skips Level 4) ─────────
     this.phantomSystem = new PhantomSystem(this);
 
@@ -420,6 +423,11 @@ class GameScene extends Phaser.Scene {
         enemy.takeDamage(attackPower, this.player.x);
         this._attackHitList.add(enemy);
 
+        // Notify chest system when enemy dies (Phase 6)
+        if (enemy.isDead && this.chestSystem) {
+          this.chestSystem.onEnemyKilled(enemy.x, enemy.y);
+        }
+
         if (this.player.isPlunging && !this.player.plungeHit) {
           this.player.plungeHit = true;
           this.player.body.setVelocityY(-150);
@@ -480,6 +488,9 @@ class GameScene extends Phaser.Scene {
 
     // Items
     this.itemSystem.update(delta, this.player);
+
+    // Chests & Mimics
+    this.chestSystem.update(delta, this.player);
 
     // Phantom
     this.phantomSystem.update(delta, this.player);

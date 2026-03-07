@@ -381,17 +381,61 @@ and dramatic death sequence.
 
 ---
 
-## Known Items — Phases 6-11
+## Phase 6 — Chests & Mimics
+
+Added contextual chest spawning after enemy kills (post-loop 1 only) and
+the Mimic enemy — a chest-disguised threat that rewards observant players.
+
+### Files Created
+
+- **`src/systems/ChestSystem.js`** — Chest spawning and lifecycle manager:
+  - Only active when `GameState.currentLoop >= 2` (after first loop).
+  - `onEnemyKilled(x, y)`: 15% base chance to spawn a chest at enemy death
+    location. +10% bonus if 2+ kills within 2 seconds (multi-kill reward).
+  - Normal chests: 12x10 brown/gold rectangles with highlight strip. 15s
+    lifetime, blink during last 3s. Player overlap opens chest with gold
+    flash, 50 score bonus, and generous drop roll (30% weapon, 30% armor,
+    50% heart, 100% mana shard fallback).
+  - Mimic selection: 25% of spawned chests are mimics on loop 2, +8% per
+    additional loop, capped at 65%. Spawns a Mimic enemy instance instead.
+  - `update(delta, player)`: ticks chest lifetimes, checks player overlap
+    for normal chests, runs mimic ambush checks.
+  - `destroyAll()`: cleanup for scene restart.
+
+- **`src/entities/enemies/Mimic.js`** — Chest-disguised enemy (extends
+  EnemyEntity):
+  - **Chest form**: 12x10 brown rectangle, identical to normal chests.
+    Subtle tell: very slight breathing scale pulse (1.03x/0.97x, 1.2s
+    cycle) that normal chests don't have.
+  - **Ambush**: If player touches mimic without attacking first, deals 3
+    heavy damage and transforms. `checkAmbush(player)` called by
+    ChestSystem each frame.
+  - **Attack-first path**: If player attacks the chest, mimic takes damage
+    normally and wakes up. Can be killed before fully transforming.
+  - **Transformation**: 500ms wake animation with red flash, scale pulse,
+    and camera shake. Body resizes from 12x10 to 14x16, texture changes
+    to dark red.
+  - **Active AI**: Fast aggressive chase (70px/s). 14px attack range, 350ms
+    windup, 800ms cooldown. Platform edge detection prevents walking off.
+  - **Stats**: 4 HP, 2 contact damage (3 on ambush), 40 XP, 200 score.
+  - **Drops**: Guaranteed rare+ (45% weapon, 45% armor, 100% heart fallback).
+
+### Files Modified
+
+- **`src/scenes/GameScene.js`** — Added:
+  - ChestSystem instantiation in `create()` (after EnemyManager).
+  - `chestSystem.update(delta, player)` call in update loop.
+  - Enemy kill notification: `chestSystem.onEnemyKilled(x, y)` called in
+    `_checkAttackHitboxCollisions()` when an enemy dies from player attack.
+
+- **`index.html`** — Added script tags for `Mimic.js` (after
+  HollowKingBoss.js) and `ChestSystem.js` (after ItemSystem.js).
+
+---
+
+## Known Items — Phases 7-11
 
 The following phases remain unimplemented per the Master Design Document.
-
-### Phase 6 — Chests & Mimics
-- Normal chests spawning after impressive kills or platforming (contextual
-  triggers). Higher-than-normal drop rates for equipment.
-- Mimic chests (post-loop 1): identical appearance, subtle tell (animation/
-  sound cue). Attack first = normal enemy. Touch first = heavy damage hit +
-  transforms into fast aggressive enemy. Guaranteed rare+ drop on kill.
-  Frequency increases per loop.
 
 ### Phase 7 — UI & Screens
 - Full pause/inventory screen with equipment management and controller
