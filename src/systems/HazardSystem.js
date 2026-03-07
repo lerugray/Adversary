@@ -189,17 +189,24 @@ class HazardSystem {
         // Falling — apply gravity, keep horizontal velocity
         h.vy += HAZARD_GRAVITY * dt;
         h.x += h.vx * dt;
+        const prevY = h.y;
         h.y += h.vy * dt;
 
-        // Check if we've landed on a platform below
-        const plat = this._isOnPlatform(h.x, h.y);
-        if (plat && h.vy > 0) {
-          // Land on this platform
-          h.y = plat.y;
-          h.vy = 0;
-          h.grounded = true;
-          // Reverse direction on landing
-          h.vx = -Math.sign(h.vx) * speed;
+        // Check if we've passed through any platform during this fall step.
+        // Scan all platforms between prevY and h.y to prevent overshooting.
+        let landed = false;
+        for (const p of this._platforms) {
+          if (h.x >= p.x && h.x <= p.x + p.w) {
+            // Platform surface is at p.y. Did we cross it this frame?
+            if (prevY <= p.y + 2 && h.y >= p.y - 2 && h.vy > 0) {
+              h.y = p.y;
+              h.vy = 0;
+              h.grounded = true;
+              h.vx = -Math.sign(h.vx) * speed;
+              landed = true;
+              break;
+            }
+          }
         }
       }
 

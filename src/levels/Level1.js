@@ -53,7 +53,7 @@ const Level1Data = {
     y: 58,               // stone head Y (sits on platform surface)
     speed: 52,            // horizontal roll speed (px/s)
     interval: 3500,       // ms between skull spawns
-    initialDelay: 3000,   // ms before first skull
+    initialDelay: 1500,   // ms before first skull
     initialDirection: 1,  // 1 = starts rolling RIGHT
     damage: 1,
   },
