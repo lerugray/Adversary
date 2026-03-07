@@ -35,6 +35,9 @@ const GameState = {
     accessory: null,
     // Special attack currently equipped
     specialAttack: 'knife',
+    // Level-up bonuses (accumulated from choices)
+    attackPowerBonus: 0,
+    speedBonus:       0,
   },
 
   // ── Soul / death state ────────────────────────────────────────────────────
@@ -65,6 +68,8 @@ const GameState = {
       armor:         null,
       accessory:     null,
       specialAttack: 'knife',
+      attackPowerBonus: 0,
+      speedBonus:       0,
     };
   },
 

@@ -21,6 +21,8 @@ const ITEM_DEFS = {
   heart:      { w: 8,  h: 8,  color: 0xff4444, label: 'Heart' },
   weapon:     { w: 10, h: 10, color: 0xaaaaaa, label: 'Weapon' },
   armor:      { w: 10, h: 10, color: 0xddaa44, label: 'Armor' },
+  accessory:  { w: 8,  h: 8,  color: 0x44ccaa, label: 'Accessory' },
+  special:    { w: 8,  h: 6,  color: 0xff88ff, label: 'Special' },
 };
 
 // ── Weapon pool (random selection on drop) ──────────────────────────────────
@@ -36,6 +38,19 @@ const ARMOR_POOL = [
   { name: 'Chain Mail',    defenseBonus: 2 },
   { name: 'Plate Armor',   defenseBonus: 3 },
 ];
+
+// ── Accessory pool ─────────────────────────────────────────────────────────
+const ACCESSORY_POOL = [
+  { name: 'Rusted Ring',     effect: 'speed',       desc: 'Slight speed boost' },
+  { name: 'Hawk Ring',       effect: 'range',       desc: 'Special attack range up' },
+  { name: 'Chloranthy Ring', effect: 'mana_regen',  desc: 'Passive mana regen' },
+  { name: 'Covetous Ring',   effect: 'drop_rate',   desc: 'Better item drops' },
+  { name: 'Hornet Ring',     effect: 'plunge_crit', desc: 'Plunge attack crits' },
+  { name: 'Ring of Fog',     effect: 'iframes',     desc: 'Extended i-frames' },
+];
+
+// ── Special attack cycle order ─────────────────────────────────────────────
+const SPECIAL_CYCLE = ['knife', 'axe', 'holy water', 'cross', 'skull key', 'ember flask'];
 
 class ItemSystem {
   /**
@@ -55,9 +70,13 @@ class ItemSystem {
   rollDrop(x, y, dropTable) {
     if (!dropTable || !dropTable.length) return;
 
+    // Covetous Ring: 20% boost to all drop chances
+    const acc = GameState.player.accessory;
+    const dropBonus = (acc && acc.effect === 'drop_rate') ? 0.20 : 0;
+
     // Roll once per enemy death — pick the first drop that hits
     for (const entry of dropTable) {
-      if (Math.random() < entry.chance) {
+      if (Math.random() < entry.chance + dropBonus) {
         this._spawnItem(x, y, entry.type);
         return; // only one drop per enemy
       }
@@ -170,6 +189,18 @@ class ItemSystem {
       case 'armor': {
         const armor = ARMOR_POOL[Math.floor(Math.random() * ARMOR_POOL.length)];
         gs.armor = { ...armor };
+        break;
+      }
+      case 'accessory': {
+        const acc = ACCESSORY_POOL[Math.floor(Math.random() * ACCESSORY_POOL.length)];
+        gs.accessory = { ...acc };
+        break;
+      }
+      case 'special': {
+        // Cycle to the next special attack in the list
+        const curIdx = SPECIAL_CYCLE.indexOf(gs.specialAttack);
+        const nextIdx = (curIdx + 1) % SPECIAL_CYCLE.length;
+        gs.specialAttack = SPECIAL_CYCLE[nextIdx];
         break;
       }
     }

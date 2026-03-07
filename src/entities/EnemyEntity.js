@@ -166,6 +166,8 @@ class EnemyEntity {
    */
   getDropTable() {
     return [
+      { type: 'special',    chance: 0.05 },
+      { type: 'accessory',  chance: 0.03 },
       { type: 'mana_shard', chance: 0.4 },
     ];
   }

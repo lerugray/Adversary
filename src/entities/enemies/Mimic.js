@@ -83,9 +83,10 @@ class Mimic extends EnemyEntity {
   // ── Drop table: guaranteed rare+ drop ───────────────────────────────────
   getDropTable() {
     return [
-      { type: 'weapon', chance: 0.45 },
-      { type: 'armor',  chance: 0.45 },
-      { type: 'heart',  chance: 1.0 },  // fallback: always a heart at minimum
+      { type: 'accessory', chance: 0.20 },
+      { type: 'weapon',    chance: 0.45 },
+      { type: 'armor',     chance: 0.45 },
+      { type: 'heart',     chance: 1.0 },  // fallback: always a heart at minimum
     ];
   }
 

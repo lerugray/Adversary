@@ -61,19 +61,23 @@ const Level1Data = {
     // Tier 0 — Ground (full width, thick slab)
     { x: 0,   y: 280, w: 256, h: 40,  tier: 0 },
 
-    // Tier 1 — Two stone ledges; left one is the main approach
+    // Tier 1 — Two stone ledges with stepping stones between
     { x: 0,   y: 240, w: 90,  h: 10,  tier: 1 },
-    { x: 160, y: 240, w: 96,  h: 10,  tier: 1 },
+    { x: 105, y: 242, w: 24,  h: 8,   tier: 1 },  // stepping stone 1
+    { x: 140, y: 241, w: 24,  h: 8,   tier: 1 },  // stepping stone 2
+    { x: 170, y: 240, w: 86,  h: 10,  tier: 1 },
 
     // Tier 2 — Crumbled mid-section; player must use ladders
     { x: 30,  y: 195, w: 110, h: 10,  tier: 2 },
     { x: 190, y: 200, w: 66,  h: 10,  tier: 2 },
 
-    // Tier 3 — Broken arch remnants
+    // Tier 3 — Broken arch remnants with stepping stones
     { x: 0,   y: 155, w: 80,  h: 10,  tier: 3 },
-    { x: 120, y: 148, w: 100, h: 10,  tier: 3 },
+    { x: 86,  y: 153, w: 20,  h: 8,   tier: 3 },  // stepping stone 1
+    { x: 112, y: 150, w: 20,  h: 8,   tier: 3 },  // stepping stone 2
+    { x: 138, y: 148, w: 82,  h: 10,  tier: 3 },
 
-    // Tier 4 — Elevated ruins; the right side drops to a gap
+    // Tier 4 — Elevated ruins
     { x: 60,  y: 105, w: 130, h: 10,  tier: 4 },
 
     // Tier 5 — Summit platform; checkpoint lives here
@@ -116,8 +120,8 @@ const Level1Data = {
     { x: 60,  y: 232, type: 'hollow_soldier' },   // Tier 1 left ledge
     { x: 200, y: 232, type: 'hollow_archer'  },   // Tier 1 right ledge
     { x: 90,  y: 187, type: 'hollow_soldier' },   // Tier 2 mid
-    { x: 160, y: 140, type: 'hollow_knight'  },   // Tier 3 right (tougher)
-    { x: 115, y: 97,  type: 'hollow_knight'  },   // Tier 4 mid
+    { x: 155, y: 140, type: 'hollow_knight'  },   // Tier 3 right mid
+    { x: 130, y: 97,  type: 'hollow_knight'  },   // Tier 4 centre (far from ladders)
   ],
 
   // ── Decorative elements ────────────────────────────────────────────────

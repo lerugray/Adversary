@@ -54,9 +54,11 @@ class HollowKnight extends EnemyEntity {
 
   getDropTable() {
     return [
-      { type: 'heart',  chance: HK_DROP_HEART_CHANCE },
-      { type: 'weapon', chance: HK_DROP_WEAPON_CHANCE },
-      { type: 'armor',  chance: HK_DROP_ARMOR_CHANCE },
+      { type: 'accessory', chance: 0.08 },
+      { type: 'special',   chance: 0.10 },
+      { type: 'heart',     chance: HK_DROP_HEART_CHANCE },
+      { type: 'weapon',    chance: HK_DROP_WEAPON_CHANCE },
+      { type: 'armor',     chance: HK_DROP_ARMOR_CHANCE },
     ];
   }
 

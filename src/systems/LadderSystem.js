@@ -183,8 +183,10 @@ class LadderSystem {
         sprite.setX(Phaser.Math.Linear(sprite.x, activeZone.x, 0.3));
 
         // Reached the top of the zone → dismount onto upper platform
-        if (midY <= activeZone.topY + 2) {
-          body.setVelocityY(-20); // tiny nudge to clear the top
+        if (midY <= activeZone.topY + 4) {
+          // Place player on top of the platform and re-enable collision
+          sprite.setY(activeZone.topY - 1);
+          body.setVelocityY(0);
           this._exitClimb(player, input);
         }
       } else if (input.isDownHeld()) {
@@ -226,6 +228,11 @@ class LadderSystem {
     body.setAllowGravity(false);
     body.setVelocity(0, 0);
 
+    // Disable platform collision so player can pass through platforms while climbing
+    if (this.scene.playerPlatformCollider) {
+      this.scene.playerPlatformCollider.active = false;
+    }
+
     // Snap X to ladder centre for visual cleanliness
     player.gameObject.setX(zone.x);
   }
@@ -241,6 +248,11 @@ class LadderSystem {
 
     const body = player.body;
     body.setAllowGravity(true);
+
+    // Re-enable platform collision
+    if (this.scene.playerPlatformCollider) {
+      this.scene.playerPlatformCollider.active = true;
+    }
 
     // If exiting via jump, apply a small upward kick
     if (input.isJumpJustPressed()) {

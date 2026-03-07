@@ -24,14 +24,14 @@
 /** Horizontal walk speed (px/s). Castlevania 1 feel — deliberate, not floaty. */
 const PLAYER_SPEED        = 80;
 
-/** Jump impulse (initial upward velocity). Negative = upward in Phaser. */
-const JUMP_VELOCITY       = -280;
+/** Jump impulse (initial upward velocity). Donkey Kong — barely a hop. */
+const JUMP_VELOCITY       = -155;
 
 /** Extra upward boost per frame while holding jump (variable jump). */
-const JUMP_HOLD_FORCE     = -18;
+const JUMP_HOLD_FORCE     = -6;
 
 /** Max frames the jump-hold boost is applied. */
-const JUMP_HOLD_MAX_FRAMES = 14;
+const JUMP_HOLD_MAX_FRAMES = 5;
 
 /** Gravity applied to the player body (px/s²). */
 const PLAYER_GRAVITY      = 600;
@@ -119,6 +119,9 @@ class PlayerEntity {
     // ── Soul orb reference (Phaser GameObject) ────────────────────────
     this.soulOrb = null;
 
+    // ── Active projectiles (for special attack collision) ──────────────
+    this.projectiles = [];
+
     // ── Build Phaser objects ──────────────────────────────────────────
     this._buildSprite(x, y);
     this._buildHitbox();
@@ -129,25 +132,24 @@ class PlayerEntity {
 
   /** Create the player's visual rectangle and physics body. */
   _buildSprite(x, y) {
+    const texW = BODY_W + 2;  // 12
+    const texH = BODY_H + 4;  // 26
+
     const gfx = this.scene.add.graphics();
-
-    // Draw a simple placeholder character sprite (will be replaced with
-    // real spritesheet in Phase 3).
-    // Body: white rectangle; head: slightly lighter.
+    // Draw within positive coordinates so generateTexture captures it
     gfx.fillStyle(0xeeeeee);
-    gfx.fillRect(-5, -22, 10, 10); // head
+    gfx.fillRect(1, 0, 10, 8);     // head
     gfx.fillStyle(0xcccccc);
-    gfx.fillRect(-5, -12, 10, 14); // torso
+    gfx.fillRect(1, 8, 10, 12);    // torso
     gfx.fillStyle(0x999999);
-    gfx.fillRect(-5, 2,  4, 6);    // left leg
-    gfx.fillRect(1,  2,  4, 6);    // right leg
-
-    const texture = gfx.generateTexture('player_placeholder', BODY_W + 2, BODY_H + 4);
+    gfx.fillRect(1, 20, 4, 6);     // left leg
+    gfx.fillRect(7, 20, 4, 6);     // right leg
+    gfx.generateTexture('player_placeholder', texW, texH);
     gfx.destroy();
 
     this.sprite = this.scene.physics.add.sprite(x, y, 'player_placeholder');
     this.sprite.setOrigin(0.5, 1);  // pivot at feet for clean platform landing
-    this.sprite.setCollideWorldBounds(false);
+    this.sprite.setCollideWorldBounds(true);
 
     // Set physics body size
     this.sprite.body.setSize(BODY_W, BODY_H);
@@ -162,19 +164,14 @@ class PlayerEntity {
 
   /** Create the attack hitbox (invisible rectangle, disabled by default). */
   _buildHitbox() {
-    // Hitbox is a separate physics-enabled rectangle.
-    // It is repositioned and enabled when the player attacks.
     this.hitbox = this.scene.physics.add.image(0, 0, '__DEFAULT');
     this.hitbox.setVisible(false);
     this.hitbox.body.setAllowGravity(false);
     this.hitbox.body.enable = false;
 
-    // Debug: make hitbox visible in dev mode
-    if (this.scene.physics.world.debugGraphic) {
-      this.hitbox.setVisible(true);
-      this.hitbox.setAlpha(0.4);
-      this.hitbox.setTint(0xff4400);
-    }
+    // Visible sword slash rectangle (shown during attacks)
+    this._slashVisual = this.scene.add.rectangle(0, 0, 16, 4, 0xffffff)
+      .setDepth(8).setVisible(false).setAlpha(0.9);
   }
 
   /**
@@ -282,13 +279,18 @@ class PlayerEntity {
     }
 
     // ── Horizontal movement ───────────────────────────────────────────
+    const speedBonus = (GameState.player.speedBonus || 0) * 8;
+    const acc = GameState.player.accessory;
+    const ringSpeed = (acc && acc.effect === 'speed') ? 10 : 0;
+    const moveSpeed = PLAYER_SPEED + speedBonus + ringSpeed;
+
     if (input.isLeftHeld()) {
-      this.sprite.body.setVelocityX(-PLAYER_SPEED);
+      this.sprite.body.setVelocityX(-moveSpeed);
       this.facing = -1;
       this.sprite.setFlipX(true);
       if (grounded && this.state !== STATE.ATTACK) this.state = STATE.WALK;
     } else if (input.isRightHeld()) {
-      this.sprite.body.setVelocityX(PLAYER_SPEED);
+      this.sprite.body.setVelocityX(moveSpeed);
       this.facing = 1;
       this.sprite.setFlipX(false);
       if (grounded && this.state !== STATE.ATTACK) this.state = STATE.WALK;
@@ -312,7 +314,9 @@ class PlayerEntity {
       (this.sprite.width - BODY_W) / 2,
       this.sprite.height - DUCK_H
     );
-    this.sprite.setTint(0x5599cc); // slightly different tint for visual feedback
+    // Visually squash the sprite to show ducking
+    this.sprite.setScale(1, 0.5);
+    this.sprite.setTint(0x5599cc);
   }
 
   _exitDuck() {
@@ -323,6 +327,8 @@ class PlayerEntity {
       (this.sprite.width - BODY_W) / 2,
       this.sprite.height - BODY_H
     );
+    // Restore full height
+    this.sprite.setScale(1, 1);
     this.sprite.setTint(0x88ccff);
   }
 
@@ -389,7 +395,8 @@ class PlayerEntity {
 
   _startAttack(isDucking, isAir) {
     this.state = STATE.ATTACK;
-    this.attackCooldownTimer = ATTACK_COOLDOWN;
+    const speedReduction = (GameState.player.speedBonus || 0) * 25;
+    this.attackCooldownTimer = Math.max(200, ATTACK_COOLDOWN - speedReduction);
 
     // Determine hitbox zone
     let hbW = 16, hbH = 8;
@@ -489,8 +496,17 @@ class PlayerEntity {
 
     proj.body.setVelocity(vx, vy);
 
-    // Auto-destroy after 1.2 s or when off-screen
-    this.scene.time.delayedCall(1200, () => {
+    // Track projectile for collision checking
+    const SPECIAL_DAMAGE = { knife: 1, axe: 2, 'holy water': 2, cross: 2, 'skull key': 3, 'ember flask': 4 };
+    proj._damage = SPECIAL_DAMAGE[type] || 1;
+    this.projectiles.push(proj);
+
+    // Hawk Ring: extend projectile lifetime
+    const accR = GameState.player.accessory;
+    const projLifetime = (accR && accR.effect === 'range') ? 2000 : 1200;
+
+    // Auto-destroy after lifetime expires
+    this.scene.time.delayedCall(projLifetime, () => {
       if (proj && proj.active) proj.destroy();
     });
   }
@@ -502,11 +518,24 @@ class PlayerEntity {
     this.hitbox.body.setSize(w, h);
     this.hitboxTimer = HITBOX_DURATION;
     this._positionHitbox();
+
+    // Show sword slash visual
+    if (this._slashVisual) {
+      this._slashVisual.setSize(w, h);
+      this._slashVisual.setVisible(true);
+      // Color based on attack type
+      if (this.isPlunging) {
+        this._slashVisual.setFillStyle(0xff8800, 0.9); // orange for plunge
+      } else {
+        this._slashVisual.setFillStyle(0xffffff, 0.9); // white for normal
+      }
+    }
   }
 
   _deactivateHitbox() {
     this.hitbox.body.enable = false;
     this.hitboxTimer = 0;
+    if (this._slashVisual) this._slashVisual.setVisible(false);
   }
 
   /**
@@ -534,6 +563,9 @@ class PlayerEntity {
     }
 
     this.hitbox.setPosition(hx, hy);
+    if (this._slashVisual && this._slashVisual.visible) {
+      this._slashVisual.setPosition(hx, hy);
+    }
   }
 
   // ── Pause hook ────────────────────────────────────────────────────────────
@@ -555,6 +587,22 @@ class PlayerEntity {
   takeDamage(amount, sourceX) {
     if (this.isInvincible || this.state === STATE.DEAD) return;
 
+    // Armor damage negation — chance to block 1 point of damage
+    const armor = GameState.player.armor;
+    if (armor && armor.defenseBonus) {
+      // 15% per defense bonus point (e.g. Plate Armor = 3 → 45%)
+      const negateChance = armor.defenseBonus * 0.15;
+      if (Math.random() < negateChance) {
+        amount = Math.max(0, amount - 1);
+        // Flash blue to show armor absorbed damage
+        this.sprite.setTint(0x4488ff);
+        this.scene.time.delayedCall(150, () => {
+          if (this.state !== STATE.DEAD) this.sprite.setTint(0x88ccff);
+        });
+        if (amount <= 0) return; // fully negated
+      }
+    }
+
     // Subtract HP
     GameState.player.hp = Math.max(0, GameState.player.hp - amount);
 
@@ -573,7 +621,9 @@ class PlayerEntity {
 
     // ── Start i-frames ────────────────────────────────────────────────
     this.isInvincible = true;
-    this.iframeTimer  = IFRAME_DURATION;
+    const accI = GameState.player.accessory;
+    const iframeBonus = (accI && accI.effect === 'iframes') ? 600 : 0;
+    this.iframeTimer  = IFRAME_DURATION + iframeBonus;
     this._startFlash();
   }
 

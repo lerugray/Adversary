@@ -39,6 +39,7 @@ class HUD {
 
   _build() {
     const W = this.scene.cameras.main.width;   // 256
+    const H = this.scene.cameras.main.height;  // 240
     const s = this.scene;                       // shorthand
 
     const TEXT_STYLE = {

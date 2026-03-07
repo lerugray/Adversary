@@ -109,9 +109,10 @@ class HollowKingBoss extends EnemyEntity {
 
   getDropTable() {
     return [
-      { type: 'heart',  chance: 1.0 },
-      { type: 'weapon', chance: 0.4 },
-      { type: 'armor',  chance: 0.4 },
+      { type: 'accessory', chance: 0.30 },
+      { type: 'heart',     chance: 1.0 },
+      { type: 'weapon',    chance: 0.4 },
+      { type: 'armor',     chance: 0.4 },
     ];
   }
 

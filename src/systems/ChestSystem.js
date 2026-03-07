@@ -39,9 +39,11 @@ const MIMIC_MAX_CHANCE    = 0.65;       // never more than 65% mimics
 
 // Chest drop table (better than normal enemy drops)
 const CHEST_DROP_TABLE = [
-  { type: 'weapon', chance: 0.30 },
-  { type: 'armor',  chance: 0.30 },
-  { type: 'heart',  chance: 0.50 },
+  { type: 'accessory',  chance: 0.12 },
+  { type: 'special',    chance: 0.15 },
+  { type: 'weapon',     chance: 0.30 },
+  { type: 'armor',      chance: 0.30 },
+  { type: 'heart',      chance: 0.50 },
   { type: 'mana_shard', chance: 1.0 },  // fallback
 ];
 

@@ -50,8 +50,8 @@ class GameScene extends Phaser.Scene {
     const sp = data.playerSpawn;
     this.player = new PlayerEntity(this, sp.x, sp.y);
 
-    // Platform collider
-    this.physics.add.collider(this.player.gameObject, this.platforms);
+    // Platform collider (stored so LadderSystem can toggle it)
+    this.playerPlatformCollider = this.physics.add.collider(this.player.gameObject, this.platforms);
 
     // Geometry-aware soul spawn
     this._patchPlayerSoulSpawn();
@@ -81,6 +81,12 @@ class GameScene extends Phaser.Scene {
 
     // ── Chest System (Phase 6 — active after loop 1) ────────────────
     this.chestSystem = new ChestSystem(this);
+
+    // ── Level-Up System ────────────────────────────────────────────
+    this.levelUpSystem = new LevelUpSystem(this);
+
+    // ── Mana regen timer (for Chloranthy Ring) ─────────────────────
+    this._manaRegenTimer = 0;
 
     // ── Phantom System (anti-grinding ghost — skips Level 4) ─────────
     this.phantomSystem = new PhantomSystem(this);
@@ -402,10 +408,16 @@ class GameScene extends Phaser.Scene {
     const hh = hitbox.body.height / 2;
 
     const weaponBonus = GameState.player.weapon?.attackBonus ?? 0;
-    let attackPower = 1 + weaponBonus;
+    const levelBonus = GameState.player.attackPowerBonus || 0;
+    let attackPower = 1 + weaponBonus + levelBonus;
 
     if (this.player.isPlunging) {
       attackPower *= 2;
+      // Hornet Ring: 40% chance for plunge crit (double again)
+      const accP = GameState.player.accessory;
+      if (accP && accP.effect === 'plunge_crit' && Math.random() < 0.4) {
+        attackPower *= 2;
+      }
     }
 
     const enemies = this.enemyManager.getEnemies();
@@ -431,6 +443,48 @@ class GameScene extends Phaser.Scene {
         if (this.player.isPlunging && !this.player.plungeHit) {
           this.player.plungeHit = true;
           this.player.body.setVelocityY(-150);
+        }
+      }
+    }
+  }
+
+  // ── Projectile → enemy collision ──────────────────────────────────────
+
+  _checkProjectileCollisions() {
+    const projs = this.player.projectiles;
+    if (!projs || projs.length === 0) return;
+
+    const enemies = this.enemyManager.getEnemies();
+
+    for (let i = projs.length - 1; i >= 0; i--) {
+      const proj = projs[i];
+      if (!proj || !proj.active) {
+        projs.splice(i, 1);
+        continue;
+      }
+
+      const px = proj.x;
+      const py = proj.y;
+
+      for (const enemy of enemies) {
+        if (!enemy.sprite || !enemy.sprite.active) continue;
+        if (enemy.isDead) continue;
+
+        const ex = enemy.sprite.x;
+        const ey = enemy.sprite.y - enemy.sprite.body.height / 2;
+        const ew = enemy.sprite.body.width / 2 + 4;
+        const eh = enemy.sprite.body.height / 2 + 4;
+
+        if (Math.abs(px - ex) < ew && Math.abs(py - ey) < eh) {
+          enemy.takeDamage(proj._damage || 1, px);
+          proj.destroy();
+          projs.splice(i, 1);
+
+          // Notify chest system when enemy dies
+          if (enemy.isDead && this.chestSystem) {
+            this.chestSystem.onEnemyKilled(enemy.x, enemy.y);
+          }
+          break;
         }
       }
     }
@@ -467,6 +521,16 @@ class GameScene extends Phaser.Scene {
   // ── update ────────────────────────────────────────────────────────────────
 
   update(time, delta) {
+    // Level-up menu takes priority over all other input
+    if (this.levelUpSystem.isActive) {
+      this.levelUpSystem.update(this.inputManager, delta);
+      this.hud.update(this.player);
+      return;
+    }
+
+    // Check for level-up trigger
+    this.levelUpSystem.update(this.inputManager, delta);
+
     // Debug shortcuts
     if (this.inputManager.isDebugGameOverPressed()) {
       this.scene.start('GameOverScene');
@@ -495,8 +559,21 @@ class GameScene extends Phaser.Scene {
     // Phantom
     this.phantomSystem.update(delta, this.player);
 
+    // Chloranthy Ring: passive mana regen (1 mana every 5 seconds)
+    const accM = GameState.player.accessory;
+    if (accM && accM.effect === 'mana_regen') {
+      this._manaRegenTimer += delta;
+      if (this._manaRegenTimer >= 5000) {
+        this._manaRegenTimer -= 5000;
+        GameState.player.mana = Math.min(GameState.player.maxMana, GameState.player.mana + 1);
+      }
+    }
+
     // Attack hitbox → enemy collision
     this._checkAttackHitboxCollisions();
+
+    // Special attack projectile → enemy collision
+    this._checkProjectileCollisions();
 
     // Enemy body → player contact damage
     this._checkEnemyContactDamage();

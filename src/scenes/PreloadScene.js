@@ -75,31 +75,13 @@ class PreloadScene extends Phaser.Scene {
    * (load → cache → texture) without needing any files on disk.
    */
   _loadPlaceholderAssets() {
-    // Minimal 1×1 white pixel PNG, base64 encoded.
-    // We'll use a generated texture instead — see create().
-    // The loader needs at least one load call to fire events, so we use
-    // Phaser's built-in texture generation via a data URI.
-
-    // 16×16 solid white PNG (base64).
-    // Generated with: python3 -c "
-    //   import base64, struct, zlib
-    //   def png_chunk(tag, data):
-    //       c = zlib.crc32(tag+data) & 0xffffffff
-    //       return struct.pack('>I',len(data))+tag+data+struct.pack('>I',c)
-    //   w=h=16; raw=b'\\x00'+b'\\xff'*3*w
-    //   idat=zlib.compress(raw*h)
-    //   data=(b'\\x89PNG\\r\\n\\x1a\\n'
-    //         +png_chunk(b'IHDR',struct.pack('>IIBBBBB',w,h,8,2,0,0,0))
-    //         +png_chunk(b'IDAT',idat)+png_chunk(b'IEND',b''))
-    //   print(base64.b64encode(data).decode())"
-    const WHITE_PNG_B64 =
-      'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAADklEQVQI12P4z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==';
-
-    this.load.spritesheet(
-      'placeholder',                          // texture key
-      'data:image/png;base64,' + WHITE_PNG_B64,
-      { frameWidth: 16, frameHeight: 16 }
-    );
+    // Generate a 16x16 white placeholder texture directly (no file load needed).
+    // This avoids data URI issues when running from file:// protocol.
+    const gfx = this.make.graphics({ x: 0, y: 0, add: false });
+    gfx.fillStyle(0xffffff);
+    gfx.fillRect(0, 0, 16, 16);
+    gfx.generateTexture('placeholder', 16, 16);
+    gfx.destroy();
 
     // ── Phase 8: Replace the block above with real spritesheets ───────────
     // Example (paths relative to index.html):
