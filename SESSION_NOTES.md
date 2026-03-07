@@ -1,42 +1,40 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Cross-phase items (before Phase 7) + playtesting bug fixes
+- Bug fixes, polish, and Level 1 redesign with rolling hazards
 
 ## What got done
 
-### Cross-Phase Features
-1. **Level-Up System** (LevelUpSystem.js) — XP thresholds trigger a choice menu: +1 max HP, +1 attack power, +3 max mana, or speed boost
-2. **Armor Damage Negation** — equipped armor has a chance (15% per defenseBonus) to block 1 damage
-3. **Accessory System** — 6 rings with passive effects: Rusted Ring (speed), Hawk Ring (range), Chloranthy Ring (mana regen), Covetous Ring (drops), Hornet Ring (plunge crits), Ring of Fog (i-frames)
-4. **Special Attack Pickup Cycling** — pink pickups cycle through knife/axe/holy water/cross/skull key/ember flask
-5. **Special attacks now deal damage** — projectiles collide with enemies (knife=1, axe/cross/holy water=2, skull key=3, ember flask=4)
+### Bug Fixes
+1. **Enemy body-null crash** — added null guard in EnemyEntity.update() so dead enemies with destroyed sprites don't freeze the game
+2. **Level-up freezes enemies** — LevelUpSystem now pauses/resumes physics.world so nothing moves during the menu
+3. **Plunge attack too fast** — reduced from 240 to 160 px/s
 
-### Bug Fixes & Polish
-- Fixed PreloadScene freeze (data URI blocked on file:// protocol, switched to generated texture)
-- Fixed HUD crash (missing `H` variable for screen height)
-- Fixed player sprite invisible (texture drawn at negative coordinates, rewritten)
-- Fixed ducking not visible (sprite now squashes to half height)
-- Added visible sword slash rectangle during attacks (white for normal, orange for plunge)
-- Fixed ladder climbing — player can now pass through platforms while climbing
-- Fixed player walking off screen edge (enabled world bounds collision)
-- Reduced jump height to Donkey Kong levels (short hop only, ladders required for vertical travel)
-- Added stepping-stone platforms to Level 1 for short-jump navigation
-- Moved HollowKnights away from ladder exits
-- GameState.player now tracks attackPowerBonus and speedBonus
+### Polish
+4. **HUD text readability** — bumped font sizes, added black stroke + drop shadow to all HUD text, boss label, and soul arrow
+5. **Dark Souls-style level name overlay** — fade-in/hold/fade-out with decorative lines when entering any level
+6. **Original level names** — The Ashen Hearth, Cresthollow, The Iron Passage, The Pale Spire (added `name` property to all level data)
+7. **Phantom timer relaxed** — base 20s→35s, minimum 8s→15s (less brutal with rolling hazards in play)
 
-### Files Changed
-- **New:** src/systems/LevelUpSystem.js
-- **Modified:** GameState.js, PlayerEntity.js, ItemSystem.js, GameScene.js, HUD.js, ChestSystem.js, LadderSystem.js, PreloadScene.js, Level1.js, HollowKnight.js, HollowKingBoss.js, Mimic.js, EnemyEntity.js, index.html
+### Level 1 Redesign (DK-style)
+8. **New platform layout** — 6 wide platforms (224px) with alternating 32px gaps, zigzag ladder pattern (right/left/right/left/right)
+9. **More vertical space** — 50-55px between tiers (was ~45px), world height now 350
+10. **Rolling skull hazards** (HazardSystem.js) — stone head at top-left of tier 5 spawns skulls every 3.5s that roll right, fall off edges, reverse direction on landing, cascading all the way down
+11. **Manual position tracking** — skulls don't use Arcade physics (which breaks off-camera), instead manually simulate gravity and check platform data directly
+12. **Sweep-based landing** — checks if skull passed through any platform between frames to prevent fast-fall overshooting
+13. **Jump-over bonus** — +100 score with floating gold popup when player jumps over a rolling skull (DK style)
+
+### Files Changed/Created
+- **New:** src/systems/HazardSystem.js
+- **Rewritten:** src/levels/Level1.js (DK-style layout)
+- **Modified:** EnemyEntity.js, PlayerEntity.js, GameScene.js, HUD.js, LevelUpSystem.js, PhantomSystem.js, Level2-4.js (names), index.html
 
 ## Current state
-- Everything through Phase 6 + all cross-phase items complete
-- Playtested and fixed major issues
-- All code uses colored-rectangle placeholders (no real art/audio yet)
+- Everything through Phase 6 + cross-phase items + Level 1 redesign complete
+- Skull hazards spawning and cascading — may still need tuning (speed, interval, etc.)
+- User wants more polish before Phase 7
 
 ## What's next
-- Phase 7: UI & Screens
-  - Pause/inventory screen (show equipped gear, accessory, stats)
-  - Interlude scenes between levels
-  - High score initials entry
-- Phase 8: Real art/audio assets
+- User has additional polish ideas to test
+- May need skull tuning after playtesting
+- Phase 7: UI & Screens (pause/inventory, interludes, high score initials)
