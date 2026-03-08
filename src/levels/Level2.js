@@ -132,8 +132,8 @@ const Level2Data = {
 
   // ── Flying hazards (DK-style bats on a timer) ─────────────────────────
   flyingHazard: {
-    interval: 6000,         // ms between bat spawns
-    speed: 65,              // px/s horizontal
+    interval: 4500,         // ms between bat spawns (was 6000 — tighter pressure)
+    speed: 65,              // px/s horizontal (loop scaling adds +8/loop)
     damage: 1,
     yOffset: [-30, 10],     // spawn near player height, biased slightly above
   },

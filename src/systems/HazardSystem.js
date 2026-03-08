@@ -5,6 +5,12 @@
  * so hazards work even when off-camera. Each skull rolls across platforms,
  * falls off edges, lands on the tier below and reverses direction.
  *
+ * DK-inspired mechanics:
+ *   - Skulls can descend ladders using a probability algorithm based on
+ *     player position, input direction, difficulty, and randomness.
+ *   - "Wild" skulls (loop 2+) bounce diagonally, loosely tracking the player.
+ *   - Speed, spawn rate, and ladder aggression scale with loop count.
+ *
  * Usage:
  *   // In GameScene.create():
  *   this.hazardSystem = new HazardSystem(this);
@@ -20,6 +26,8 @@ const HAZARD_DAMAGE   = 1;
 const HAZARD_MAX      = 12;
 const HAZARD_CONTACT_COOLDOWN = 1200; // ms between damage ticks
 const HAZARD_JUMP_BONUS      = 50;   // score for jumping over a hazard
+const HAZARD_LADDER_SPEED    = 50;   // px/s descent speed on ladders
+const HAZARD_WILD_BOUNCE_VY  = -120; // vertical bounce impulse for wild skulls
 
 class HazardSystem {
   constructor(scene) {
@@ -29,6 +37,8 @@ class HazardSystem {
     this._config = null;
     this._contactCooldown = 0;
     this._platforms = []; // sorted copy of platform data for collision
+    this._stopped = false; // true after destroyAll — prevents new spawns during transitions
+    this._ladderZones = []; // ladder zones for skull descent
 
     const data = scene.currentLevelData;
     if (data && data.hazardSpawner) {
@@ -36,10 +46,45 @@ class HazardSystem {
       this._spawnTimer = 500; // first skull almost immediately
       // Cache platforms sorted by Y for efficient lookup
       this._platforms = (data.platforms || []).slice().sort((a, b) => a.y - b.y);
+      // Cache ladder zones
+      if (scene.ladderSystem) {
+        this._ladderZones = scene.ladderSystem.zones;
+      }
       this._buildTexture();
       this._buildSpawnerVisual();
       this._spawnPreRolled(data);
     }
+  }
+
+  // ── Loop-scaled values ────────────────────────────────────────────────────
+
+  _getLoop() {
+    return GameState.currentLoop || 1;
+  }
+
+  /** Skull roll speed — increases ~10% each loop */
+  _getSpeed() {
+    const loop = this._getLoop();
+    return this._config.speed + (loop - 1) * 5;
+  }
+
+  /** Spawn interval — decreases each loop, minimum 2000ms */
+  _getInterval() {
+    const loop = this._getLoop();
+    return Math.max(this._config.interval - (loop - 1) * 300, 2000);
+  }
+
+  /** Chance a skull takes a ladder (base %). Increases with loop. */
+  _getLadderChance() {
+    const loop = this._getLoop();
+    return Math.min(0.15 + (loop - 1) * 0.12, 0.65);
+  }
+
+  /** Chance a newly spawned skull is "wild" (bouncing). Loop 2+ only. */
+  _getWildChance() {
+    const loop = this._getLoop();
+    if (loop < 2) return 0;
+    return Math.min(0.12 + (loop - 2) * 0.08, 0.45);
   }
 
   // ── Texture ─────────────────────────────────────────────────────────────
@@ -61,6 +106,22 @@ class HazardSystem {
 
     gfx.generateTexture(key, s, s);
     gfx.destroy();
+
+    // Wild skull texture — slightly different colour (reddish bone)
+    const wildKey = 'hazard_skull_wild';
+    if (this.scene.textures.exists(wildKey)) return;
+
+    const gfx2 = this.scene.add.graphics();
+    gfx2.fillStyle(0xaa7766); // reddish bone
+    gfx2.fillRect(0, 0, s, s);
+    gfx2.fillStyle(0x442222);
+    gfx2.fillRect(1, 2, 2, 2);
+    gfx2.fillRect(5, 2, 2, 2);
+    gfx2.fillStyle(0x553322);
+    gfx2.fillRect(3, 5, 2, 1);
+
+    gfx2.generateTexture(wildKey, s, s);
+    gfx2.destroy();
   }
 
   // ── Stone head visual ───────────────────────────────────────────────────
@@ -86,7 +147,7 @@ class HazardSystem {
 
   _spawnPreRolled(data) {
     if (!this._config) return;
-    const speed = this._config.speed;
+    const speed = this._getSpeed();
 
     // Sort platforms by Y ascending (highest first) and skip ground (tier 0)
     const tiers = (data.platforms || [])
@@ -118,6 +179,10 @@ class HazardSystem {
         grounded: true,
         age: 0,
         jumpedOver: false,
+        wild: false,
+        onLadder: false,        // currently descending a ladder
+        ladderZone: null,       // which ladder zone
+        passedLadders: new Set(), // ladder indices already evaluated
       });
     }
   }
@@ -157,15 +222,98 @@ class HazardSystem {
     return null;
   }
 
+  // ── DK-style ladder decision ──────────────────────────────────────────
+
+  /**
+   * Decide whether a skull should descend a ladder it's passing over.
+   * Inspired by the original Donkey Kong barrel algorithm:
+   *   1. Skip if skull is already at or below the player
+   *   2. Difficulty-gated random chance (increases with loop)
+   *   3. "Steering" — if player is moving toward the skull, more likely
+   *   4. Fallback random chance
+   *
+   * @param {Object} h      - the hazard object
+   * @param {Object} zone   - the ladder zone
+   * @param {Object} player - the player entity
+   * @returns {boolean} true if the skull should take the ladder
+   */
+  _shouldTakeLadder(h, zone, player) {
+    if (!player || player.state === 'dead') return false;
+
+    // Step 1: Height check — no point going down if already at/below player
+    if (h.y >= player.y) return false;
+
+    // Step 2: Difficulty-gated chance (loop scaling)
+    const ladderChance = this._getLadderChance();
+    if (Math.random() < ladderChance) return true;
+
+    // Step 3: "Steering" — if player is moving toward the skull
+    // (mimics DK's joystick-steering mechanic)
+    if (this.scene.inputManager) {
+      const input = this.scene.inputManager;
+      const skullIsLeft = h.x < player.x;
+      const playerMovingLeft = input.isLeftHeld();
+      const playerMovingRight = input.isRightHeld();
+
+      // Player moving toward the skull? Higher chance to take ladder
+      if ((skullIsLeft && playerMovingLeft) || (!skullIsLeft && playerMovingRight)) {
+        if (Math.random() < 0.35) return true;
+      }
+    }
+
+    // Step 4: Final fallback random (like DK's 25% last chance)
+    if (Math.random() < 0.15) return true;
+
+    return false;
+  }
+
+  /**
+   * Check if a grounded skull overlaps a ladder zone and should descend.
+   */
+  _checkLadderDescent(h, player) {
+    if (h.onLadder || h.wild) return;
+
+    for (let i = 0; i < this._ladderZones.length; i++) {
+      if (h.passedLadders.has(i)) continue;
+
+      const zone = this._ladderZones[i];
+
+      // Skull must be horizontally within the ladder zone
+      if (h.x < zone.left || h.x > zone.right) continue;
+
+      // Skull must be at the top of this ladder (on the upper platform)
+      if (Math.abs(h.y - zone.topY) > 5) continue;
+
+      // Mark as evaluated so we don't re-check every frame
+      h.passedLadders.add(i);
+
+      // Run the DK-style decision algorithm
+      if (this._shouldTakeLadder(h, zone, player)) {
+        h.onLadder = true;
+        h.ladderZone = zone;
+        h.grounded = false;
+        h.vx = 0;
+        h.vy = HAZARD_LADDER_SPEED;
+        // Snap to ladder centre
+        h.x = zone.x;
+        return;
+      }
+    }
+  }
+
   // ── Spawn ───────────────────────────────────────────────────────────────
 
   _spawn() {
     if (this._hazards.length >= HAZARD_MAX) return;
 
     const c = this._config;
+    const speed = this._getSpeed();
+    const isWild = Math.random() < this._getWildChance();
+
+    const textureKey = isWild ? 'hazard_skull_wild' : 'hazard_skull';
 
     // Visual sprite (rendering only — no physics body)
-    const sprite = this.scene.add.sprite(c.x, c.y - HAZARD_SIZE / 2, 'hazard_skull');
+    const sprite = this.scene.add.sprite(c.x, c.y - HAZARD_SIZE / 2, textureKey);
     sprite.setOrigin(0.5, 0.5);
     sprite.setDepth(5);
 
@@ -173,35 +321,76 @@ class HazardSystem {
       sprite: sprite,
       x: c.x,
       y: c.y,              // bottom of skull (feet), starts on platform surface
-      vx: (c.initialDirection || 1) * c.speed,
+      vx: (c.initialDirection || 1) * speed,
       vy: 0,
       grounded: true,      // starts on the spawner platform
       age: 0,
       jumpedOver: false,    // true once player earns the jump bonus for this skull
+      wild: isWild,
+      onLadder: false,
+      ladderZone: null,
+      passedLadders: new Set(),
     };
 
+    // Wild skulls start with an upward bounce to get airborne
+    if (isWild) {
+      hazard.grounded = false;
+      hazard.vy = HAZARD_WILD_BOUNCE_VY;
+      // Slightly faster horizontal
+      hazard.vx = (c.initialDirection || 1) * (speed * 1.15);
+    }
+
     this._hazards.push(hazard);
+  }
+
+  // ── Wild skull bounce logic ───────────────────────────────────────────
+
+  /**
+   * When a wild skull lands on a platform, it bounces back up and
+   * adjusts its horizontal direction slightly toward the player.
+   */
+  _wildBounce(h, player) {
+    const speed = this._getSpeed() * 1.15;
+
+    // Bounce upward
+    h.vy = HAZARD_WILD_BOUNCE_VY;
+    h.grounded = false;
+
+    // Slight horizontal tracking toward player
+    if (player && player.state !== 'dead') {
+      const dx = player.x - h.x;
+      // Bias toward player direction, but keep some randomness
+      if (Math.abs(dx) > 20) {
+        const trackDir = Math.sign(dx);
+        // 60% chance to angle toward player, 40% random
+        if (Math.random() < 0.6) {
+          h.vx = trackDir * speed;
+        } else {
+          h.vx = (Math.random() < 0.5 ? 1 : -1) * speed;
+        }
+      }
+    }
   }
 
   // ── Frame update ────────────────────────────────────────────────────────
 
   update(delta, player) {
-    if (!this._config) return;
+    if (!this._config || this._stopped) return;
 
     const dt = delta / 1000; // seconds
 
     if (this._contactCooldown > 0) this._contactCooldown -= delta;
 
-    // Spawn timer
+    // Spawn timer (loop-scaled interval)
     this._spawnTimer -= delta;
     if (this._spawnTimer <= 0) {
       this._spawn();
-      this._spawnTimer = this._config.interval;
+      this._spawnTimer = this._getInterval();
     }
 
     const worldH = this.scene.currentLevelData.worldHeight;
     const worldW = this.scene.currentLevelData.worldWidth;
-    const speed = this._config.speed;
+    const speed = this._getSpeed();
 
     for (let i = this._hazards.length - 1; i >= 0; i--) {
       const h = this._hazards[i];
@@ -214,10 +403,33 @@ class HazardSystem {
       h.age += delta;
 
       // ── Movement ──────────────────────────────────────────────────
-      if (h.grounded) {
+      if (h.onLadder) {
+        // Descending a ladder — move straight down
+        h.y += h.vy * dt;
+        h.x = h.ladderZone.x; // stay centred on ladder
+
+        // Reached the bottom of the ladder?
+        if (h.y >= h.ladderZone.bottomY) {
+          h.y = h.ladderZone.bottomY;
+          h.onLadder = false;
+          h.ladderZone = null;
+          h.grounded = true;
+          h.vy = 0;
+          // Pick a direction — away from the ladder side
+          // (use alternating direction like landing from a fall)
+          h.vx = -Math.sign(h.vx || 1) * speed;
+          // If vx ended up 0 (shouldn't happen), default right
+          if (h.vx === 0) h.vx = speed;
+        }
+      } else if (h.grounded) {
         // Roll horizontally
         h.x += h.vx * dt;
         h.vy = 0;
+
+        // Check ladder descent (DK-style) — only for regular skulls
+        if (!h.wild) {
+          this._checkLadderDescent(h, player);
+        }
 
         // Check if we've walked off the edge of our current platform
         const plat = this._isOnPlatform(h.x, h.y);
@@ -233,18 +445,28 @@ class HazardSystem {
         const prevY = h.y;
         h.y += h.vy * dt;
 
+        // Wild skulls bounce off side walls
+        if (h.wild) {
+          if (h.x < 4) { h.x = 4; h.vx = Math.abs(h.vx); }
+          else if (h.x > worldW - 4) { h.x = worldW - 4; h.vx = -Math.abs(h.vx); }
+        }
+
         // Check if we've passed through any platform during this fall step.
         // Scan all platforms between prevY and h.y to prevent overshooting.
-        let landed = false;
         for (const p of this._platforms) {
           if (h.x >= p.x && h.x <= p.x + p.w) {
             // Platform surface is at p.y. Did we cross it this frame?
             if (prevY <= p.y + 2 && h.y >= p.y - 2 && h.vy > 0) {
               h.y = p.y;
               h.vy = 0;
-              h.grounded = true;
-              h.vx = -Math.sign(h.vx) * speed;
-              landed = true;
+
+              if (h.wild) {
+                // Wild skulls bounce instead of rolling
+                this._wildBounce(h, player);
+              } else {
+                h.grounded = true;
+                h.vx = -Math.sign(h.vx) * speed;
+              }
               break;
             }
           }
@@ -277,7 +499,7 @@ class HazardSystem {
         // ── Jump-over bonus (DK style) ────────────────────────────
         // Player is airborne, horizontally close, and above the skull
         const jumpDy = h.y - player.y;
-        if (!h.jumpedOver && h.grounded && dx < 14 &&
+        if (!h.jumpedOver && (h.grounded || h.onLadder) && dx < 14 &&
             player.sprite && !player.sprite.body.blocked.down &&
             jumpDy > HAZARD_SIZE && jumpDy < 28) {
           h.jumpedOver = true;
@@ -304,5 +526,6 @@ class HazardSystem {
       if (h.sprite && h.sprite.active) h.sprite.destroy();
     }
     this._hazards = [];
+    this._stopped = true; // prevent new spawns during scene transitions
   }
 }

@@ -5,6 +5,10 @@
  * at or near the player's height. Contact damages the player.
  * Can be killed with one hit for a small score/XP reward.
  *
+ * Bats bob up and down in a sine wave as they fly, making them
+ * harder to dodge and harder to hit. Amplitude and speed scale
+ * with loop count.
+ *
  * Configured per-level via levelData.flyingHazard:
  *   {
  *     interval: 8000,        // ms between spawns
@@ -30,6 +34,10 @@ const FH_KILL_SCORE     = 30;
 const FH_KILL_XP        = 5;
 const FH_WING_SPEED     = 200; // ms per wing flap frame
 
+// Sine wave bob defaults
+const FH_WAVE_AMP       = 6;   // base amplitude in pixels
+const FH_WAVE_FREQ      = 3.0; // base frequency (radians/sec)
+
 class FlyingHazardSystem {
   constructor(scene) {
     this.scene = scene;
@@ -37,6 +45,8 @@ class FlyingHazardSystem {
     this._spawnTimer = 0;
     this._config = null;
     this._contactCooldown = 0;
+    this._elapsed = 0; // total elapsed time for sine wave
+    this._stopped = false; // true after destroyAll — prevents spawns during transitions
 
     const data = scene.currentLevelData;
     if (data && data.flyingHazard) {
@@ -45,6 +55,36 @@ class FlyingHazardSystem {
       this._spawnTimer = 3000;
       this._buildTexture();
     }
+  }
+
+  // ── Loop-scaled values ────────────────────────────────────────────────────
+
+  _getLoop() {
+    return GameState.currentLoop || 1;
+  }
+
+  /** Bat horizontal speed — increases each loop */
+  _getSpeed() {
+    const loop = this._getLoop();
+    return this._config.speed + (loop - 1) * 8;
+  }
+
+  /** Spawn interval — decreases each loop, minimum 2500ms */
+  _getInterval() {
+    const loop = this._getLoop();
+    return Math.max(this._config.interval - (loop - 1) * 500, 2500);
+  }
+
+  /** Sine wave amplitude — increases each loop, capped at 14px */
+  _getWaveAmp() {
+    const loop = this._getLoop();
+    return Math.min(FH_WAVE_AMP + (loop - 1) * 2, 14);
+  }
+
+  /** Sine wave frequency — slightly faster each loop */
+  _getWaveFreq() {
+    const loop = this._getLoop();
+    return FH_WAVE_FREQ + (loop - 1) * 0.3;
   }
 
   // ── Bat texture (simple wing-flap sprite) ──────────────────────────────
@@ -95,6 +135,7 @@ class FlyingHazardSystem {
 
     const c = this._config;
     const worldW = this.scene.currentLevelData.worldWidth;
+    const speed = this._getSpeed();
 
     // Pick a side to spawn from — force opposite side if player is near an edge
     const edgeMargin = 40;  // px — if player is within this distance of an edge, bat comes from the other side
@@ -151,32 +192,37 @@ class FlyingHazardSystem {
     this._bats.push({
       sprite: sprite,
       x: startX,
+      baseY: startY,       // centre line of the sine wave
       y: startY,
-      vx: dir * c.speed,
+      vx: dir * speed,
       dir: dir,
       alive: true,
       wingTimer: 0,
       wingFrame: 1,
+      wavePhase: Math.random() * Math.PI * 2, // random start phase so bats don't sync
     });
   }
 
   // ── Frame update ──────────────────────────────────────────────────────
 
   update(delta, player) {
-    if (!this._config) return;
+    if (!this._config || this._stopped) return;
 
     const dt = delta / 1000;
+    this._elapsed += dt;
 
     if (this._contactCooldown > 0) this._contactCooldown -= delta;
 
-    // Spawn timer
+    // Spawn timer (loop-scaled)
     this._spawnTimer -= delta;
     if (this._spawnTimer <= 0) {
       this._spawn(player);
-      this._spawnTimer = this._config.interval;
+      this._spawnTimer = this._getInterval();
     }
 
     const worldW = this.scene.currentLevelData.worldWidth;
+    const waveAmp = this._getWaveAmp();
+    const waveFreq = this._getWaveFreq();
 
     for (let i = this._bats.length - 1; i >= 0; i--) {
       const bat = this._bats[i];
@@ -188,6 +234,10 @@ class FlyingHazardSystem {
 
       // Move horizontally
       bat.x += bat.vx * dt;
+
+      // Sine wave vertical bobbing
+      bat.y = bat.baseY + waveAmp * Math.sin(bat.wavePhase + this._elapsed * waveFreq);
+
       bat.sprite.setPosition(bat.x, bat.y);
 
       // Wing flap animation
@@ -274,5 +324,6 @@ class FlyingHazardSystem {
       if (bat.sprite && bat.sprite.active) bat.sprite.destroy();
     }
     this._bats = [];
+    this._stopped = true; // prevent new spawns during scene transitions
   }
 }
