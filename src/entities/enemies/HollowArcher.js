@@ -147,9 +147,9 @@ class HollowArcher extends EnemyEntity {
 
         // Jump-over bonus: player is airborne, horizontally close, and above the arrow
         const jumpDy = arrowData.obj.y - player.y;
-        if (!arrowData.jumpedOver && dx < 14 &&
+        if (!arrowData.jumpedOver && dx < 20 &&
             player.sprite && !player.sprite.body.blocked.down &&
-            jumpDy > 6 && jumpDy < 28) {
+            jumpDy > 2 && jumpDy < 36) {
           arrowData.jumpedOver = true;
           GameState.score += 50;
           const popup = this.scene.add.text(player.x, player.y - 20, '+50', {

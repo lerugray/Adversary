@@ -166,7 +166,7 @@ class LadderSystem {
                         midY > activeZone.bottomY + 2;
 
       if (exitJump || outOfZone) {
-        this._exitClimb(player, input);
+        this._exitClimb(player, input, exitJump);
         return;
       }
 
@@ -188,7 +188,7 @@ class LadderSystem {
         if (midY <= activeZone.topY + 4) {
           sprite.setY(activeZone.topY - 1);
           body.setVelocityY(0);
-          this._exitClimb(player, input);
+          this._exitClimb(player, input, false);
         }
       } else if (input.isDownHeld()) {
         body.setVelocityY(CLIMB_SPEED);
@@ -198,7 +198,7 @@ class LadderSystem {
 
         // Reached the bottom of the zone → dismount onto lower platform
         if (py >= activeZone.bottomY - 4) {
-          this._exitClimb(player, input);
+          this._exitClimb(player, input, false);
         }
       } else {
         // Idle on ladder — freeze in place
@@ -242,8 +242,9 @@ class LadderSystem {
    * Return player to normal physics.
    * @param {PlayerEntity}  player
    * @param {InputManager}  input
+   * @param {boolean}       jumped — true if the player pressed jump to exit
    */
-  _exitClimb(player, input) {
+  _exitClimb(player, input, jumped) {
     player._isClimbing = false;
     player._climbZone  = null;
 
@@ -255,8 +256,8 @@ class LadderSystem {
       this.scene.playerPlatformCollider.active = true;
     }
 
-    // If exiting via jump, apply a small upward kick
-    if (input.isJumpJustPressed()) {
+    // If exiting via jump, apply an upward kick
+    if (jumped) {
       body.setVelocityY(-180);
     }
 
