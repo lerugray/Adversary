@@ -41,23 +41,21 @@
 
     /* ── Manual toggle button ── */
     #manual-toggle {
-      position: absolute;
-      left: -36px;
-      top: 50%;
-      transform: translateY(-50%);
       writing-mode: vertical-rl;
       text-orientation: mixed;
       background: #1a1408;
       color: #aa8844;
       border: 1px solid #554422;
       border-right: none;
-      padding: 12px 6px;
+      padding: 14px 8px;
       font-family: 'Press Start 2P', monospace;
-      font-size: 7px;
+      font-size: 10px;
       cursor: pointer;
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       z-index: 100;
       transition: background 0.2s;
+      flex-shrink: 0;
+      align-self: center;
     }
     #manual-toggle:hover {
       background: #2a2010;
@@ -66,14 +64,14 @@
 
     /* ── Manual panel ── */
     #manual-panel {
-      width: 320px;
-      height: 480px;
+      width: 420px;
+      height: 640px;
+      max-height: 90vh;
       background: #1a1408;
       border: 2px solid #554422;
       overflow-y: auto;
       display: none;
       flex-shrink: 0;
-      margin-right: 8px;
       scrollbar-width: thin;
       scrollbar-color: #554422 #0d0a04;
     }
@@ -85,28 +83,28 @@
 
     /* ── Manual content styles ── */
     .manual-inner {
-      padding: 20px 18px 30px;
+      padding: 24px 22px 36px;
       color: #ccbb88;
       font-family: 'Silkscreen', 'Press Start 2P', monospace;
-      font-size: 9px;
-      line-height: 1.7;
+      font-size: 11px;
+      line-height: 1.8;
     }
 
     .manual-inner h1 {
       font-family: 'Press Start 2P', monospace;
-      font-size: 14px;
+      font-size: 18px;
       color: #cc3333;
       text-align: center;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       text-shadow: 1px 1px 0 #440000;
     }
 
     .manual-inner .subtitle {
       text-align: center;
       color: #887744;
-      font-size: 7px;
-      margin-bottom: 16px;
-      letter-spacing: 1px;
+      font-size: 9px;
+      margin-bottom: 18px;
+      letter-spacing: 2px;
     }
 
     .manual-inner .wip-banner {
@@ -114,29 +112,29 @@
       color: #cc8833;
       background: #2a1a08;
       border: 1px dashed #665522;
-      padding: 6px 8px;
-      margin-bottom: 16px;
-      font-size: 7px;
+      padding: 8px 10px;
+      margin-bottom: 18px;
+      font-size: 9px;
     }
 
     .manual-inner h2 {
       font-family: 'Press Start 2P', monospace;
-      font-size: 9px;
+      font-size: 12px;
       color: #cc3333;
       border-bottom: 1px solid #443322;
-      padding-bottom: 4px;
-      margin: 18px 0 8px;
+      padding-bottom: 5px;
+      margin: 22px 0 10px;
     }
 
     .manual-inner h3 {
       font-family: 'Press Start 2P', monospace;
-      font-size: 8px;
+      font-size: 10px;
       color: #aa7744;
-      margin: 12px 0 4px;
+      margin: 14px 0 6px;
     }
 
     .manual-inner p {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .manual-inner .flavor {
@@ -147,19 +145,19 @@
     .manual-inner table {
       width: 100%;
       border-collapse: collapse;
-      margin: 6px 0 10px;
+      margin: 8px 0 12px;
     }
     .manual-inner th {
       color: #aa8844;
       text-align: left;
       border-bottom: 1px solid #443322;
-      padding: 3px 4px;
-      font-size: 8px;
+      padding: 4px 6px;
+      font-size: 10px;
     }
     .manual-inner td {
-      padding: 3px 4px;
+      padding: 4px 6px;
       border-bottom: 1px solid #221a0a;
-      font-size: 8px;
+      font-size: 10px;
       vertical-align: top;
     }
     .manual-inner td:first-child {
@@ -171,9 +169,9 @@
       display: inline-block;
       background: #2a2010;
       border: 1px solid #554422;
-      padding: 1px 4px;
+      padding: 2px 5px;
       color: #ddcc88;
-      font-size: 8px;
+      font-size: 10px;
     }
 
     .manual-inner .enemy-name {
@@ -187,15 +185,15 @@
     .manual-inner .divider {
       border: none;
       border-top: 1px solid #332a14;
-      margin: 14px 0;
+      margin: 16px 0;
     }
 
     .manual-inner .footer {
       text-align: center;
       color: #554422;
-      font-size: 7px;
-      margin-top: 20px;
-      padding-top: 10px;
+      font-size: 9px;
+      margin-top: 24px;
+      padding-top: 12px;
       border-top: 1px solid #332a14;
     }
   </style>
