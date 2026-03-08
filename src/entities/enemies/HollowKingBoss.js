@@ -73,7 +73,7 @@ class HollowKingBoss extends EnemyEntity {
     super(scene, x, y, {
       width:       16,
       height:      26,
-      color:       0x442244,  // deep purple — the Dark Knight
+      color:       0x8844aa,  // bright purple — the Dark Knight
       hp:          hp,
       damage:      BOSS_BASE_DAMAGE + (loop - 1) * BOSS_DAMAGE_PER_LOOP,
       xpReward:    BOSS_XP_REWARD,
@@ -552,6 +552,6 @@ class HollowKingBoss extends EnemyEntity {
   // ── Tint ───────────────────────────────────────────────────────────────
 
   _restoreTint() {
-    this.sprite.setTint(0x442244);
+    this.sprite.setTint(0x8844aa);
   }
 }
