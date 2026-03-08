@@ -8,6 +8,12 @@
  *   - Stagger mechanic: hitting all 4 weak points opens a critical window
  *   - Death: dramatic camera shake + screen flash sequence
  *
+ * Fairness rules:
+ *   - NO contact damage while idle or walking — boss only hurts during attacks
+ *   - Charge can only hit the player ONCE per dash (no re-hit after i-frames)
+ *   - Charge hitbox is vertically narrow — a well-timed jump clears it
+ *   - Wider recovery windows after attacks so the player can punish whiffs
+ *
  * Stats (loop 1):
  *   HP: 20, Damage: 2 (slash), 3 (leap/charge)
  *   XP: 200, Score: 1000
@@ -281,8 +287,13 @@ class HollowKingBoss extends EnemyEntity {
         break;
     }
 
-    // ── Contact damage (always active unless staggered/dying) ────────
-    if (this._aiState !== BOSS_AI.STAGGER && this._aiState !== BOSS_AI.DYING) {
+    // ── Contact damage ONLY during active attack states ─────────────
+    // Boss is safe to stand near when idle or walking — damage comes
+    // from attacks, not from bumping into him.
+    if (this._aiState === BOSS_AI.SLASH ||
+        this._aiState === BOSS_AI.LEAP  ||
+        this._aiState === BOSS_AI.CHARGE ||
+        this._aiState === BOSS_AI.BASH) {
       this._checkContactDamage(player);
     }
   }
@@ -392,7 +403,7 @@ class HollowKingBoss extends EnemyEntity {
       });
 
       this._aiState = BOSS_AI.IDLE;
-      this._aiTimer = 400;
+      this._aiTimer = 650;  // recovery window — player can punish a whiffed slash
     }
   }
 
@@ -432,7 +443,7 @@ class HollowKingBoss extends EnemyEntity {
       this.scene.cameras.main.shake(200, 0.008);
 
       this._aiState = BOSS_AI.IDLE;
-      this._aiTimer = 600;
+      this._aiTimer = 900;  // heavy landing — long recovery, punish window
     }
   }
 
@@ -443,6 +454,7 @@ class HollowKingBoss extends EnemyEntity {
     this._aiTimer     = BOSS_CHARGE_WINDUP;
     this._chargeTimer = BOSS_CHARGE_DURATION;
     this._chargeDirX  = player.x > this.sprite.x ? 1 : -1;
+    this._chargeHit   = false; // only hit the player once per charge
     this._lastAction  = 'charge';
     this.sprite.body.setVelocityX(0);
 
@@ -471,9 +483,11 @@ class HollowKingBoss extends EnemyEntity {
     this._chargeTimer -= delta;
     this.sprite.body.setVelocityX(this._chargeDirX * this._chargeSpeed);
 
-    // Hit player during charge
-    if (this.hDistTo(player) < 14 && this.vDistTo(player) < 20) {
+    // Hit player during charge — only once per charge, and vertically
+    // narrow so a well-timed jump lets the player hop over it
+    if (!this._chargeHit && this.hDistTo(player) < 14 && this.vDistTo(player) < 10) {
       player.takeDamage(this._heavyDamage, this.sprite.x);
+      this._chargeHit = true; // can't re-hit after i-frames expire
     }
 
     // End charge on wall hit or timer
@@ -484,13 +498,13 @@ class HollowKingBoss extends EnemyEntity {
       this._restoreTint();
       this._attackCooldown = BOSS_CHARGE_COOLDOWN;
       this._aiState = BOSS_AI.IDLE;
-      this._aiTimer = 800;
+      this._aiTimer = 1000; // recovery after charge — punish window
 
-      // Wall hit: brief self-stun
+      // Wall hit: longer self-stun (boss overcommitted)
       if (this.sprite.body.blocked.left || this.sprite.body.blocked.right) {
-        this._aiTimer = 1200;
+        this._aiTimer = 1500;
         this.sprite.setTint(0x888888);
-        this.scene.time.delayedCall(400, () => {
+        this.scene.time.delayedCall(600, () => {
           if (!this._dead) this._restoreTint();
         });
       }
@@ -532,7 +546,7 @@ class HollowKingBoss extends EnemyEntity {
       });
 
       this._aiState = BOSS_AI.IDLE;
-      this._aiTimer = 500;
+      this._aiTimer = 700;  // recovery after bash — punish window
     }
   }
 
