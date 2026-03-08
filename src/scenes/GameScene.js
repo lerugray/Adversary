@@ -457,6 +457,15 @@ class GameScene extends Phaser.Scene {
         color:      '#334433',
       }
     ).setScrollFactor(0).setDepth(20);
+
+    // Gamepad debug — shows button indices when pressed
+    this._gpDebugText = this.add.text(4, 232, '', {
+      fontFamily: 'monospace',
+      fontSize:   '6px',
+      color:      '#44ff44',
+      stroke:     '#000000',
+      strokeThickness: 1,
+    }).setScrollFactor(0).setDepth(20);
   }
 
   // ── Attack hitbox → enemy collision ────────────────────────────────────────
@@ -663,5 +672,10 @@ class GameScene extends Phaser.Scene {
 
     // HUD
     this.hud.update(this.player);
+
+    // Gamepad debug display
+    if (this._gpDebugText) {
+      this._gpDebugText.setText(this.inputManager.getGamepadDebug());
+    }
   }
 }

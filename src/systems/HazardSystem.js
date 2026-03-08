@@ -19,7 +19,7 @@ const HAZARD_GRAVITY  = 400; // px/s^2 (for manual sim)
 const HAZARD_DAMAGE   = 1;
 const HAZARD_MAX      = 12;
 const HAZARD_CONTACT_COOLDOWN = 1200; // ms between damage ticks
-const HAZARD_JUMP_BONUS      = 100;  // score for jumping over a hazard
+const HAZARD_JUMP_BONUS      = 50;   // score for jumping over a hazard
 
 class HazardSystem {
   constructor(scene) {
@@ -33,11 +33,12 @@ class HazardSystem {
     const data = scene.currentLevelData;
     if (data && data.hazardSpawner) {
       this._config = data.hazardSpawner;
-      this._spawnTimer = this._config.initialDelay || 3000;
+      this._spawnTimer = 500; // first skull almost immediately
       // Cache platforms sorted by Y for efficient lookup
       this._platforms = (data.platforms || []).slice().sort((a, b) => a.y - b.y);
       this._buildTexture();
       this._buildSpawnerVisual();
+      this._spawnPreRolled(data);
     }
   }
 
@@ -79,6 +80,46 @@ class HazardSystem {
     s.add.rectangle(hx + 3, hy - 14, 3, 3, 0x222222).setDepth(2);
     // Open mouth (where skulls emerge)
     s.add.rectangle(hx, hy - 4, 8, 5, 0x1a1a1a).setOrigin(0.5, 1).setDepth(2);
+  }
+
+  // ── Pre-rolled skulls (so the level feels alive from the start) ─────────
+
+  _spawnPreRolled(data) {
+    if (!this._config) return;
+    const speed = this._config.speed;
+
+    // Sort platforms by Y ascending (highest first) and skip ground (tier 0)
+    const tiers = (data.platforms || [])
+      .filter(p => p.tier && p.tier > 0)
+      .sort((a, b) => b.y - a.y); // lowest tiers first (closest to player)
+
+    // Place a skull on the four lowest tiers (closest to player spawn)
+    const count = Math.min(4, tiers.length);
+    for (let i = 0; i < count; i++) {
+      const plat = tiers[i];
+      // Random X somewhere in the middle of the platform
+      const margin = plat.w * 0.2;
+      const x = plat.x + margin + Math.random() * (plat.w - margin * 2);
+      const y = plat.y; // on the platform surface
+
+      // Alternate direction: odd tiers roll right, even roll left
+      const dir = (plat.tier % 2 === 1) ? 1 : -1;
+
+      const sprite = this.scene.add.sprite(x, y - HAZARD_SIZE / 2, 'hazard_skull');
+      sprite.setOrigin(0.5, 0.5);
+      sprite.setDepth(5);
+
+      this._hazards.push({
+        sprite: sprite,
+        x: x,
+        y: y,
+        vx: dir * speed,
+        vy: 0,
+        grounded: true,
+        age: 0,
+        jumpedOver: false,
+      });
+    }
   }
 
   // ── Platform helpers ────────────────────────────────────────────────────
@@ -214,7 +255,7 @@ class HazardSystem {
       h.sprite.setPosition(h.x, h.y - HAZARD_SIZE / 2);
 
       // ── Despawn if off-world ──────────────────────────────────────
-      if (h.y > worldH + 30 || h.x < -30 || h.x > worldW + 30 || h.age > 25000) {
+      if (h.y > worldH + 30 || h.x < -30 || h.x > worldW + 30 || h.age > 45000) {
         h.sprite.destroy();
         this._hazards.splice(i, 1);
         continue;
@@ -235,9 +276,10 @@ class HazardSystem {
 
         // ── Jump-over bonus (DK style) ────────────────────────────
         // Player is airborne, horizontally close, and above the skull
+        const jumpDy = h.y - player.y;
         if (!h.jumpedOver && h.grounded && dx < 14 &&
             player.sprite && !player.sprite.body.blocked.down &&
-            player.y < h.y - HAZARD_SIZE) {
+            jumpDy > HAZARD_SIZE && jumpDy < 28) {
           h.jumpedOver = true;
           GameState.score += HAZARD_JUMP_BONUS;
           // Brief floating score text

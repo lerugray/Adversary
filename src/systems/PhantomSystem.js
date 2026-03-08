@@ -70,7 +70,18 @@ class PhantomSystem {
   update(delta, player) {
     // Don't spawn in boss level (Level 4)
     if (GameState.currentLevel === 4) return;
-    if (!player || player.state === 'dead') return;
+    if (!player || player.state === 'dead') {
+      // Reset everything so the ghost clock starts fresh after respawn
+      this.idleTimer = 0;
+      this.telegraphing = false;
+      this.telegraphTimer = 0;
+      if (this.warningText) {
+        this.warningText.destroy();
+        this.warningText = null;
+      }
+      if (this.phantomActive) this._despawnPhantom();
+      return;
+    }
 
     const playerY = player.y;
 

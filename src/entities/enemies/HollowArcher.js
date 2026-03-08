@@ -137,6 +137,25 @@ class HollowArcher extends EnemyEntity {
           player.takeDamage(this.damage, arrowData.obj.x);
           this._destroyArrow(arrowData);
           this.arrows.splice(i, 1);
+          continue;
+        }
+
+        // Jump-over bonus: player is airborne, horizontally close, and above the arrow
+        const jumpDy = arrowData.obj.y - player.y;
+        if (!arrowData.jumpedOver && dx < 14 &&
+            player.sprite && !player.sprite.body.blocked.down &&
+            jumpDy > 6 && jumpDy < 28) {
+          arrowData.jumpedOver = true;
+          GameState.score += 50;
+          const popup = this.scene.add.text(player.x, player.y - 20, '+50', {
+            fontFamily: 'monospace', fontSize: '7px', color: '#ffdd44',
+            stroke: '#000000', strokeThickness: 2,
+          }).setOrigin(0.5, 1).setDepth(50);
+          this.scene.tweens.add({
+            targets: popup, y: popup.y - 16, alpha: 0,
+            duration: 800, ease: 'Power2',
+            onComplete: () => popup.destroy(),
+          });
         }
       }
     }
