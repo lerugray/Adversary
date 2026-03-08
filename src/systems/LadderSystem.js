@@ -261,9 +261,10 @@ class LadderSystem {
       this.scene.playerPlatformCollider.active = true;
     }
 
-    // If exiting via jump, apply an upward kick
+    // If exiting via jump, apply an upward kick + horizontal push in facing dir
     if (jumped) {
-      body.setVelocityY(-180);
+      body.setVelocityY(-155);
+      body.setVelocityX(player.facing * 60);
     }
 
     // Restore player tint (respects soulless state)

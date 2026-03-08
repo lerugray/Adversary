@@ -2,7 +2,7 @@
  * Level4.js — "The Pale Spire" level data definition.
  *
  * Theme: Grand cathedral, cold white stone, the final ascent.
- * DK-style ladder climb to a wide boss arena at the top.
+ * DK-style full-width platforms with zigzag ladders up to the boss arena.
  *
  * Coordinate system:
  *   Origin (0,0) is top-left.  Y increases downward.
@@ -17,13 +17,13 @@
  *   y=60  │  ████                            ████     │  upper arena ledges (20px jump)
  *         │                                           │
  *   y=80  │  ████████████████████████████████████████ │  ARENA FLOOR / boss threshold
- *         │                                           │
- *   y=140 │  ██████████████████                       │  approach tier 3
- *         │                                           │
- *   y=200 │            ██████████████████████         │  approach tier 2
- *         │                                           │
- *   y=260 │  ██████████████████                       │  approach tier 1
- *         │                                           │
+ *         │            ↑ ladder (left x=14)           │
+ *   y=140 │  ████████████████████████████████████████ │  approach tier 3
+ *         │                       ↑ ladder (right)    │
+ *   y=200 │  ████████████████████████████████████████ │  approach tier 2
+ *         │            ↑ ladder (left x=14)           │
+ *   y=260 │  ████████████████████████████████████████ │  approach tier 1
+ *         │                       ↑ ladder (right)    │
  *   y=320 │  ████████████████████████████████████████ │  GROUND
  *   y=380 └──────────────────────────────────────────┘
  *
@@ -59,14 +59,14 @@ const Level4Data = {
     // Ground (full width cathedral floor)
     { x: 0,   y: 320, w: 256, h: 60,  tier: 0 },
 
-    // Approach tier 1 — left side
-    { x: 0,   y: 260, w: 140, h: 10,  tier: 1 },
+    // Approach tier 1 — full width (DK style)
+    { x: 0,   y: 260, w: 256, h: 10,  tier: 1 },
 
-    // Approach tier 2 — right side
-    { x: 110, y: 200, w: 146, h: 10,  tier: 2 },
+    // Approach tier 2 — full width
+    { x: 0,   y: 200, w: 256, h: 10,  tier: 2 },
 
-    // Approach tier 3 — left side, leads to arena
-    { x: 0,   y: 140, w: 150, h: 10,  tier: 3 },
+    // Approach tier 3 — full width, leads to arena
+    { x: 0,   y: 140, w: 256, h: 10,  tier: 3 },
 
     // ── Boss Arena ──────────────────────────────────────────────────
     // Arena floor — full width, the main fighting platform
@@ -87,25 +87,28 @@ const Level4Data = {
     { x: 215, topY: 260, bottomY: 320, w: 14 },
 
     // Tier 1 → Tier 2 (left side)
-    { x: 14,  topY: 200, bottomY: 260, w: 14 },
+    { x: 40,  topY: 200, bottomY: 260, w: 14 },
 
     // Tier 2 → Tier 3 (right side)
-    { x: 228, topY: 140, bottomY: 200, w: 14 },
+    { x: 215, topY: 140, bottomY: 200, w: 14 },
 
     // Tier 3 → Arena floor (left side)
-    { x: 14,  topY: 80,  bottomY: 140, w: 14 },
+    { x: 40,  topY: 80,  bottomY: 140, w: 14 },
   ],
 
   // ── Enemy spawn markers (approach only — boss owns the arena) ─────────
   enemySpawns: [
     // Ground — knight patrol
-    { x: 160, y: 312, type: 'hollow_knight' },
+    { x: 130, y: 312, type: 'hollow_knight' },
 
-    // Tier 1 — archer on approach ledge
-    { x: 80,  y: 252, type: 'hollow_archer' },
+    // Tier 1 — archer midway
+    { x: 120, y: 252, type: 'hollow_archer' },
 
-    // Tier 2 — knight guards the upper approach
-    { x: 180, y: 192, type: 'hollow_knight' },
+    // Tier 2 — knight guards the climb
+    { x: 130, y: 192, type: 'hollow_knight' },
+
+    // Tier 3 — archer near the arena entrance
+    { x: 100, y: 132, type: 'hollow_archer' },
   ],
 
   // ── Decorative elements ────────────────────────────────────────────────
