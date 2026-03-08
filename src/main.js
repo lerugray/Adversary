@@ -29,6 +29,7 @@ const config = {
     parent:          'game-container',
     width:           GAME_WIDTH,
     height:          GAME_HEIGHT,
+    expandParent:    false,                     // don't resize parent div
   },
 
   // ── Rendering ────────────────────────────────────────────────────────────
