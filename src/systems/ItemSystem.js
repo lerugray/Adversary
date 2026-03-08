@@ -210,7 +210,7 @@ class ItemSystem {
       player.gameObject.setTint(0xffff88);
       this.scene.time.delayedCall(150, () => {
         if (player.gameObject && player.gameObject.active && player.state !== 'dead') {
-          player.gameObject.setTint(0x88ccff);
+          player.gameObject.setTint(player._baseTint());
         }
       });
     }

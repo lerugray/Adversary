@@ -43,7 +43,7 @@ const Level2Data = {
 
   // ── Checkpoint (ruined tower gate at summit) ──────────────────────────
   checkpoint: {
-    x: 36,
+    x: 88,
     y: 38,
     radius: 8,
     type: 'gate',
@@ -74,9 +74,11 @@ const Level2Data = {
 
     // Tier 5 — "Knight's Watch": single platform, tough guard
     { x: 0,   y: 110, w: 200, h: 10,  tier: 5 },
+    { x: 218, y: 100, w: 30,  h: 10,  tier: 5 },  // elevated sniper perch (inaccessible)
 
     // Tier 6 — Summit platform (gate checkpoint here)
     { x: 0,   y: 50,  w: 110, h: 10,  tier: 6 },
+    { x: 130, y: 38,  w: 30,  h: 10,  tier: 6 },  // elevated sniper perch (inaccessible)
 
   ],
 
@@ -122,10 +124,10 @@ const Level2Data = {
     { x: 40,  y: 162, type: 'hollow_archer' },
     { x: 165, y: 162, type: 'hollow_soldier' },
 
-    // Tier 5 — knight guards the final approach + archers on elevated perches
+    // Tier 5 — knight guards the final approach
     { x: 100, y: 102, type: 'hollow_knight' },
-    { x: 160, y: 102, type: 'hollow_archer', canShootDown: true },  // shoots down at Tier 4 climbers
-    { x: 60,  y: 42,  type: 'hollow_archer', canShootDown: true },  // summit sniper, shoots down at Tier 5
+    { x: 230, y: 92,  type: 'hollow_archer', canShootDown: true },  // perched right, shoots down at climbers
+    { x: 142, y: 30,  type: 'hollow_archer', canShootDown: true },  // summit perch, shoots down at Tier 5
   ],
 
   // ── Flying hazards (DK-style bats on a timer) ─────────────────────────

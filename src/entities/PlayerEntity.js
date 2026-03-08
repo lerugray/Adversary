@@ -293,6 +293,7 @@ class PlayerEntity {
       if (this.iframeTimer <= 0) {
         this.isInvincible = false;
         this.sprite.setAlpha(1);
+        this.sprite.setTint(this._baseTint());
         // Ensure flash tween is stopped
         if (this._flashTween) {
           this._flashTween.stop();

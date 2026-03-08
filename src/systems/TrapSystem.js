@@ -31,6 +31,7 @@ const DART_W           = 8;
 const DART_H           = 3;
 const DART_LIFETIME    = 3000;   // ms before auto-despawn
 const DART_CONTACT_CD  = 800;    // ms cooldown after dart damages player
+const DART_JUMP_BONUS  = 25;     // score for jumping over a dart
 
 class TrapSystem {
   constructor(scene) {
@@ -169,6 +170,7 @@ class TrapSystem {
       vx: trap.dir * trap.speed,
       damage: trap.damage,
       age: 0,
+      jumpedOver: false,
     });
   }
 
@@ -221,6 +223,27 @@ class TrapSystem {
           // Dart is consumed on hit
           d.sprite.destroy();
           this._darts.splice(i, 1);
+          continue;
+        }
+      }
+
+      // Jump-over bonus — player is airborne, horizontally close, and above the dart
+      if (player && player.state !== 'dead' && !d.jumpedOver &&
+          player.sprite && !player.sprite.body.blocked.down) {
+        const dx = Math.abs(player.x - d.x);
+        const jumpDy = d.y - player.y;
+        if (dx < 14 && jumpDy > 4 && jumpDy < 24) {
+          d.jumpedOver = true;
+          GameState.score += DART_JUMP_BONUS;
+          const popup = this.scene.add.text(player.x, player.y - 20, `+${DART_JUMP_BONUS}`, {
+            fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
+            stroke: '#000000', strokeThickness: 2, padding: FONT_PAD,
+          }).setOrigin(0.5, 1).setDepth(50);
+          this.scene.tweens.add({
+            targets: popup, y: popup.y - 16, alpha: 0,
+            duration: 800, ease: 'Power2',
+            onComplete: () => popup.destroy(),
+          });
         }
       }
     }
