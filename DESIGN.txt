@@ -1,323 +1,348 @@
-ADVERSARY — Master Design & Development Plan
-Vision Statement
-Adversary is a single-screen platformer in the tradition of Donkey Kong, filtered through the 
-death mechanics of Dark Souls and the gothic atmosphere of early Castlevania, with subtle 
-references to Dark Souls lore woven into its four levels. It targets the aesthetic, feel, and sound 
-of a lost 1984-1986 NES cartridge. Built in Phaser.js for browser play, architected from day one 
-for Electron packaging and eventual Steam distribution.
- 
-Tech Stack
-Layer
-Technology
-Reason
-Game Engine
-Phaser 3
-Purpose-built for 2D, handles tilemaps, 
-physics, audio, input
-Language
-JavaScript (ES6+)
-Portable, shareable, good Phaser ecosystem
-Desktop 
-Wrapper
-Electron
-Wraps to .exe/.app for Steam
-Steam 
-Integration
-Greenworks (Steamworks 
-SDK)
-Achievements, leaderboards, cloud saves
-Save System
-Abstracted SaveManager
-Swaps between localStorage and Steam 
-Cloud
-Asset Pipeline
-Texture atlases / sprite 
-sheets
-NES-style, loaded via Phaser asset loader
-Audio
-Phaser + Web Audio API
-Chiptune-ready, can use .ogg/.mp3 tracker 
-exports
- 
-Game States / Scene List
-1.	BootScene — Preload minimal assets, set up display scaling
-2.	PreloadScene — Load all assets with a simple loading bar
-3.	TitleScene — Title screen with flashing "INSERT COIN" style prompt
-4.	GameScene — Core gameplay (instantiated per level)
-5.	PauseScene — Inventory/equipment management overlay
-6.	InterludeScene — Optional brief interlude cutscenes between levels (1-2 screens, Pac-
-Man style)
-7.	LoopCompleteScene — Loop completion screen with stats
-8.	GameOverScene — Game over + high score initials entry
-9.	HighScoreScene — High score display table
- 
-Level Themes & Dark Souls References
-Level
-Theme
-DS 
-Reference
-Checkpoint
-1
-Ruined bonfire shrine, warm amber tones, 
-crumbling stone
-Firelink 
-Shrine
-Lit bonfire at top
-2
-Winding urban ruins, fog, archers on ledges
-Undead Burg
-Tower gate
-3
-Gears, traps, moving platforms, iron architecture
-Sen's 
-Fortress
-Iron fog gate
-4
-Cathedral, grand hall, stained glass, final boss
-Anor Londo
-Defeat Dark 
-Knight
-Each level has subtle environmental easter eggs — a hollow sitting by a wall, messages on the 
-ground in DS tradition, illusory walls that briefly reveal references, etc.
- 
-Player Attributes & Systems
-Core Stats:
-?	HP — starts at 1 max, increases via level up
-?	XP — accumulates from kills, retrieved from soul on death
-?	Mana — starts at 6, increases via drops
-?	Level — gates attribute point allocation on level up
-Level Up Choices (pick one per level):
-?	Increase max HP by 1
-?	Increase attack power
-?	Increase max mana by 3
-?	Increase move/attack speed slightly
-Gear Slots:
-?	Weapon (affects attack damage)
-?	Armor (chance to negate 1 damage per hit)
-?	Accessory (special passive effect)
- 
-Controls (Castlevania 1 inspired)
-Input
-Action
-D-Pad Left/Right
-Move
-D-Pad Down
-Duck
-D-Pad Up + Attack
-Special attack (costs 
-mana)
-A Button
-Jump
-B Button
-Attack (sword swing)
-B while ducking
-Low attack
-B while jumping
-Air attack
-Down + B while airborne
-Plunging attack
-Start
-Pause / Inventory
-Keyboard mapping for browser: Arrow keys = D-Pad, Z = Jump, X = Attack. Gamepad support 
-via Phaser's gamepad API.
- 
-Hit Reaction / Knockback
-When the player takes damage, they are knocked backward and upward in the air — identical in 
-feel to Castlevania 1. This is not merely cosmetic: the knockback can send the player off 
-platforms, into hazards, or into enemies, making positioning and terrain awareness critical. 
-Knockback direction is always away from the damage source. The player has brief invincibility 
-frames after being hit (i-frames) to prevent chain damage. Enemies have their own lighter 
-knockback reactions when struck.
- 
-Death & Soul Mechanic
-1.	Player dies ? soul orb spawns at last safe ground position before death (or nearest 
-reachable safe location if the player died falling off-screen)
-2.	Player respawns at stage start with 1 HP, no XP bonuses active, gear retained
-3.	Player reaches soul ? XP and level bonuses restored, game continues
-4.	Player dies again before reaching soul ? GAME OVER
-5.	Soul is visible on screen as a distinct glowing orb with a pulse animation
-6.	If soul is off-screen, it should be placed back to nearest safe reachable location.
- 
-The Phantom — Anti-Grinding Mechanic
-Inspired by the ghost in the original Spelunker, a Phantom enemy will emerge from off-screen if 
-the player remains on a single screen section too long without progressing. The Phantom is 
-completely invincible — it cannot be damaged or destroyed by any means. It moves slowly but 
-relentlessly toward the player, ignoring platforms and walls, passing through all geometry. It 
-deals heavy damage on contact and cannot be outrun indefinitely on a single screen. The only 
-way to make the Phantom retreat is to advance to a new section of the level or reach the 
-checkpoint.
-This mechanic prevents cheap XP grinding by making stalling dangerous without imposing a 
-hard time limit. The Phantom's arrival is telegraphed by a distinct audio cue and a brief visual 
-warning so the player always has a moment to react. On later loops, the Phantom's trigger timer 
-shortens and its movement speed increases slightly. Not sure if this mechanic should come into 
-play on the boss stage, probably not. 
- 
-Special Attacks (Castlevania pickup-swap system)
-Name
-Mana Cost
-Effect
-Knife
-1
-Fast horizontal projectile, low damage
-Axe
-2
-Arc throw, hits airborne enemies well
-Holy Water / Potion
-3
-Hits ground, creates damaging pool briefly
-Cross (Boomerang)
-3
-Returns to player, hits twice
-Skull Key
-4
-Screen-edge wrapping projectile with dark souls skull 
-motif
-Ember Flask
-5
-AoE burst around player, short range but high damage
-Pickups cycle through available specials. Player always sees current special and mana count 
-on HUD.
- 
-Items & Drops
-Drop Frequency (from enemies):
-?	Mana Shards (most common) — restore 1-2 mana
-?	Hearts (uncommon) — restore 1 HP
-?	Weapon drops (rare) — improve attack tier
-?	Armor drops (rare) — improve damage negation
-?	Accessory drops (very rare) — special passive effects
-Accessories (examples):
-?	Rusted Ring — slight speed boost
-?	Hawk Ring — increases special attack range
-?	Chloranthy Ring — faster mana regen
-?	Covetous Ring — increased drop rates
-?	Hornet Ring — critical hit chance on plunging attack
-?	Ring of Fog — extended invincibility frames when taking damage
-Breakable Objects: Barrels, crates, coffins appear throughout all levels. Drop rates are lower 
-than enemies but they are plentiful and reward exploration and thoroughness.
- 
-Chests & Mimics (Post-Loop 1)
-Beginning after the first successful loop, chests begin appearing in the world. They are rare and 
-their appearance is always a small reward moment.
-Normal Chests appear occasionally after defeating enemies or after pulling off impressive 
-jumps or kills (the game tracks these contextually). They have a higher-than-normal chance of 
-dropping equipable items or bonus XP, making them meaningfully better than standard enemy 
-drops.
-Mimics look identical to normal chests. The tell, for observant players, is subtle — a slight 
-animation difference or a faint sound cue. If the player attacks a mimic before touching it, it 
-takes damage like a normal enemy. If the player touches a mimic without attacking first, it 
-delivers a heavy damage hit and transforms — growing legs and becoming a fast, aggressive, 
-difficult enemy. Defeating a mimic guarantees a rare or better drop. Mimic frequency increases 
-with each loop.
- 
-Bestiary
-Standard Enemies (all levels, scaled per loop):
-?	Hollow Soldier — basic melee, walks back and forth
-?	Hollow Archer — stationary or slow, fires arrows
-?	Bat — erratic flight, disrupts platforming
-?	Skeleton — reassembles once unless hit with special attack or blessed weapon
-?	Armored Knight — tanky, slow, high damage
-?	Gargoyle (Level 3+) — flying, swoops at player
-?	Mimic (Post-loop 1) — see Chests & Mimics section above
-Loop-Exclusive Enemies (loop 1+, frequency increases per loop):
-?	Silver Knight — faster Armored Knight variant, unique weapon drop possible
-?	Painting Guardian — fast and aggressive, rare unique sword drop
-?	Titanite Demon — rare, powerful, guaranteed rare drop
-?	Darkmoon Soldier — fires special projectiles, unique accessory drop possible
-Boss — The Dark Knight (Level 4):
-?	Displayed health bar
-?	Moves similarly to the player: can jump, attack, and duck
-?	Stage contains 4 environmental weak points (pillars/switches) — triggering all 4 staggers 
-the boss and opens a critical hit window
-?	Can be defeated via pure combat, environmental exploitation, or a combination of both
-?	On loop 2+, gains additional attack patterns and increased speed
- 
-Scoring System
-?	Kills grant base XP and score (enemy-dependent)
-?	Level completion grants a time bonus
-?	Retrieving soul grants a score multiplier bonus
-?	Loop completion multiplies total accumulated score
-?	Top 5 high scores saved with 3-character initials entry (old-school style)
-?	Scores stored via SaveManager
- 
-Loop System
-?	Completing all 4 levels triggers Loop Complete screen, then restarts from Level 1
-?	Player retains: gear, level, attributes, XP, current special attack
-?	Each loop: enemy HP and damage scale up, spawn rates increase slightly, unique 
-enemies become more common, some platform arrangements subtly randomize, 
-Phantom trigger timer shortens
-?	Loop count displayed as a subtle HUD indicator
- 
-Save System Architecture (SaveManager)
-SaveManager
-  .saveHighScores(scores)
-  .loadHighScores()
-  .saveSettings(settings)
-  .loadSettings()
-In browser: uses localStorage. In Electron build: uses Steam Cloud via greenworks or falls back 
-to local file. Game code never calls localStorage directly — always through SaveManager — 
-making the swap to Steam Cloud clean and low-risk.
- 
-Asset Integration Plan
-All assets loaded via Phaser's asset loader from an /assets directory. Sprite sheets use 
-texture atlases (JSON + PNG). The game ships with clearly named placeholder colored 
-rectangles for all sprite slots so development can proceed fully before final art is ready.
-Sprite categories needed:
-?	Player: idle, walk, jump, duck, attack, air attack, plunge, hurt/knockback, death, soul orb
-?	Per enemy: idle, walk, attack, death
-?	Chest: closed, opening, Mimic idle, Mimic reveal, Mimic walk, Mimic attack
-?	Phantom: idle, move (semi-transparent, ghostly)
-?	Environment: tileset per level (floor, wall, platform, ladder, background, breakables)
-?	UI: HUD elements, NES-style bitmap font, menu screens, heart/mana icons
-?	Effects: projectiles, impacts, soul orb glow, level up flash, Phantom warning overlay
-NES Palette Constraint: Limit to the 54 NES hardware colors. Max 4 colors per background 
-tile, max 3 colors + transparency per sprite. This is the single most important visual constraint 
-for authenticity. Exact hex palette specs will be provided when writing asset generation prompts.
- 
-Audio Plan
-Music tracks needed:
-?	Title theme
-?	Level 1-3 theme (shared or per-level variants)
-?	Level 4 / boss theme
-?	Phantom warning sting
-?	Loop complete jingle
-?	Game over theme
-?	High score entry theme
-SFX needed:
-?	Jump, attack swing, hit landed, player hurt, player death
-?	Soul appear, soul retrieve
-?	Item pickup, chest open, Mimic reveal
-?	Level up
-?	Special attack (per type)
-?	Boss stagger, boss death
-?	Phantom approach warning
-?	Knockback impact
-Recommended free tools: BeepBox or FamiTracker for music, JSFXR for SFX — all export to 
-formats Phaser handles natively.
- 
-Development Phases
-Phase 1 — Skeleton & Engine Setup Scene manager, game loop, input system, 
-SaveManager stub, display scaling, Phaser config
-Phase 2 — Player System All movement, combat, knockback/hit reaction, death/soul 
-mechanic, attribute system, inventory
-Phase 3 — Level 1 Buildout Tilemap, platforms, ladders, placeholder enemies, checkpoint 
-logic, HUD
-Phase 4 — Enemy & Item Systems Enemy AI behaviors, drop system, item pickup/equip logic, 
-Phantom mechanic
-Phase 5 — Levels 2-4 + Boss Remaining levels, boss fight logic, environmental triggers
-Phase 6 — Chests & Mimics Chest spawn logic (contextual triggers), Mimic AI, drop tables
-Phase 7 — UI & Screens All non-gameplay scenes, high score entry, pause/inventory screen, 
-interlude scenes
-Phase 8 — Asset Integration Swap placeholders for real sprites and audio
-Phase 9 — Loop System & Secrets Loop scaling, randomization, unique enemies, easter 
-eggs, Phantom scaling per loop
-Phase 10 — Electron Wrapper & Desktop Build Package for desktop, implement 
-SaveManager Electron path, test builds
-Phase 11 — Steam Prep Greenworks integration, achievements design, Steam store assets, 
-submission
- 
-Prompt Writing for Asset Generation
-When ready, detailed prompts will be written for each sprite sheet and background tileset — 
-specifying exact pixel dimensions (16x16 tiles, 16x32 player sprite), NES color palette hex 
-values, animation frame counts, and per-level visual direction. These can target Figma AI tools, 
-Midjourney with pixel art settings, or dedicated pixel art tools like Aseprite.
+ADVERSARY - Master Design & Development Plan
 
+Vision Statement
+Adversary is a single-screen platformer in the tradition of Donkey Kong, filtered through the
+death mechanics of Dark Souls and the gothic atmosphere of early Castlevania, with subtle
+references to Dark Souls lore woven into its four levels. It targets the aesthetic, feel, and sound
+of a lost 1984-1986 NES cartridge. Built in Phaser.js for browser play, architected from day one
+for Electron packaging and eventual Steam distribution.
+
+Tech Stack
+  Game Engine:       Phaser 3 - Purpose-built for 2D, handles tilemaps, physics, audio, input
+  Language:          JavaScript (ES6+) - Portable, shareable, good Phaser ecosystem
+  Desktop Wrapper:   Electron - Wraps to .exe/.app for Steam
+  Steam Integration: Greenworks (Steamworks SDK) - Achievements, leaderboards, cloud saves
+  Save System:       Abstracted SaveManager - Swaps between localStorage and Steam Cloud
+  Asset Pipeline:    Texture atlases / sprite sheets - NES-style, loaded via Phaser asset loader
+  Audio:             Phaser + Web Audio API - Chiptune-ready, can use .ogg/.mp3 tracker exports
+
+Game States / Scene List
+  1. BootScene - Preload minimal assets, set up display scaling
+  2. PreloadScene - Load all assets with a simple loading bar
+  3. TitleScene - Title screen with flashing "PRESS ANY KEY TO START" prompt
+  4. GameScene - Core gameplay (instantiated per level via LevelRegistry)
+  5. PauseScene - Overlay pause (inventory/equipment management planned for Phase 7)
+  6. InterludeScene - Brief interlude between levels (stub, Phase 7 expansion)
+  7. LoopCompleteScene - Loop completion screen with loop number
+  8. GameOverScene - Game over, displays final score, transitions to high scores
+  9. HighScoreScene - High score table (top 10, initials entry planned for Phase 7)
+
+Level Themes & Dark Souls References
+  Level 1: "The Ashen Hearth"   - Ruined bonfire shrine, warm amber tones. (Firelink Shrine)
+           Checkpoint: Lit bonfire at top
+  Level 2: "Cresthollow"        - Winding urban ruins, fog, archers on ledges. (Undead Burg)
+           Checkpoint: Tower gate
+  Level 3: "The Iron Passage"   - Gears, traps, pendulum blades, iron architecture. (Sen's Fortress)
+           Checkpoint: Iron fog gate
+  Level 4: "The Pale Spire"     - Cathedral, grand hall, boss arena. (Anor Londo)
+           Checkpoint: Defeat the Hollow King
+
+Player Attributes & Systems
+  Core Stats:
+    HP - starts at 1 max, increases via level up
+    XP - accumulates from kills, held in soul on death (no XP recovery = no heal)
+    Mana - starts at 6, increases via level up or drops
+    Level - gates attribute point allocation on level up
+
+  Level Up Choices (pick one per level):
+    Increase max HP by 1
+    Increase attack power by 1
+    Increase max mana by 3
+    (Speed boost option planned but not yet implemented)
+
+  Gear Slots:
+    Weapon (affects attack damage) - Rusty Sword (+1), Iron Blade (+2), Knight Saber (+3)
+    Armor (chance to negate 1 damage per hit) - Leather Vest (+1), Chain Mail (+2), Plate Armor (+3)
+    Accessory (special passive effect) - not yet implemented
+
+Controls (Castlevania 1 inspired)
+  Keyboard:
+    Arrow Keys     Move / Climb ladders
+    Down           Duck
+    Z              Jump
+    X              Attack (sword swing)
+    X while duck   Low attack
+    X while air    Air attack
+    Down+X (air)   Plunging attack (2x damage, bounces on hit)
+    Up+X           Special attack (costs mana)
+    C              Dodge roll (brief i-frames)
+    Enter          Pause
+
+  Gamepad:
+    D-Pad / Left Stick   Move / Climb
+    A Button (0)         Jump
+    X Button (2)         Attack
+    Start (9)            Pause
+
+  Debug (will be removed):
+    G                    Trigger Game Over
+    L                    Trigger Loop Complete
+    Gamepad L1           Skip Level
+
+Hit Reaction / Knockback
+  When the player takes damage, they are knocked backward and upward in the air - identical in
+  feel to Castlevania 1. The knockback can send the player off platforms, into hazards, or into
+  enemies, making positioning and terrain awareness critical. Knockback direction is always away
+  from the damage source. The player has 1.5s invincibility frames after being hit (i-frames) to
+  prevent chain damage. Enemies have their own lighter knockback reactions when struck.
+  Ring of Fog accessory extends i-frames by 600ms (not yet implemented).
+
+Death & Soul Mechanic
+  1. Player dies - soul orb spawns at last safe ground position (clamped to nearest valid
+     platform surface if needed)
+  2. Player respawns at stage start with 1 HP, gear retained
+  3. Player reaches soul - XP restored (NO health recovery - intentional design decision)
+  4. Player dies again before reaching soul - GAME OVER
+  5. Soul is visible on screen as a pulsing orb
+  6. HUD shows directional arrow pointing toward off-screen soul
+
+The Phantom - Anti-Grinding Mechanic
+  Invincible ghost that appears if the player lingers too long without climbing higher. Passes
+  through all geometry, deals 2 damage on contact (1.5s cooldown). Retreats when player
+  climbs 40px above trigger position. Telegraphed by 2.5s "!! DANGER !!" text warning.
+  Base trigger: 20s idle timer. Scales with loop (-3s per loop, min 8s).
+  Disabled in Level 4 (boss level).
+
+Special Attacks (Castlevania pickup-swap system)
+  Knife        1 mana   Fast horizontal projectile, low damage
+  Axe          2 mana   Arc throw upward then falls with gravity, spins visually
+  Holy Water   2 mana   Short lob, creates damaging ground fire on impact
+  Cross        2 mana   Boomerang - flies out and returns to player, hits twice
+  Skull Key    3 mana   Slow spiralling projectile, pierces enemies
+  Ember Flask  4 mana   Arcs forward, explodes on platform impact for area damage
+
+  Note: Original design had Holy Water at 3 mana and Cross at 3 mana. Adjusted during
+  implementation for balance. Pickup cycling system not yet implemented.
+
+Items & Drops
+  Drop Frequency (from enemies):
+    Mana Shards (most common) - restore 1-2 mana
+    Hearts (uncommon) - restore 1 HP
+    Weapon drops (rare) - improve attack tier
+    Armor drops (rare) - improve damage negation
+    Special attack pickups (rare) - cycle current special weapon
+
+  Items pop upward on drop, fall with gravity, bounce, collide with platforms.
+  8s lifetime, blink during last 2s. Yellow flash on player confirms pickup.
+
+  Accessories (NOT YET IMPLEMENTED):
+    Rusted Ring - slight speed boost
+    Hawk Ring - increases special attack range (projectile lifetime extension IS implemented)
+    Chloranthy Ring - faster mana regen
+    Covetous Ring - increased drop rates
+    Hornet Ring - critical hit chance on plunging attack
+    Ring of Fog - extended invincibility frames when taking damage
+
+  Breakable Objects: Crates and barrels placed at fixed positions per level. One hit to break.
+  25 score bonus. Drop table: 35% heart, 50% mana shard, 8% special attack pickup.
+
+Chests & Mimics (Post-Loop 1)
+  Only active when currentLoop >= 2. 15% base chance to spawn a chest when an enemy dies,
+  +10% bonus if 2+ kills within 2 seconds.
+
+  Normal Chests: 12x10 brown/gold rectangles. 15s lifetime, blink last 3s. 50 score bonus on
+  open. Generous drops: 30% weapon, 30% armor, 50% heart, 100% mana shard fallback.
+
+  Mimics: 25% of spawned chests on loop 2, +8% per additional loop, capped at 65%.
+  Tell: subtle breathing scale pulse (1.03x/0.97x). Ambush deals 3 damage if touched without
+  attacking first. 4 HP, fast chase AI (70px/s). Guaranteed rare+ drops on kill.
+
+Bestiary
+
+  IMPLEMENTED ENEMIES:
+
+  Hollow Soldier - 1 HP, 1 dmg, 10 XP, 50 score
+    Basic melee patrol. 30px/s walk, 50px/s chase within 60px. Platform edge detection.
+    400ms attack windup, 900ms cooldown. Drops: 45% mana, 15% heart.
+
+  Hollow Archer - 1 HP, 1 dmg, 15 XP, 75 score
+    Stationary ranged. Fires horizontal arrows (100px/s) when player within 120px H + 30px V.
+    Some archers can shoot diagonally downward. 2.5s cooldown. Arrows can be ducked under.
+    Drops: 50% mana, 6% special.
+
+  Hollow Knight - 3 HP, 2 dmg, 30 XP, 150 score
+    Tougher melee with ladder climbing (40% chance). 22px/s patrol, 38px/s chase.
+    550ms attack windup, 1200ms cooldown. Drops: 25% heart, 5% weapon, 5% armor.
+
+  Skeleton - 1 HP, 1 dmg, 20 XP, 80 score
+    Reassembles once after death (1.5s delay, awards only 25% score on first kill).
+    Second death or special attack kill is permanent. Same AI as Hollow Soldier.
+    Drops (permanent death only): 45% mana.
+
+  Gargoyle - 2 HP, 1 dmg, 20 XP, 100 score
+    Flying swooper. Patrols horizontally at set altitude (40px/s). Swoops diagonally at 90px/s
+    when player passes below. Low/duck attacks cannot reach it. Drops: 40% mana.
+
+  Bat (Flying Hazard) - killable, 30 score, 5 XP
+    Flies horizontally across screen near player height. Bobs in sine wave pattern.
+    Speed, amplitude, and spawn rate scale with loop. Not a full enemy - managed by
+    FlyingHazardSystem.
+
+  Mimic - 4 HP, 2 dmg (3 on ambush), 40 XP, 200 score
+    See Chests & Mimics section. Fast aggressive chase (70px/s) after transformation.
+
+  BOSS - The Hollow King (Level 4):
+    20 HP (loop 1), +8 HP per loop. 16x26 deep purple rectangle.
+    Loop scaling: +1 damage, +10% speed per loop.
+
+    Attack patterns:
+      Slash - Close-range melee. 400ms windup, 650ms recovery window.
+      Leap - Mid-range jump attack. 500ms windup, 3 damage, 900ms recovery.
+      Charge - Dash across arena. 600ms windup with telegraph, 180px/s.
+               Jumpable (10px vertical hit check). Single-hit per dash.
+               1000ms recovery (1500ms if hits wall).
+      Shield Bash (loop 2+) - AoE close-range. 350ms windup, 700ms recovery. 35% chance.
+
+    No passive contact damage - only hurts during active attack states.
+    Cannot be staggered by normal attacks (no HURT state).
+    4 weak points in arena - hitting all 4 triggers 3s stagger with 2x damage multiplier.
+    Death sequence: multi-flash, camera shakes, 2x scale fade.
+    Drops: 100% heart, 40% weapon, 40% armor.
+
+  NOT YET IMPLEMENTED:
+    Silver Knight - faster Armored Knight variant
+    Painting Guardian - fast and aggressive
+    Titanite Demon - rare, powerful
+    Darkmoon Soldier - ranged with special projectiles
+
+Traps & Environmental Hazards
+
+  Rolling Skulls (HazardSystem) - DK-style rolling hazards
+    Spawned from stone head structures. Roll across platforms, fall off edges, reverse direction
+    on landing. Can descend ladders using DK-style probability algorithm (factors in player
+    position, input direction, difficulty). Jump over for 50 score bonus.
+    Loop 2+: "Wild" skulls (reddish) bounce diagonally and loosely track player.
+    Speed, spawn rate, and ladder aggression scale with loop.
+
+  Pendulum Blades (TrapSystem) - Swinging ceiling-mounted blades
+    Sine wave swing motion. 1 damage, 1s contact cooldown.
+    Time your movement to pass at the peak of the swing.
+
+  Dart Traps (TrapSystem) - Wall-mounted arrow launchers
+    Fire darts at regular intervals. 1 damage, consumed on hit.
+    Jump over for 25 score bonus. 3s lifetime.
+
+  Flying Bats (FlyingHazardSystem) - See Bat entry in Bestiary.
+
+Scoring System
+  Kills grant base XP and score (enemy-dependent)
+  Jump-over bonuses: skulls (+50), darts (+25), arrows (+50)
+  Breakable objects: +25
+  Chest open: +50
+  Level completion time bonus (not yet implemented)
+  Soul retrieval score multiplier (not yet implemented)
+  Top 10 high scores saved. 3-character initials entry planned (Phase 7).
+
+Loop System
+  Completing all 4 levels triggers Loop Complete screen, then restarts from Level 1.
+  Player retains: gear, level, attributes, XP, current special attack.
+  Each loop: enemy HP/damage scale up, spawn rates increase, wild skulls appear,
+  Phantom trigger timer shortens, bat speed/amplitude increase.
+  Mimic chance increases per loop. Shield Bash unlocked on loop 2+.
+  Loop count displayed on HUD when loop > 1.
+
+  NOT YET IMPLEMENTED: platform randomization, loop-exclusive enemies, score multipliers,
+  combo counters, environmental easter eggs, attract-mode demo.
+
+Save System Architecture (SaveManager)
+  SaveManager.saveHighScores(scores) / .loadHighScores()
+  SaveManager.saveSettings(settings) / .loadSettings()
+  Browser: localStorage. Electron: Steam Cloud via greenworks or local file fallback.
+  Game code never calls localStorage directly.
+
+HUD
+  HP hearts (colored squares, red=full, dark red=empty), max 20.
+  MP, XP, LV, Special attack labels.
+  Score (top-right), Loop indicator (top-center, shown if loop > 1).
+  Soul directional arrow when soul is off-screen.
+  Boss health bar (bottom of screen, Level 4 only) with color shift at HP thresholds.
+
+Level-Up System
+  XP thresholds: 80, 200, 400, 700, 1100, 1600, 2200, 2900, 3700 (then +900/level).
+  Two-phase UI: "LEVEL UP" announcement splash, then choice menu with confirm step.
+  Game freezes during selection (physics paused). 800ms freeze after confirming choice
+  before physics resumes. 1.5s i-frames granted on resume to prevent cheap deaths.
+
+In-Browser Instruction Manual
+  NES-style instruction booklet built into the game page. Toggled via "MANUAL" tab on the
+  left side of the game screen. Covers story, controls, gameplay mechanics, special attacks,
+  full bestiary, traps, items, equipment, all four worlds, and debug controls.
+  Marked as work in progress.
+
+Asset Integration Plan (Phase 8 - NOT YET STARTED)
+  All assets loaded via Phaser's asset loader from an /assets directory. Sprite sheets use
+  texture atlases (JSON + PNG). Currently using colored rectangle placeholders for all sprites.
+
+  Sprite categories needed:
+    Player: idle, walk, jump, duck, attack, air attack, plunge, hurt/knockback, death, soul orb
+    Per enemy: idle, walk, attack, death
+    Chest: closed, opening, Mimic idle, Mimic reveal, Mimic walk, Mimic attack
+    Phantom: idle, move (semi-transparent, ghostly)
+    Environment: tileset per level (floor, wall, platform, ladder, background, breakables)
+    UI: HUD elements, NES-style bitmap font, menu screens, heart/mana icons
+    Effects: projectiles, impacts, soul orb glow, level up flash, Phantom warning overlay
+
+  NES Palette Constraint: Limit to the 54 NES hardware colors. Max 4 colors per background
+  tile, max 3 colors + transparency per sprite.
+
+Audio Plan (Phase 8 - NOT YET STARTED)
+  Music tracks needed:
+    Title theme, Level 1-3 theme (shared or per-level), Level 4/boss theme,
+    Phantom warning sting, Loop complete jingle, Game over theme, High score entry theme
+  SFX needed:
+    Jump, attack swing, hit landed, player hurt, player death, soul appear, soul retrieve,
+    item pickup, chest open, Mimic reveal, level up, special attack (per type),
+    boss stagger, boss death, Phantom approach warning, knockback impact
+  Recommended tools: BeepBox or FamiTracker for music, JSFXR for SFX.
+
+Development Phases
+
+  Phase 1 - Skeleton & Engine Setup [COMPLETE]
+    Scene manager, game loop, input system, SaveManager stub, display scaling, Phaser config.
+
+  Phase 2 - Player System [COMPLETE]
+    All movement, combat, knockback/hit reaction, death/soul mechanic, attribute system,
+    dodge roll, HUD overlay.
+
+  Phase 3 - Level 1 Buildout [COMPLETE]
+    Platform geometry, ladder climbing, checkpoint/bonfire detection, soul-orb clamping,
+    camera follow with deadzone.
+
+  Phase 4 - Enemy & Item Systems [COMPLETE]
+    5 enemy types (Hollow Soldier, Archer, Knight, Skeleton, Gargoyle), EnemyManager,
+    ItemSystem (drops, pickups, equip), PhantomSystem (anti-grinding ghost).
+
+  Phase 5 - Levels 2-4 + Boss [COMPLETE]
+    LevelRegistry, all 4 levels playable, full boss fight with 4 attack patterns + stagger
+    mechanic + dramatic death sequence. Level transitions and loop system.
+
+  Phase 6 - Chests, Mimics, Hazards & Traps [COMPLETE]
+    ChestSystem, Mimic enemy, HazardSystem (rolling skulls with DK-style ladder AI),
+    FlyingHazardSystem (bats), TrapSystem (pendulums + darts), BreakableSystem (crates/barrels),
+    LevelUpSystem (choice menu with freeze + i-frames).
+
+  CURRENT: Pre-Phase 7 refinement and balance tuning
+    Boss fight fairness overhaul (no passive contact damage, jumpable charge, wider punish windows)
+    XP duplication bug fix, archer arrow hitbox tightening, level-up resume delay.
+    In-browser instruction manual added.
+
+  Phase 7 - UI & Screens [NEXT]
+    Full pause/inventory screen with equipment management and controller navigation.
+    Animated interlude cutscene panels between levels.
+    3-character initials entry on high score (old-school arcade style).
+
+  Phase 8 - Asset Integration
+    Replace all colored-rectangle placeholders with real sprite sheets and texture atlases.
+    Swap programmatic level geometry for Tiled JSON tilemap exports.
+    Integrate chiptune music and SFX.
+
+  Phase 9 - Loop System & Secrets
+    Per-loop enemy scaling refinement, platform randomization, loop-exclusive enemies,
+    score multipliers, combo counters, environmental easter eggs, attract-mode demo.
+
+  Phase 10 - Electron Wrapper & Desktop Build
+    Package for desktop, implement SaveManager Electron path, full gamepad support, test builds.
+
+  Phase 11 - Steam Prep
+    Greenworks integration, achievements design, Steam Cloud save, Steam store assets,
+    submission.
