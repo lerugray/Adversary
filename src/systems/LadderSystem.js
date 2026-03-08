@@ -155,22 +155,22 @@ class LadderSystem {
       // ── Currently climbing ───────────────────────────────────────────
       const activeZone = player._climbZone;
 
-      // Exit conditions:
-      const exitLeft  = input.isLeftHeld();
-      const exitRight = input.isRightHeld();
+      // Exit conditions: jump off, or scrolled outside zone bounds
       const exitJump  = input.isJumpJustPressed();
-
-      // Also exit if we've scrolled outside the zone bounds
       const outOfZone = !activeZone ||
                         px < activeZone.left - 2 ||
                         px > activeZone.right + 2 ||
                         midY < activeZone.topY - 2 ||
                         midY > activeZone.bottomY + 2;
 
-      if (exitLeft || exitRight || exitJump || outOfZone) {
+      if (exitJump || outOfZone) {
         this._exitClimb(player, input);
         return;
       }
+
+      // Left/right changes facing direction (for attacks) but stays on ladder
+      if (input.isLeftHeld())  { player.facing = -1; sprite.setFlipX(true);  }
+      if (input.isRightHeld()) { player.facing =  1; sprite.setFlipX(false); }
 
       // ── Vertical movement on ladder ──────────────────────────────────
       const CLIMB_SPEED = 60; // px/s
@@ -184,7 +184,6 @@ class LadderSystem {
 
         // Reached the top of the zone → dismount onto upper platform
         if (midY <= activeZone.topY + 4) {
-          // Place player on top of the platform and re-enable collision
           sprite.setY(activeZone.topY - 1);
           body.setVelocityY(0);
           this._exitClimb(player, input);

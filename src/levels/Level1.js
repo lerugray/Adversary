@@ -35,14 +35,14 @@ const Level1Data = {
 
   name: 'The Ashen Hearth',
   worldWidth:  256,
-  worldHeight: 380,
+  worldHeight: 405,
 
   // ── Player spawn ───────────────────────────────────────────────────────
-  playerSpawn: { x: 28, y: 334 },
+  playerSpawn: { x: 28, y: 359 },
 
   // ── Checkpoint (bonfire near summit, past the stone head) ──
   checkpoint: {
-    x: 140,
+    x: 80,
     y: 57,
     radius: 8,
   },
@@ -65,21 +65,21 @@ const Level1Data = {
   platforms: [
 
     // Ground — full width
-    { x: 0,   y: 340, w: 256, h: 40,  tier: 0 },
+    { x: 0,   y: 365, w: 256, h: 40,  tier: 0 },
 
-    // Tier 1 — gap on RIGHT (55px above ground)
-    { x: 0,   y: 285, w: 224, h: 10,  tier: 1 },
+    // Tier 1 — gap on RIGHT (60px above ground)
+    { x: 0,   y: 305, w: 224, h: 10,  tier: 1 },
 
-    // Tier 2 — gap on LEFT (55px above tier 1)
-    { x: 32,  y: 230, w: 224, h: 10,  tier: 2 },
+    // Tier 2 — gap on LEFT (60px above tier 1)
+    { x: 32,  y: 245, w: 224, h: 10,  tier: 2 },
 
-    // Tier 3 — gap on RIGHT (55px above tier 2)
-    { x: 0,   y: 175, w: 224, h: 10,  tier: 3 },
+    // Tier 3 — gap on RIGHT (60px above tier 2)
+    { x: 0,   y: 185, w: 224, h: 10,  tier: 3 },
 
-    // Tier 4 — gap on LEFT (55px above tier 3)
-    { x: 32,  y: 120, w: 224, h: 10,  tier: 4 },
+    // Tier 4 — gap on LEFT (60px above tier 3)
+    { x: 32,  y: 125, w: 224, h: 10,  tier: 4 },
 
-    // Tier 5 — summit, gap on RIGHT (55px above tier 4)
+    // Tier 5 — summit, gap on RIGHT (60px above tier 4)
     { x: 0,   y: 65,  w: 224, h: 10,  tier: 5 },
 
   ],
@@ -88,38 +88,38 @@ const Level1Data = {
   // Zigzag pattern: right, left, right, left, right
   ladders: [
     // Ground → Tier 1 (right side)
-    { x: 210, topY: 285, bottomY: 340, w: 14 },
+    { x: 210, topY: 305, bottomY: 365, w: 14 },
 
     // Tier 1 → Tier 2 (left side)
-    { x: 42,  topY: 230, bottomY: 285, w: 14 },
+    { x: 42,  topY: 245, bottomY: 305, w: 14 },
 
     // Tier 2 → Tier 3 (right side)
-    { x: 210, topY: 175, bottomY: 230, w: 14 },
+    { x: 210, topY: 185, bottomY: 245, w: 14 },
 
     // Tier 3 → Tier 4 (left side)
-    { x: 42,  topY: 120, bottomY: 175, w: 14 },
+    { x: 42,  topY: 125, bottomY: 185, w: 14 },
 
     // Tier 4 → Tier 5 (right side)
-    { x: 210, topY: 65,  bottomY: 120, w: 14 },
+    { x: 210, topY: 65,  bottomY: 125, w: 14 },
   ],
 
   // ── Enemy spawn markers ──────────────────────────────────────────────
   enemySpawns: [
-    { x: 130, y: 332, type: 'hollow_soldier' },   // Ground — mid patrol
-    { x: 120, y: 277, type: 'hollow_soldier' },   // Tier 1 — mid patrol
-    { x: 180, y: 222, type: 'hollow_archer'  },   // Tier 2 — guards right ladder
-    { x: 100, y: 167, type: 'hollow_soldier' },   // Tier 3 — mid patrol
-    { x: 160, y: 112, type: 'hollow_knight'  },   // Tier 4 — tough guard
+    { x: 130, y: 357, type: 'hollow_soldier' },   // Ground — mid patrol
+    { x: 120, y: 297, type: 'hollow_soldier' },   // Tier 1 — mid patrol
+    { x: 180, y: 237, type: 'hollow_archer'  },   // Tier 2 — guards right ladder
+    { x: 100, y: 177, type: 'hollow_soldier' },   // Tier 3 — mid patrol
+    { x: 160, y: 117, type: 'hollow_knight'  },   // Tier 4 — tough guard
     { x: 130, y: 57,  type: 'hollow_knight'  },   // Tier 5 — guards checkpoint
   ],
 
   // ── Decorative elements ──────────────────────────────────────────────
   decorations: [
     // Ruined pillar stumps along the edges
-    { x: 232, y: 300, w: 12, h: 25, color: 0x2a2028, alpha: 0.9 },
-    { x: 4,   y: 245, w: 10, h: 20, color: 0x2a2028, alpha: 0.8 },
-    { x: 232, y: 185, w: 12, h: 20, color: 0x2a2028, alpha: 0.9 },
-    { x: 4,   y: 132, w: 10, h: 18, color: 0x2a2028, alpha: 0.8 },
+    { x: 232, y: 320, w: 12, h: 25, color: 0x2a2028, alpha: 0.9 },
+    { x: 4,   y: 260, w: 10, h: 20, color: 0x2a2028, alpha: 0.8 },
+    { x: 232, y: 195, w: 12, h: 20, color: 0x2a2028, alpha: 0.9 },
+    { x: 4,   y: 137, w: 10, h: 18, color: 0x2a2028, alpha: 0.8 },
 
     // Crumbled rubble at base of stone head
     { x: 6,   y: 57,  w: 20, h: 5,  color: 0x3a3530, alpha: 0.7 },
