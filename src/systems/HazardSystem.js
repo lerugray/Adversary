@@ -289,6 +289,7 @@ class HazardSystem {
 
       // Run the DK-style decision algorithm
       if (this._shouldTakeLadder(h, zone, player)) {
+        h.preLadderDir = Math.sign(h.vx) || 1; // remember roll direction
         h.onLadder = true;
         h.ladderZone = zone;
         h.grounded = false;
@@ -412,14 +413,22 @@ class HazardSystem {
         if (h.y >= h.ladderZone.bottomY) {
           h.y = h.ladderZone.bottomY;
           h.onLadder = false;
+          const exitX = h.ladderZone.x;
           h.ladderZone = null;
           h.grounded = true;
           h.vy = 0;
-          // Pick a direction — away from the ladder side
-          // (use alternating direction like landing from a fall)
-          h.vx = -Math.sign(h.vx || 1) * speed;
-          // If vx ended up 0 (shouldn't happen), default right
-          if (h.vx === 0) h.vx = speed;
+
+          // Pick the direction with more platform space to avoid
+          // immediately walking off an edge
+          const plat = this._isOnPlatform(exitX, h.y);
+          if (plat) {
+            const spaceLeft = exitX - plat.x;
+            const spaceRight = (plat.x + plat.w) - exitX;
+            h.vx = (spaceRight >= spaceLeft ? 1 : -1) * speed;
+          } else {
+            // Fallback: reverse pre-ladder direction
+            h.vx = -(h.preLadderDir || 1) * speed;
+          }
         }
       } else if (h.grounded) {
         // Roll horizontally

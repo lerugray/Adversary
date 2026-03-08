@@ -256,6 +256,25 @@ class PlayerEntity {
     if (this.isPlunging && this.sprite.body.blocked.down) {
       this._endPlunge();
     }
+
+    // Update special projectiles (axe spin, cross boomerang, skull key spiral)
+    this._updateProjectiles(delta);
+  }
+
+  /**
+   * Tick custom per-frame behaviour on active projectiles.
+   */
+  _updateProjectiles(delta) {
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const p = this.projectiles[i];
+      if (!p || !p.active) {
+        this.projectiles.splice(i, 1);
+        continue;
+      }
+      if (p._updateSpin)    p._updateSpin(delta);
+      if (p._updateCross)   p._updateCross(delta);
+      if (p._updateSpiral)  p._updateSpiral(delta);
+    }
   }
 
   // ── Timer tick ────────────────────────────────────────────────────────────
@@ -583,47 +602,257 @@ class PlayerEntity {
    * @param {string} type
    */
   _fireSpecial(type) {
-    // Placeholder projectile — a colored rectangle flying in facing direction.
+    // Castlevania-style special weapons with proper arcs and behaviours.
     const COLORS = {
-      knife:      0xffffff,
-      axe:        0xffaa00,
+      knife:        0xffffff,
+      axe:          0xffaa00,
       'holy water': 0x00aaff,
-      cross:      0xffff00,
+      cross:        0xffff00,
       'skull key':  0xcc44cc,
       'ember flask': 0xff4400,
     };
-    const color = COLORS[type] ?? 0xffffff;
-
-    const px  = this.sprite.x + this.facing * 14;
-    const py  = this.sprite.y - 14;
-
-    // Create a small projectile rectangle
-    const proj = this.scene.add.rectangle(px, py, 8, 4, color);
-    this.scene.physics.add.existing(proj);
-    proj.body.setAllowGravity(false);
-
-    let vx = this.facing * 160;
-    let vy = 0;
-
-    // Special per-type arcs (stubs)
-    if (type === 'axe')        { vy = -200; vx = this.facing * 100; }
-    if (type === 'holy water') { proj.body.setAllowGravity(true); vy = -220; }
-
-    proj.body.setVelocity(vx, vy);
-
-    // Track projectile for collision checking
-    const SPECIAL_DAMAGE = { knife: 1, axe: 2, 'holy water': 2, cross: 2, 'skull key': 3, 'ember flask': 4 };
-    proj._damage = SPECIAL_DAMAGE[type] || 1;
-    this.projectiles.push(proj);
 
     // Hawk Ring: extend projectile lifetime
     const accR = GameState.player.accessory;
-    const projLifetime = (accR && accR.effect === 'range') ? 2000 : 1200;
+    const hawkBonus = (accR && accR.effect === 'range') ? 1.6 : 1.0;
 
-    // Auto-destroy after lifetime expires
-    this.scene.time.delayedCall(projLifetime, () => {
+    const SPECIAL_DAMAGE = {
+      knife: 1, axe: 2, 'holy water': 2,
+      cross: 2, 'skull key': 3, 'ember flask': 4,
+    };
+
+    const color = COLORS[type] ?? 0xffffff;
+    const px = this.sprite.x + this.facing * 14;
+    const py = this.sprite.y - 14;
+    const facing = this.facing;
+    const scene = this.scene;
+    const projs = this.projectiles;
+
+    // ── Knife — fast straight throw (like CV dagger) ─────────────────
+    if (type === 'knife') {
+      const proj = scene.add.rectangle(px, py, 6, 3, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(false);
+      proj.body.setVelocity(facing * 200, 0);
+      proj._damage = SPECIAL_DAMAGE[type];
+      projs.push(proj);
+      scene.time.delayedCall(1000 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // ── Axe — arcs upward then falls with gravity (like CV axe) ──────
+    if (type === 'axe') {
+      const proj = scene.add.rectangle(px, py, 7, 7, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(true);
+      proj.body.setGravityY(400);
+      // Strong upward arc, moderate forward speed
+      proj.body.setVelocity(facing * 80, -280);
+      proj._damage = SPECIAL_DAMAGE[type];
+      // Spin the axe visually
+      proj._spinTimer = 0;
+      proj._updateSpin = (delta) => {
+        proj._spinTimer += delta;
+        proj.rotation = proj._spinTimer * 0.012 * facing;
+      };
+      projs.push(proj);
+      scene.time.delayedCall(1800 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // ── Holy water — short lob, drops and creates ground fire ────────
+    if (type === 'holy water') {
+      const proj = scene.add.rectangle(px, py, 6, 6, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(true);
+      proj.body.setGravityY(500);
+      // Short forward lob
+      proj.body.setVelocity(facing * 60, -180);
+      proj._damage = SPECIAL_DAMAGE[type];
+      proj._isHolyWater = true;
+      // Add platform collision so it hits the ground
+      scene.physics.add.collider(proj, scene.platforms, () => {
+        if (!proj.active) return;
+        // Spawn ground fire effect at impact point
+        this._spawnHolyWaterFire(proj.x, proj.y, SPECIAL_DAMAGE[type]);
+        proj.destroy();
+      });
+      projs.push(proj);
+      scene.time.delayedCall(1400 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // ── Cross — boomerang, flies out and returns (like CV cross) ──────
+    if (type === 'cross') {
+      const proj = scene.add.rectangle(px, py, 7, 7, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(false);
+      proj.body.setVelocity(facing * 140, 0);
+      proj._damage = SPECIAL_DAMAGE[type];
+      proj._returning = false;
+      proj._originX = px;
+      proj._spinTimer = 0;
+      // Custom update: decelerate, stop, then return
+      proj._updateCross = (delta) => {
+        proj._spinTimer += delta;
+        proj.rotation = proj._spinTimer * 0.015;
+        if (!proj._returning) {
+          // Decelerate
+          const curVx = proj.body.velocity.x;
+          const decel = facing * -180 * (delta / 1000);
+          const newVx = curVx + decel;
+          // If velocity has reversed direction, start returning
+          if ((facing > 0 && newVx <= 0) || (facing < 0 && newVx >= 0)) {
+            proj._returning = true;
+            proj.body.setVelocity(-facing * 140, 0);
+          } else {
+            proj.body.setVelocityX(newVx);
+          }
+        } else {
+          // Returning — destroy when it passes origin
+          if ((facing > 0 && proj.x < proj._originX) ||
+              (facing < 0 && proj.x > proj._originX)) {
+            proj.destroy();
+          }
+        }
+      };
+      projs.push(proj);
+      scene.time.delayedCall(2200 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // ── Skull key — slow spiralling projectile, pierces enemies ──────
+    if (type === 'skull key') {
+      const proj = scene.add.rectangle(px, py, 6, 6, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(false);
+      proj.body.setVelocity(facing * 70, 0);
+      proj._damage = SPECIAL_DAMAGE[type];
+      proj._spiralTimer = 0;
+      proj._piercing = true; // won't destroy on enemy hit
+      proj._updateSpiral = (delta) => {
+        proj._spiralTimer += delta / 1000;
+        // Spiral up and down while moving forward
+        const spiralY = Math.sin(proj._spiralTimer * 5) * 50;
+        proj.body.setVelocityY(spiralY);
+        proj.rotation = proj._spiralTimer * 4;
+      };
+      projs.push(proj);
+      scene.time.delayedCall(2000 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // ── Ember flask — arcs then explodes on impact ───────────────────
+    if (type === 'ember flask') {
+      const proj = scene.add.rectangle(px, py, 6, 8, color);
+      scene.physics.add.existing(proj);
+      proj.body.setAllowGravity(true);
+      proj.body.setGravityY(450);
+      proj.body.setVelocity(facing * 90, -220);
+      proj._damage = SPECIAL_DAMAGE[type];
+      proj._isEmberFlask = true;
+      // Explode on platform collision
+      scene.physics.add.collider(proj, scene.platforms, () => {
+        if (!proj.active) return;
+        this._spawnExplosion(proj.x, proj.y, SPECIAL_DAMAGE[type]);
+        proj.destroy();
+      });
+      projs.push(proj);
+      scene.time.delayedCall(1600 * hawkBonus, () => {
+        if (proj && proj.active) proj.destroy();
+      });
+      return;
+    }
+
+    // Fallback (unknown type) — straight throw
+    const proj = scene.add.rectangle(px, py, 8, 4, color);
+    scene.physics.add.existing(proj);
+    proj.body.setAllowGravity(false);
+    proj.body.setVelocity(facing * 160, 0);
+    proj._damage = 1;
+    projs.push(proj);
+    scene.time.delayedCall(1200, () => {
       if (proj && proj.active) proj.destroy();
     });
+  }
+
+  /**
+   * Holy water ground fire — damages enemies in area for a brief duration.
+   */
+  _spawnHolyWaterFire(x, y, damage) {
+    const scene = this.scene;
+    const fire = scene.add.rectangle(x, y - 2, 16, 6, 0x00aaff, 0.8);
+    fire.setDepth(5);
+    // Flicker effect
+    scene.tweens.add({
+      targets: fire, alpha: 0.3, duration: 100,
+      yoyo: true, repeat: 8,
+    });
+    // Create a damage hitbox
+    scene.physics.add.existing(fire, true); // static body
+    fire.body.setSize(16, 8);
+
+    // Check enemy overlap every frame for 900ms
+    const enemies = this.scene.enemyManager ? this.scene.enemyManager.getEnemies() : [];
+    const hitSet = new Set();
+    const timer = scene.time.addEvent({
+      delay: 150,
+      repeat: 5,
+      callback: () => {
+        const living = this.scene.enemyManager ? this.scene.enemyManager.getEnemies() : [];
+        for (const enemy of living) {
+          if (hitSet.has(enemy)) continue;
+          if (!enemy.sprite || !enemy.sprite.active) continue;
+          const dx = Math.abs(enemy.sprite.x - x);
+          const dy = Math.abs(enemy.sprite.y - enemy.sprite.body.height / 2 - (y - 2));
+          if (dx < 12 && dy < 10) {
+            enemy.takeDamage(damage, x);
+            hitSet.add(enemy);
+          }
+        }
+      },
+    });
+    scene.time.delayedCall(900, () => {
+      if (fire && fire.active) fire.destroy();
+    });
+  }
+
+  /**
+   * Ember flask explosion — AoE burst damage at impact point.
+   */
+  _spawnExplosion(x, y, damage) {
+    const scene = this.scene;
+    // Visual: expanding orange circle
+    const blast = scene.add.circle(x, y - 4, 4, 0xff4400, 0.9).setDepth(6);
+    scene.tweens.add({
+      targets: blast,
+      scaleX: 3, scaleY: 3, alpha: 0,
+      duration: 350, ease: 'Cubic.easeOut',
+      onComplete: () => blast.destroy(),
+    });
+    // Camera shake for impact
+    scene.cameras.main.shake(150, 0.005);
+
+    // Damage all enemies in radius
+    const enemies = this.scene.enemyManager ? this.scene.enemyManager.getEnemies() : [];
+    for (const enemy of enemies) {
+      if (!enemy.sprite || !enemy.sprite.active) continue;
+      const dx = Math.abs(enemy.sprite.x - x);
+      const dy = Math.abs((enemy.sprite.y - enemy.sprite.body.height / 2) - (y - 4));
+      if (dx < 20 && dy < 16) {
+        enemy.takeDamage(damage, x);
+      }
+    }
   }
 
   // ── Hitbox helpers ────────────────────────────────────────────────────────

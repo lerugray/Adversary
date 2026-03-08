@@ -627,13 +627,17 @@ class GameScene extends Phaser.Scene {
 
         if (Math.abs(px - ex) < ew && Math.abs(py - ey) < eh) {
           enemy.takeDamage(proj._damage || 1, px);
-          proj.destroy();
-          projs.splice(i, 1);
 
           // Notify chest system when enemy dies
           if (enemy.isDead && this.chestSystem) {
             this.chestSystem.onEnemyKilled(enemy.x, enemy.y);
           }
+
+          // Piercing projectiles (skull key) pass through enemies
+          if (proj._piercing) continue;
+
+          proj.destroy();
+          projs.splice(i, 1);
           break;
         }
       }
