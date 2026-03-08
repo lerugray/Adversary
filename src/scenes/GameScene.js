@@ -490,6 +490,7 @@ class GameScene extends Phaser.Scene {
 
       GameState.soul      = { x: sx, y: sy };
       GameState.pendingXP += GameState.player.xp;
+      GameState.player.xp = 0;  // clear XP until soul is recovered
 
       this._spawnSoulOrb(sx, sy);
     };

@@ -1,25 +1,27 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Boss fight fairness tuning — making damage avoidable through skillful play
+- Boss fight fairness tuning
+- XP duplication bug fix
 
 ## What got done
 
-1. **Removed passive contact damage** — Boss no longer hurts the player just by walking into them. Contact damage only active during attack states (slash, leap, charge, bash). Player can now stand near the boss safely between attacks.
+1. **Boss fight fairness overhaul** — Three major changes to make damage avoidable through skillful play:
+   - **No passive contact damage** — Boss only hurts the player during active attack states (slash, leap, charge, bash). Safe to stand near when idle or walking.
+   - **Charge is jumpable + single-hit** — Vertical hit check tightened (20px → 10px) so a well-timed hop clears it. Charge can only hit once per dash (no re-hit after i-frames).
+   - **Wider recovery windows** — Slash: 400→650ms, Leap: 600→900ms, Charge: 800→1000ms (wall: 1200→1500ms), Bash: 500→700ms. Clear punish windows after dodging attacks.
+   - Dodge roll intentionally untouched (160ms i-frames) to keep DK physics feel.
 
-2. **Charge attack made dodgeable** — Vertical hit check tightened from 20px to 10px so a well-timed jump clears it. Added single-hit flag so charge can only damage the player once per dash (no re-hit after i-frames expire).
-
-3. **Wider recovery windows after all attacks** — Slash: 400→650ms, Leap: 600→900ms, Charge: 800→1000ms (wall hit: 1200→1500ms), Bash: 500→700ms. Gives skilled players clear punish windows after dodging attacks.
-
-4. **Dodge roll intentionally untouched** — Kept limited (160ms i-frames) to preserve DK physics feel per user preference.
+2. **Fixed XP duplication bug** — The monkey-patched `_spawnSoul` in GameScene.js was missing `GameState.player.xp = 0` after storing XP in pendingXP. This caused XP to double every death/soul-recovery cycle, triggering false level-ups at the boss fight.
 
 ### Key files modified
-- src/entities/enemies/HollowKingBoss.js (all fairness changes)
+- src/entities/enemies/HollowKingBoss.js (fairness changes)
+- src/scenes/GameScene.js (XP bug fix in _patchPlayerSoulSpawn)
 
 ## Current state
 - Levels 1-3 playable, Level 3 checkpoint reachable
 - Level 4 boss fight retuned for fair-but-hard design
-- Boss telegraphs attacks, player can read and react, every hit is avoidable
+- XP/soul system working correctly
 - All special weapons have proportional trajectories
 - Mimics activate on loop 2+
 
