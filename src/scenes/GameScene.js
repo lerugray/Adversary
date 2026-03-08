@@ -613,24 +613,27 @@ class GameScene extends Phaser.Scene {
   _checkEnemyContactDamage() {
     if (this.player.isInvincible || this.player.state === 'dead') return;
 
-    const px = this.player.x;
-    const py = this.player.y - 11;
-    const pw = 5;
-    const ph = 11;
+    const pb = this.player.body;
+    if (!pb) return;
+    const pcx = pb.center.x;
+    const pcy = pb.center.y;
+    const phw = pb.halfWidth;
+    const phh = pb.halfHeight;
 
     const enemies = this.enemyManager.getEnemies();
     for (const enemy of enemies) {
-      if (!enemy.sprite || !enemy.sprite.active) continue;
+      if (!enemy.sprite || !enemy.sprite.active || !enemy.sprite.body) continue;
       if (enemy.state === ENEMY_STATE.HURT || enemy.state === ENEMY_STATE.DEAD) continue;
 
-      const ex = enemy.sprite.x;
-      const ey = enemy.sprite.y - enemy.sprite.body.height / 2;
-      const ew = enemy.sprite.body.width  / 2;
-      const eh = enemy.sprite.body.height / 2;
+      const eb = enemy.sprite.body;
+      const ecx = eb.center.x;
+      const ecy = eb.center.y;
+      const ehw = eb.halfWidth;
+      const ehh = eb.halfHeight;
 
-      if (Math.abs(px - ex) < pw + ew &&
-          Math.abs(py - ey) < ph + eh) {
-        this.player.takeDamage(enemy.damage, ex);
+      if (Math.abs(pcx - ecx) < phw + ehw &&
+          Math.abs(pcy - ecy) < phh + ehh) {
+        this.player.takeDamage(enemy.damage, ecx);
         return;
       }
     }
