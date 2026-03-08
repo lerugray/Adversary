@@ -113,16 +113,16 @@ const Level3Data = {
   traps: {
     pendulums: [
       // Tier 2 — pendulum between left and middle platforms
-      { anchorX: 76,  anchorY: 300, length: 34, speed: 1.8, damage: 1, startAngle: 0 },
+      { anchorX: 76,  anchorY: 300, length: 34, speed: 1.3, damage: 1, startAngle: 0 },
 
       // Tier 2 — pendulum between middle and right platforms
-      { anchorX: 158, anchorY: 300, length: 34, speed: 1.6, damage: 1, startAngle: 1.5 },
+      { anchorX: 158, anchorY: 300, length: 34, speed: 1.2, damage: 1, startAngle: 1.5 },
 
       // Tier 4 — pendulum over center island
-      { anchorX: 100, anchorY: 182, length: 32, speed: 2.0, damage: 2, startAngle: 0.8 },
+      { anchorX: 100, anchorY: 182, length: 32, speed: 1.5, damage: 2, startAngle: 0.8 },
 
-      // Tier 6 — pendulum on the narrow bridge (fast!)
-      { anchorX: 130, anchorY: 62,  length: 32, speed: 2.4, damage: 2, startAngle: 0 },
+      // Tier 6 — pendulum on the narrow bridge (faster, but still readable)
+      { anchorX: 130, anchorY: 62,  length: 32, speed: 1.8, damage: 2, startAngle: 0 },
     ],
 
     dartTraps: [

@@ -281,6 +281,15 @@ class GameScene extends Phaser.Scene {
   _triggerCheckpoint() {
     this._checkpointTriggered = true;
 
+    // ── Make the player safe — nothing can hurt them after clearing the level ──
+    this.player.isInvincible = true;
+
+    // Destroy all enemies, traps, darts, and flying hazards
+    this.enemyManager.destroyAll();
+    if (this.trapSystem) this.trapSystem.destroyAll();
+    if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
+    if (this.phantomSystem) this.phantomSystem.reset();
+
     // Visual celebration
     this.tweens.killTweensOf(this.checkpointFlame);
     this.tweens.add({
