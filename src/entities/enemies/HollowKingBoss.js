@@ -232,7 +232,7 @@ class HollowKingBoss extends EnemyEntity {
   // ── Main update ────────────────────────────────────────────────────────
 
   update(delta, player) {
-    if (this._dead) return;
+    if (this._dead || !this.sprite || !this.sprite.active || !this.sprite.body) return;
 
     // Tick stagger
     if (this._isStaggered) {

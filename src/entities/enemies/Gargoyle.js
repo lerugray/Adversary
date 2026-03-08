@@ -88,7 +88,7 @@ class Gargoyle extends EnemyEntity {
 
   update(delta, player) {
     super.update(delta, player);
-    if (this._dead) return;
+    if (this._skipUpdate) return;
     if (this.state === ENEMY_STATE.HURT) {
       // Still allow hurt state to tick, but stop movement
       this.sprite.body.setVelocity(0, 0);

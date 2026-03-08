@@ -119,7 +119,7 @@ class Skeleton extends EnemyEntity {
   update(delta, player) {
     if (this._reassembling) return; // waiting to reassemble
     super.update(delta, player);
-    if (this._dead) return;
+    if (this._skipUpdate) return;
     if (this.state === ENEMY_STATE.HURT) return;
 
     if (this.attackCooldown > 0) this.attackCooldown -= delta;

@@ -188,7 +188,7 @@ class Mimic extends EnemyEntity {
   // ── Update ──────────────────────────────────────────────────────────────
   update(delta, player) {
     super.update(delta, player);
-    if (this._dead) return;
+    if (this._skipUpdate) return;
 
     // In chest form: do nothing (just sit there)
     if (this.mimicState === MIMIC_STATE.CHEST) {

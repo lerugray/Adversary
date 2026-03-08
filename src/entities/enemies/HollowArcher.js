@@ -46,7 +46,7 @@ class HollowArcher extends EnemyEntity {
 
   update(delta, player) {
     super.update(delta, player);
-    if (this._dead) return;
+    if (this._skipUpdate) return;
     if (this.state === ENEMY_STATE.HURT) return;
 
     // Tick cooldown

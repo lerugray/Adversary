@@ -64,7 +64,7 @@ class HollowKnight extends EnemyEntity {
 
   update(delta, player) {
     super.update(delta, player);
-    if (this._dead) return;
+    if (this._skipUpdate) return;
     if (this.state === ENEMY_STATE.HURT) {
       // Exit climb on hurt
       if (this._isClimbing) this._exitLadder();

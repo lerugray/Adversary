@@ -181,8 +181,11 @@ class EnemyEntity {
    * @param {PlayerEntity} player
    */
   update(delta, player) {
-    if (this._dead) return;
-    if (!this.sprite || !this.sprite.body) return;
+    if (this._dead || !this.sprite || !this.sprite.active || !this.sprite.body) {
+      this._skipUpdate = true;
+      return;
+    }
+    this._skipUpdate = false;
 
     // Tick hurt timer
     if (this.state === ENEMY_STATE.HURT) {
