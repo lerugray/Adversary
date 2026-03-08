@@ -206,11 +206,14 @@ class LadderSystem {
         body.setVelocityX(0);
       }
 
-      // Visual feedback: cycle tint to suggest climbing animation
+      // Visual feedback: subtle brightness pulse to suggest climbing animation
       const baseTint = player._baseTint();
-      const dimTint  = GameState.soul ? 0x664488 : 0x66aadd;
-      const phase = Math.floor(Date.now() / 200) % 2;
-      sprite.setTint(phase === 0 ? baseTint : dimTint);
+      const phase = (Math.sin(Date.now() / 150) + 1) / 2; // smooth 0-1 wave
+      const dim = 0.85 + phase * 0.15; // range 0.85 to 1.0 — very subtle
+      const r = ((baseTint >> 16) & 0xff) * dim;
+      const g = ((baseTint >> 8) & 0xff) * dim;
+      const b = (baseTint & 0xff) * dim;
+      sprite.setTint((r << 16) | (g << 8) | b);
     }
   }
 

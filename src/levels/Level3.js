@@ -68,10 +68,10 @@ const Level3Data = {
     // Tier 3 — "Dart Corridor": long platform, darts from both walls
     { x: 0,   y: 280, w: 240, h: 10,  tier: 3 },
 
-    // Tier 4 — "Blade Walk": three narrow islands, pendulum guards the middle
-    { x: 0,   y: 220, w: 50,  h: 10,  tier: 4 },   // left island
-    { x: 80,  y: 220, w: 40,  h: 10,  tier: 4 },   // center island (under pendulum)
-    { x: 150, y: 220, w: 50,  h: 10,  tier: 4 },   // right island
+    // Tier 4 — "Blade Walk": three islands, pendulum guards the middle
+    { x: 0,   y: 220, w: 60,  h: 10,  tier: 4 },   // left island (wider for approach jump)
+    { x: 72,  y: 220, w: 50,  h: 10,  tier: 4 },   // center island (under pendulum)
+    { x: 140, y: 220, w: 60,  h: 10,  tier: 4 },   // right island
 
     // Tier 5 — "The Gauntlet": wide platform, enemy + dart traps
     { x: 0,   y: 160, w: 200, h: 10,  tier: 5 },
@@ -113,31 +113,31 @@ const Level3Data = {
   traps: {
     pendulums: [
       // Tier 2 — pendulum between left and middle platforms
-      { anchorX: 76,  anchorY: 300, length: 34, speed: 1.3, damage: 1, startAngle: 0 },
+      { anchorX: 76,  anchorY: 300, length: 34, speed: 1.1, damage: 1, startAngle: 0 },
 
       // Tier 2 — pendulum between middle and right platforms
-      { anchorX: 158, anchorY: 300, length: 34, speed: 1.2, damage: 1, startAngle: 1.5 },
+      { anchorX: 158, anchorY: 300, length: 34, speed: 1.0, damage: 1, startAngle: 1.5 },
 
-      // Tier 4 — pendulum over center island
-      { anchorX: 100, anchorY: 182, length: 32, speed: 1.5, damage: 2, startAngle: 0.8 },
+      // Tier 4 — pendulum over center island (readable window to run through)
+      { anchorX: 97,  anchorY: 182, length: 32, speed: 1.2, damage: 2, startAngle: 0.8 },
 
-      // Tier 6 — pendulum on the narrow bridge (faster, but still readable)
-      { anchorX: 130, anchorY: 62,  length: 32, speed: 1.8, damage: 2, startAngle: 0 },
+      // Tier 6 — pendulum on the narrow bridge
+      { anchorX: 130, anchorY: 62,  length: 32, speed: 1.4, damage: 2, startAngle: 0 },
     ],
 
     dartTraps: [
       // Tier 1 — intro dart from right wall
-      { x: 250, y: 393, direction: -1, interval: 3000, speed: 110, damage: 1 },
+      { x: 250, y: 393, direction: -1, interval: 3200, speed: 100, damage: 1 },
 
-      // Tier 3 — crossfire! Darts from both sides
-      { x: 6,   y: 273, direction: 1,  interval: 2800, speed: 120, damage: 1 },
-      { x: 250, y: 273, direction: -1, interval: 2800, speed: 120, damage: 1 },
+      // Tier 3 — crossfire! Darts from both sides (staggered so there's a gap)
+      { x: 6,   y: 273, direction: 1,  interval: 3200, speed: 110, damage: 1 },
+      { x: 250, y: 273, direction: -1, interval: 3200, speed: 110, damage: 1 },
 
       // Tier 5 — dart from left wall into the gauntlet
-      { x: 6,   y: 153, direction: 1,  interval: 2200, speed: 130, damage: 1 },
+      { x: 6,   y: 153, direction: 1,  interval: 2800, speed: 120, damage: 1 },
 
       // Tier 6 — dart from right wall across the bridge (timed with pendulum)
-      { x: 250, y: 93,  direction: -1, interval: 2000, speed: 140, damage: 1 },
+      { x: 250, y: 93,  direction: -1, interval: 2500, speed: 130, damage: 1 },
     ],
   },
 
