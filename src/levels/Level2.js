@@ -122,8 +122,10 @@ const Level2Data = {
     { x: 40,  y: 162, type: 'hollow_archer' },
     { x: 165, y: 162, type: 'hollow_soldier' },
 
-    // Tier 5 — knight guards the final approach
+    // Tier 5 — knight guards the final approach + archers on elevated perches
     { x: 100, y: 102, type: 'hollow_knight' },
+    { x: 160, y: 102, type: 'hollow_archer', canShootDown: true },  // shoots down at Tier 4 climbers
+    { x: 60,  y: 42,  type: 'hollow_archer', canShootDown: true },  // summit sniper, shoots down at Tier 5
   ],
 
   // ── Flying hazards (DK-style bats on a timer) ─────────────────────────

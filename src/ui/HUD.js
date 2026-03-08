@@ -42,16 +42,15 @@ class HUD {
     const H = this.scene.cameras.main.height;  // 240
     const s = this.scene;                       // shorthand
 
-    const TEXT_STYLE = {
-      fontFamily: 'monospace',
+    const TEXT_BASE = {
+      fontFamily: HUD_FONT,
       fontSize:   '8px',
-      color:      '#ffffff',
       stroke:     '#000000',
       strokeThickness: 2,
       shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
     };
     const SMALL_STYLE = {
-      fontFamily: 'monospace',
+      fontFamily: HUD_FONT,
       fontSize:   '7px',
       color:      '#cccccc',
       stroke:     '#000000',
@@ -70,33 +69,33 @@ class HUD {
     this.heartContainer = s.add.container(4, 2).setScrollFactor(0).setDepth(11);
 
     // ── MP label ──────────────────────────────────────────────────────
-    this.mpText = s.add.text(4, 10, 'MP:6/6', TEXT_STYLE)
+    this.mpText = s.add.text(4, 10, 'MP:6/6', { ...TEXT_BASE, color: '#4488ff' })
       .setScrollFactor(0).setDepth(11);
 
     // ── XP label ──────────────────────────────────────────────────────
-    this.xpText = s.add.text(52, 10, 'XP:0', TEXT_STYLE)
+    this.xpText = s.add.text(50, 10, 'XP:0', { ...TEXT_BASE, color: '#ffdd44' })
       .setScrollFactor(0).setDepth(11);
 
     // ── LV label ──────────────────────────────────────────────────────
-    this.lvText = s.add.text(90, 10, 'LV:1', TEXT_STYLE)
+    this.lvText = s.add.text(82, 10, 'LV:1', { ...TEXT_BASE, color: '#44cc66' })
       .setScrollFactor(0).setDepth(11);
 
     // ── Special attack label ──────────────────────────────────────────
-    this.specialText = s.add.text(120, 10, 'SP:knife', TEXT_STYLE)
+    this.specialText = s.add.text(114, 10, 'SP:knife', { ...TEXT_BASE, color: '#ff8844' })
       .setScrollFactor(0).setDepth(11);
 
     // ── Score (top right) ─────────────────────────────────────────────
-    this.scoreText = s.add.text(W - 4, 2, 'SCORE:0', TEXT_STYLE)
+    this.scoreText = s.add.text(W - 4, 2, 'SCORE:0', { ...TEXT_BASE, color: '#f7b731' })
       .setOrigin(1, 0)
       .setScrollFactor(0).setDepth(11);
 
     // ── Loop indicator (top centre) ───────────────────────────────────
-    this.loopText = s.add.text(W / 2, 2, '', SMALL_STYLE)
+    this.loopText = s.add.text(W / 2, 2, '', { ...SMALL_STYLE, color: '#c77dff' })
       .setOrigin(0.5, 0)
       .setScrollFactor(0).setDepth(11);
 
     // ── Soul directional arrow (hidden by default) ────────────────────
-    this.soulArrow = s.add.text(0, 0, '', { fontFamily: 'monospace', fontSize: '9px', color: '#ffdd44', stroke: '#000000', strokeThickness: 2 })
+    this.soulArrow = s.add.text(0, 0, '', { fontFamily: HUD_FONT, fontSize: '9px', color: '#ffdd44', stroke: '#000000', strokeThickness: 2 })
       .setScrollFactor(0).setDepth(11)
       .setVisible(false);
 
@@ -114,7 +113,7 @@ class HUD {
     this._bossBarBorderGfx = borderGfx;
 
     this._bossLabel = s.add.text(W / 2, H - 22, 'THE DARK KNIGHT', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#ff6666',
+      fontFamily: HUD_FONT, fontSize: '7px', color: '#ff6666',
       stroke: '#000000', strokeThickness: 2,
     }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(11).setVisible(false);
 

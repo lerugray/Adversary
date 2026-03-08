@@ -62,6 +62,13 @@ const BODY_H = 22;
 /** Height of the ducking hitbox. */
 const DUCK_H = 12;
 
+/** Dodge roll constants. */
+const DODGE_TAP_WINDOW    = 250;   // ms — double-tap must happen within this window
+const DODGE_ROLL_SPEED    = 120;   // px/s during roll
+const DODGE_ROLL_DURATION = 350;   // total roll time ms
+const DODGE_IFRAME_DURATION = 220; // i-frames active during the first part of the roll
+const DODGE_COOLDOWN      = 500;   // ms before another dodge is allowed
+
 // ── Player states ──────────────────────────────────────────────────────────
 const STATE = {
   IDLE:     'idle',
@@ -72,7 +79,12 @@ const STATE = {
   HURT:     'hurt',
   DEAD:     'dead',
   PLUNGE:   'plunge',
+  DODGE:    'dodge',
 };
+
+/** Normal tint vs soulless tint (ghostly purple when soul is out in the world). */
+const TINT_NORMAL   = 0x88ccff;
+const TINT_SOULLESS = 0x9966cc;
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -116,6 +128,13 @@ class PlayerEntity {
     this.isPlunging    = false;
     this.plungeHit     = false; // true once plunge contacted something
 
+    // ── Dodge roll state ──────────────────────────────────────────────
+    this._lastLeftTap  = 0;   // timestamp of last left tap
+    this._lastRightTap = 0;   // timestamp of last right tap
+    this.dodgeTimer    = 0;   // ms remaining in dodge roll
+    this.dodgeCooldown = 0;   // ms remaining before next dodge allowed
+    this.dodgeDir      = 0;   // -1 or 1 during active dodge
+
     // ── Soul orb reference (Phaser GameObject) ────────────────────────
     this.soulOrb = null;
 
@@ -158,8 +177,8 @@ class PlayerEntity {
     // Apply per-body gravity (world gravity is 0 in config)
     this.sprite.body.setGravityY(PLAYER_GRAVITY);
 
-    // Tint to distinguish from placeholders
-    this.sprite.setTint(0x88ccff);
+    // Tint to distinguish from placeholders (ghostly purple if soul is lost)
+    this.sprite.setTint(this._baseTint());
   }
 
   /** Create the attack hitbox (invisible rectangle, disabled by default). */
@@ -203,11 +222,15 @@ class PlayerEntity {
       this.lastSafeY = this.sprite.y;
     }
 
-    // Input is ignored during knockback and plunge
-    if (!this.knockbackActive && !this.isPlunging) {
+    // Input is ignored during knockback, plunge, and dodge
+    if (!this.knockbackActive && !this.isPlunging && this.state !== STATE.DODGE) {
       this._handleMovement(input);
       this._handleJump(input);
       this._handleAttack(input);
+      this._handlePause(input);
+    } else if (this.state === STATE.DODGE) {
+      // During dodge: maintain roll velocity, only allow pause
+      this.sprite.body.setVelocityX(this.dodgeDir * DODGE_ROLL_SPEED);
       this._handlePause(input);
     } else if (this.isPlunging) {
       // Only allow pause during plunge, no movement/attack
@@ -254,6 +277,19 @@ class PlayerEntity {
       }
     }
 
+    // Dodge cooldown
+    if (this.dodgeCooldown > 0) {
+      this.dodgeCooldown -= delta;
+    }
+
+    // Dodge roll duration
+    if (this.dodgeTimer > 0) {
+      this.dodgeTimer -= delta;
+      if (this.dodgeTimer <= 0) {
+        this._endDodge();
+      }
+    }
+
     // Invincibility frames
     if (this.iframeTimer > 0) {
       this.iframeTimer -= delta;
@@ -273,6 +309,25 @@ class PlayerEntity {
 
   _handleMovement(input) {
     const grounded = this.sprite.body.blocked.down;
+    const now = this.scene.time.now;
+
+    // ── Double-tap dodge detection (ground only) ─────────────────────
+    if (grounded && this.dodgeCooldown <= 0) {
+      if (input.isLeftJustPressed()) {
+        if (now - this._lastLeftTap < DODGE_TAP_WINDOW) {
+          this._startDodge(-1);
+          return;
+        }
+        this._lastLeftTap = now;
+      }
+      if (input.isRightJustPressed()) {
+        if (now - this._lastRightTap < DODGE_TAP_WINDOW) {
+          this._startDodge(1);
+          return;
+        }
+        this._lastRightTap = now;
+      }
+    }
 
     // ── Duck (not while climbing a ladder) ─────────────────────────────
     if (grounded && input.isDownHeld() && !this.isPlunging && !this._isClimbing) {
@@ -321,7 +376,8 @@ class PlayerEntity {
     );
     // Visually squash the sprite to show ducking
     this.sprite.setScale(1, 0.5);
-    this.sprite.setTint(0x5599cc);
+    // Slightly darker version of base tint for ducking
+    this.sprite.setTint(GameState.soul ? 0x775599 : 0x5599cc);
   }
 
   _exitDuck() {
@@ -334,7 +390,62 @@ class PlayerEntity {
     );
     // Restore full height
     this.sprite.setScale(1, 1);
-    this.sprite.setTint(0x88ccff);
+    this.sprite.setTint(this._baseTint());
+  }
+
+  // ── Dodge roll ─────────────────────────────────────────────────────────────
+
+  _startDodge(dir) {
+    this.state       = STATE.DODGE;
+    this.dodgeDir    = dir;
+    this.dodgeTimer  = DODGE_ROLL_DURATION;
+    this.dodgeCooldown = DODGE_COOLDOWN;
+
+    // Face the dodge direction
+    this.facing = dir;
+    this.sprite.setFlipX(dir < 0);
+
+    // Grant i-frames for the first part of the roll
+    this.isInvincible = true;
+    this.iframeTimer  = DODGE_IFRAME_DURATION;
+
+    // Visual: shrink body like a roll + tint shift
+    this.sprite.body.setSize(BODY_W, DUCK_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - BODY_W) / 2,
+      this.sprite.height - DUCK_H
+    );
+    this.sprite.setScale(1, 0.5);
+    this.sprite.setTint(0xffffff);
+
+    // Flash effect during roll
+    this._startFlash();
+
+    // Set roll velocity
+    this.sprite.body.setVelocityX(dir * DODGE_ROLL_SPEED);
+  }
+
+  _endDodge() {
+    this.state      = STATE.IDLE;
+    this.dodgeTimer = 0;
+
+    // Restore standing body
+    this.sprite.body.setSize(BODY_W, BODY_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - BODY_W) / 2,
+      this.sprite.height - BODY_H
+    );
+    this.sprite.setScale(1, 1);
+    this.sprite.setTint(this._baseTint());
+
+    // Stop flash if i-frames already expired
+    if (!this.isInvincible && this._flashTween) {
+      this._flashTween.stop();
+      this._flashTween = null;
+      this.sprite.setAlpha(1);
+    }
+
+    this.sprite.body.setVelocityX(0);
   }
 
   // ── Jump ──────────────────────────────────────────────────────────────────
@@ -415,7 +526,7 @@ class PlayerEntity {
     // Briefly flash the sprite to signal attack
     this.sprite.setTint(0xffffff);
     this.scene.time.delayedCall(80, () => {
-      if (this.state !== STATE.DEAD) this.sprite.setTint(0x88ccff);
+      if (this.state !== STATE.DEAD) this.sprite.setTint(this._baseTint());
     });
 
     // End attack state after cooldown
@@ -458,7 +569,7 @@ class PlayerEntity {
     this.isPlunging = false;
     this.state      = STATE.IDLE;
     this.sprite.body.setGravityY(PLAYER_GRAVITY);
-    this.sprite.setTint(0x88ccff);
+    this.sprite.setTint(this._baseTint());
     this._deactivateHitbox();
 
     // Stub: brief bounce effect — when enemies exist, check plungeHit here
@@ -614,7 +725,7 @@ class PlayerEntity {
         // Flash blue to show armor absorbed damage
         this.sprite.setTint(0x4488ff);
         this.scene.time.delayedCall(150, () => {
-          if (this.state !== STATE.DEAD) this.sprite.setTint(0x88ccff);
+          if (this.state !== STATE.DEAD) this.sprite.setTint(this._baseTint());
         });
         if (amount <= 0) return; // fully negated
       }
@@ -739,7 +850,7 @@ class PlayerEntity {
 
     this.sprite.setPosition(this.spawnX, this.spawnY);
     this.sprite.setAlpha(1);
-    this.sprite.setTint(0x88ccff);
+    this.sprite.setTint(this._baseTint());
     this.sprite.body.setVelocity(0, 0);
 
     this.state           = STATE.IDLE;
@@ -781,11 +892,16 @@ class PlayerEntity {
     // Brief flash to confirm retrieval
     this.sprite.setTint(0xffff00);
     this.scene.time.delayedCall(200, () => {
-      if (this.state !== STATE.DEAD) this.sprite.setTint(0x88ccff);
+      if (this.state !== STATE.DEAD) this.sprite.setTint(this._baseTint());
     });
   }
 
   // ── Public accessors ──────────────────────────────────────────────────────
+
+  /** Returns the correct base tint depending on whether the soul is out. */
+  _baseTint() {
+    return GameState.soul ? TINT_SOULLESS : TINT_NORMAL;
+  }
 
   /** World X position. */
   get x() { return this.sprite.x; }

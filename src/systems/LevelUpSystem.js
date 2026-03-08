@@ -128,12 +128,12 @@ class LevelUpSystem {
 
     // Big title
     this._add(s.add.text(W / 2, H / 2 - 12, 'LEVEL UP', {
-      fontFamily: 'monospace', fontSize: '14px', color: '#ffdd44',
+      fontFamily: GAME_FONT, fontSize: '14px', color: '#ffdd44',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     // Level number
     this._add(s.add.text(W / 2, H / 2 + 8, `Level ${GameState.player.level}`, {
-      fontFamily: 'monospace', fontSize: '9px', color: '#ccaa33',
+      fontFamily: GAME_FONT, fontSize: '9px', color: '#ccaa33',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     // Decorative line below
@@ -142,7 +142,7 @@ class LevelUpSystem {
 
     // Prompt (fades in after cooldown via alpha tween)
     const prompt = s.add.text(W / 2, H / 2 + 48, '- Press any button -', {
-      fontFamily: 'monospace', fontSize: '6px', color: '#888866',
+      fontFamily: GAME_FONT, fontSize: '6px', color: '#888866',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51).setAlpha(0);
     this._add(prompt);
 
@@ -184,11 +184,11 @@ class LevelUpSystem {
 
     // Header
     this._add(s.add.text(W / 2, 24, `LEVEL ${GameState.player.level}`, {
-      fontFamily: 'monospace', fontSize: '10px', color: '#ffdd44',
+      fontFamily: GAME_FONT, fontSize: '10px', color: '#ffdd44',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     this._add(s.add.text(W / 2, 40, 'Choose your reward', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#aa9944',
+      fontFamily: GAME_FONT, fontSize: '7px', color: '#aa9944',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     // Divider
@@ -206,11 +206,11 @@ class LevelUpSystem {
       const y = startY + i * gap;
 
       const label = s.add.text(W / 2, y, choice.label, {
-        fontFamily: 'monospace', fontSize: '9px', color: '#ffffff',
+        fontFamily: GAME_FONT, fontSize: '9px', color: '#ffffff',
       }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
 
       const desc = s.add.text(W / 2, y + 14, choice.desc, {
-        fontFamily: 'monospace', fontSize: '6px', color: '#888888',
+        fontFamily: GAME_FONT, fontSize: '6px', color: '#888888',
       }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51);
 
       this._add(label);
@@ -221,13 +221,13 @@ class LevelUpSystem {
 
     // Cursor arrow
     this._cursor = s.add.text(0, 0, '>', {
-      fontFamily: 'monospace', fontSize: '10px', color: '#ffdd44',
+      fontFamily: GAME_FONT, fontSize: '10px', color: '#ffdd44',
     }).setScrollFactor(0).setDepth(51);
     this._add(this._cursor);
 
     // Footer hint
     this._add(s.add.text(W / 2, H - 16, 'Up/Down to select, Attack to choose', {
-      fontFamily: 'monospace', fontSize: '5px', color: '#555544',
+      fontFamily: GAME_FONT, fontSize: '5px', color: '#555544',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     this._updateChooseCursor();
@@ -284,11 +284,11 @@ class LevelUpSystem {
 
     // Show what they picked
     this._add(s.add.text(W / 2, H / 2 - 30, choice.label, {
-      fontFamily: 'monospace', fontSize: '12px', color: '#ffdd44',
+      fontFamily: GAME_FONT, fontSize: '12px', color: '#ffdd44',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     this._add(s.add.text(W / 2, H / 2 - 12, choice.desc, {
-      fontFamily: 'monospace', fontSize: '7px', color: '#aa9944',
+      fontFamily: GAME_FONT, fontSize: '7px', color: '#aa9944',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     // Divider
@@ -297,11 +297,11 @@ class LevelUpSystem {
 
     // Confirm / Cancel
     this._add(s.add.text(W / 2, H / 2 + 22, 'Attack = Confirm', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#88cc88',
+      fontFamily: GAME_FONT, fontSize: '7px', color: '#88cc88',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
 
     this._add(s.add.text(W / 2, H / 2 + 38, 'Jump = Go Back', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#cc8888',
+      fontFamily: GAME_FONT, fontSize: '7px', color: '#cc8888',
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(51));
   }
 

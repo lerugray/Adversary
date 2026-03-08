@@ -284,7 +284,7 @@ class HazardSystem {
           GameState.score += HAZARD_JUMP_BONUS;
           // Brief floating score text
           const popup = this.scene.add.text(player.x, player.y - 20, `+${HAZARD_JUMP_BONUS}`, {
-            fontFamily: 'monospace', fontSize: '7px', color: '#ffdd44',
+            fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
             stroke: '#000000', strokeThickness: 2,
           }).setOrigin(0.5, 1).setDepth(50);
           this.scene.tweens.add({

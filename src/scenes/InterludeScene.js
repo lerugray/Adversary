@@ -29,13 +29,13 @@ class InterludeScene extends Phaser.Scene {
     const cy = this.cameras.main.height / 2;
 
     this.add.text(cx, cy - 10, 'INTERLUDE', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '12px',
       color:      '#c77dff',
     }).setOrigin(0.5);
 
     this.add.text(cx, cy + 10, `→ Level ${this._nextLevel}`, {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '8px',
       color:      '#aaaaaa',
     }).setOrigin(0.5);

@@ -63,6 +63,11 @@ class EnemyManager {
       const enemy = this.enemies[i];
 
       if (enemy.isDead && (!enemy.sprite || !enemy.sprite.active)) {
+        // Keep archer alive if it still has arrows in flight
+        if (enemy.arrows && enemy.arrows.length > 0) {
+          enemy.update(delta, player);
+          continue;
+        }
         // Fully destroyed — remove from array
         this.enemies.splice(i, 1);
         continue;

@@ -21,7 +21,7 @@ class HighScoreScene extends Phaser.Scene {
     const cx = this.cameras.main.width  / 2;
 
     this.add.text(cx, 18, 'HIGH SCORES', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '12px',
       color:      '#f7b731',
       stroke:     '#000000',
@@ -34,7 +34,7 @@ class HighScoreScene extends Phaser.Scene {
 
     // ── Return prompt ─────────────────────────────────────────────────────
     const prompt = this.add.text(cx, 224, 'PRESS ANY KEY TO RETURN', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '7px',
       color:      '#888888',
     }).setOrigin(0.5);
@@ -59,7 +59,7 @@ class HighScoreScene extends Phaser.Scene {
 
     if (scores.length === 0) {
       this.add.text(cx, startY + 20, 'NO SCORES YET\nPlay a game to set one!', {
-        fontFamily: 'monospace',
+        fontFamily: GAME_FONT,
         fontSize:   '8px',
         color:      '#555555',
         align:      'center',
@@ -68,19 +68,19 @@ class HighScoreScene extends Phaser.Scene {
     }
 
     // Column headers
-    this.add.text(28,   startY, '#',     { fontFamily: 'monospace', fontSize: '7px', color: '#666666' });
-    this.add.text(44,   startY, 'SCORE', { fontFamily: 'monospace', fontSize: '7px', color: '#666666' });
-    this.add.text(130,  startY, 'LOOP',  { fontFamily: 'monospace', fontSize: '7px', color: '#666666' });
-    this.add.text(170,  startY, 'LVL',   { fontFamily: 'monospace', fontSize: '7px', color: '#666666' });
+    this.add.text(28,   startY, '#',     { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
+    this.add.text(44,   startY, 'SCORE', { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
+    this.add.text(130,  startY, 'LOOP',  { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
+    this.add.text(170,  startY, 'LVL',   { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
 
     scores.slice(0, 10).forEach((entry, i) => {
       const y     = startY + rowH + i * rowH;
       const color = i === 0 ? '#f7b731' : '#cccccc';
 
-      this.add.text(28,  y, `${i + 1}.`,              { fontFamily: 'monospace', fontSize: '7px', color });
-      this.add.text(44,  y, `${entry.score}`,         { fontFamily: 'monospace', fontSize: '7px', color });
-      this.add.text(130, y, `${entry.loop || 1}`,     { fontFamily: 'monospace', fontSize: '7px', color });
-      this.add.text(170, y, `${entry.level || 1}`,    { fontFamily: 'monospace', fontSize: '7px', color });
+      this.add.text(28,  y, `${i + 1}.`,              { fontFamily: GAME_FONT, fontSize: '7px', color });
+      this.add.text(44,  y, `${entry.score}`,         { fontFamily: GAME_FONT, fontSize: '7px', color });
+      this.add.text(130, y, `${entry.loop || 1}`,     { fontFamily: GAME_FONT, fontSize: '7px', color });
+      this.add.text(170, y, `${entry.level || 1}`,    { fontFamily: GAME_FONT, fontSize: '7px', color });
     });
   }
 }

@@ -23,7 +23,7 @@ class TitleScene extends Phaser.Scene {
 
     // Game title
     this.add.text(cx, cy - 30, 'ADVERSARY', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize: '20px',
       color: '#e94560',
       stroke: '#000000',
@@ -32,7 +32,7 @@ class TitleScene extends Phaser.Scene {
 
     // Call to action
     const prompt = this.add.text(cx, cy + 20, 'PRESS ANY KEY TO START', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize: '8px',
       color: '#ffffff',
     }).setOrigin(0.5);

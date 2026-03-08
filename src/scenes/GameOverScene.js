@@ -22,7 +22,7 @@ class GameOverScene extends Phaser.Scene {
     const cy = this.cameras.main.height / 2;
 
     this.add.text(cx, cy - 20, 'GAME OVER', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '18px',
       color:      '#e63946',
       stroke:     '#000000',
@@ -30,7 +30,7 @@ class GameOverScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.add.text(cx, cy + 6, `Score: ${GameState.score}`, {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '9px',
       color:      '#ffffff',
     }).setOrigin(0.5);

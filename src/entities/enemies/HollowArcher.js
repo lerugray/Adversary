@@ -13,6 +13,7 @@
 // ── Tuning constants ────────────────────────────────────────────────────────
 const HA_DETECT_RANGE_X   = 120;   // horizontal detection range
 const HA_DETECT_RANGE_Y   = 30;    // vertical range (same tier)
+const HA_DETECT_DOWN_Y    = 80;    // vertical range for downward shooting
 const HA_FIRE_COOLDOWN    = 2500;  // ms between shots
 const HA_ARROW_SPEED      = 100;   // px/s
 const HA_ARROW_LIFETIME   = 2500;  // ms before arrow self-destructs
@@ -21,7 +22,7 @@ const HA_ARROW_LIFETIME   = 2500;  // ms before arrow self-destructs
 const HA_DROP_MANA_CHANCE = 0.50;
 
 class HollowArcher extends EnemyEntity {
-  constructor(scene, x, y) {
+  constructor(scene, x, y, spawnData) {
     super(scene, x, y, {
       width:       8,
       height:      18,
@@ -35,6 +36,7 @@ class HollowArcher extends EnemyEntity {
 
     this.fireCooldown = HA_FIRE_COOLDOWN * 0.5; // shorter initial delay
     this.arrows = [];  // track active arrow projectiles
+    this.canShootDown = (spawnData && spawnData.canShootDown) || false;
   }
 
   getDropTable() {
@@ -46,6 +48,12 @@ class HollowArcher extends EnemyEntity {
 
   update(delta, player) {
     super.update(delta, player);
+
+    // Always update arrows, even after archer dies — arrows should persist
+    if (this.arrows.length > 0) {
+      this._updateArrows(delta, player);
+    }
+
     if (this._skipUpdate) return;
     if (this.state === ENEMY_STATE.HURT) return;
 
@@ -62,19 +70,25 @@ class HollowArcher extends EnemyEntity {
     this.facing = player.x > this.sprite.x ? 1 : -1;
     this.sprite.setFlipX(this.facing < 0);
 
-    // Check detection range
-    if (this.hDistTo(player) < HA_DETECT_RANGE_X &&
-        this.vDistTo(player) < HA_DETECT_RANGE_Y) {
+    // Check detection range — horizontal shot (same tier)
+    const hDist = this.hDistTo(player);
+    const vDist = player.y - this.sprite.y; // positive = player is below
+
+    if (hDist < HA_DETECT_RANGE_X && this.vDistTo(player) < HA_DETECT_RANGE_Y) {
       if (this.fireCooldown <= 0) {
-        this._fireArrow(player);
+        this._fireArrow(player, false);
+      }
+    }
+    // Downward shot — only archers with canShootDown flag
+    else if (this.canShootDown && hDist < HA_DETECT_RANGE_X && vDist > HA_DETECT_RANGE_Y && vDist < HA_DETECT_DOWN_Y) {
+      if (this.fireCooldown <= 0) {
+        this._fireArrow(player, true);
       }
     }
 
-    // Update arrows
-    this._updateArrows(delta, player);
   }
 
-  _fireArrow(player) {
+  _fireArrow(player, shootDown) {
     this.fireCooldown = HA_FIRE_COOLDOWN;
     this.state = ENEMY_STATE.ATTACK;
 
@@ -91,7 +105,16 @@ class HollowArcher extends EnemyEntity {
     const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
     this.scene.physics.add.existing(arrow);
     arrow.body.setAllowGravity(false);
-    arrow.body.setVelocityX(this.facing * HA_ARROW_SPEED);
+
+    if (shootDown) {
+      // Diagonal downward shot toward player
+      arrow.body.setVelocityX(this.facing * HA_ARROW_SPEED * 0.6);
+      arrow.body.setVelocityY(HA_ARROW_SPEED * 0.8);
+      arrow.setRotation(this.facing > 0 ? 0.6 : -0.6); // visual tilt
+    } else {
+      arrow.body.setVelocityX(this.facing * HA_ARROW_SPEED);
+    }
+
     arrow.body.setSize(8, 3);
     arrow.setDepth(4);
 
@@ -153,7 +176,7 @@ class HollowArcher extends EnemyEntity {
           arrowData.jumpedOver = true;
           GameState.score += 50;
           const popup = this.scene.add.text(player.x, player.y - 20, '+50', {
-            fontFamily: 'monospace', fontSize: '7px', color: '#ffdd44',
+            fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
             stroke: '#000000', strokeThickness: 2,
           }).setOrigin(0.5, 1).setDepth(50);
           this.scene.tweens.add({
@@ -172,13 +195,8 @@ class HollowArcher extends EnemyEntity {
     }
   }
 
-  /** Clean up all arrows on death. */
+  /** Arrows persist after death — they keep flying until they expire or hit something. */
   _die() {
-    // Destroy all active arrows
-    for (const ad of this.arrows) {
-      this._destroyArrow(ad);
-    }
-    this.arrows = [];
     super._die();
   }
 

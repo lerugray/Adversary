@@ -19,7 +19,7 @@ class LoopCompleteScene extends Phaser.Scene {
     const cy = this.cameras.main.height / 2;
 
     this.add.text(cx, cy - 20, 'LOOP COMPLETE!', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '14px',
       color:      '#fcbf49',
       stroke:     '#000000',
@@ -28,13 +28,13 @@ class LoopCompleteScene extends Phaser.Scene {
 
     // currentLoop was already incremented by advanceLevel, so show it
     this.add.text(cx, cy + 4, `Starting Loop ${GameState.currentLoop}`, {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '8px',
       color:      '#eeeeee',
     }).setOrigin(0.5);
 
     const prompt = this.add.text(cx, cy + 22, 'PRESS ANY KEY TO CONTINUE', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '7px',
       color:      '#aaaaaa',
     }).setOrigin(0.5);

@@ -63,7 +63,7 @@ class PreloadScene extends Phaser.Scene {
     this._progressBar = this.add.graphics();
 
     this.add.text(cx, cy + 20, 'LOADING...', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize: '8px',
       color: '#aaaaaa',
     }).setOrigin(0.5, 0);

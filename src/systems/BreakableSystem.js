@@ -147,7 +147,7 @@ class BreakableSystem {
 
     // Score popup
     const popup = this.scene.add.text(container.x, container.y - 10, '+25', {
-      fontFamily: 'monospace', fontSize: '7px', color: '#ffdd44',
+      fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
       stroke: '#000000', strokeThickness: 2,
     }).setOrigin(0.5, 1).setDepth(50);
     this.scene.tweens.add({

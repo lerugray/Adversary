@@ -144,7 +144,7 @@ class GameScene extends Phaser.Scene {
 
     // Level name text (large)
     const nameText = this.add.text(W / 2, H * 0.46, name, {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize: '10px',
       color: '#ffffff',
       stroke: '#000000',
@@ -154,7 +154,7 @@ class GameScene extends Phaser.Scene {
 
     // Subtitle (smaller)
     const subText = this.add.text(W / 2, H * 0.53, `— Level ${levelNum} —`, {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize: '6px',
       color: '#999999',
       stroke: '#000000',
@@ -493,7 +493,7 @@ class GameScene extends Phaser.Scene {
   _buildDebugText() {
     this._debugText = this.add.text(4, 20,
       '[G] GameOver  [L] LoopComplete', {
-        fontFamily: 'monospace',
+        fontFamily: GAME_FONT,
         fontSize:   '6px',
         color:      '#334433',
       }
@@ -501,7 +501,7 @@ class GameScene extends Phaser.Scene {
 
     // Gamepad debug — shows button indices when pressed
     this._gpDebugText = this.add.text(4, 230, '', {
-      fontFamily: 'monospace',
+      fontFamily: GAME_FONT,
       fontSize:   '8px',
       color:      '#44ff44',
       stroke:     '#000000',

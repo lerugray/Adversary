@@ -136,7 +136,7 @@ class PhantomSystem {
       128, 120,
       '!! DANGER !!',
       {
-        fontFamily: 'monospace',
+        fontFamily: GAME_FONT,
         fontSize:   '10px',
         color:      '#ff4444',
         stroke:     '#000000',
