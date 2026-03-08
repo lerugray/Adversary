@@ -459,9 +459,9 @@ class GameScene extends Phaser.Scene {
     ).setScrollFactor(0).setDepth(20);
 
     // Gamepad debug — shows button indices when pressed
-    this._gpDebugText = this.add.text(4, 232, '', {
+    this._gpDebugText = this.add.text(4, 230, '', {
       fontFamily: 'monospace',
-      fontSize:   '6px',
+      fontSize:   '8px',
       color:      '#44ff44',
       stroke:     '#000000',
       strokeThickness: 1,

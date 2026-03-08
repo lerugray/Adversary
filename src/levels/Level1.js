@@ -13,11 +13,11 @@
  *
  *   y=0   +--------------------------------------------+
  *         |              (jump headroom)               |
- *   y=88  | [SKULL]============================  T5    |  gap RIGHT
+ *   y=65  | [SKULL]============================  T5    |  gap RIGHT
  *         |                       [CHECKPOINT]         |
- *   y=130 |    =============================[L] T4     |  gap LEFT
+ *   y=120 |    =============================[L] T4     |  gap LEFT
  *         |                                            |
- *   y=180 | [L]=============================   T3      |  gap RIGHT
+ *   y=175 | [L]=============================   T3      |  gap RIGHT
  *         |                                            |
  *   y=230 |    =============================[L] T2     |  gap LEFT
  *         |                                            |
@@ -40,17 +40,17 @@ const Level1Data = {
   // ── Player spawn ───────────────────────────────────────────────────────
   playerSpawn: { x: 28, y: 334 },
 
-  // ── Checkpoint (bonfire near summit, right side past the stone head) ──
+  // ── Checkpoint (bonfire near summit, past the stone head) ──
   checkpoint: {
-    x: 200,
-    y: 80,
+    x: 140,
+    y: 57,
     radius: 8,
   },
 
   // ── Hazard spawner (stone head) ──────────────────────────────────────
   hazardSpawner: {
     x: 16,               // stone head X (left side of tier 5)
-    y: 88,               // stone head Y (sits on platform surface)
+    y: 65,               // stone head Y (sits on platform surface)
     speed: 52,            // horizontal roll speed (px/s)
     interval: 3500,       // ms between skull spawns
     initialDelay: 1500,   // ms before first skull
@@ -73,14 +73,14 @@ const Level1Data = {
     // Tier 2 — gap on LEFT (55px above tier 1)
     { x: 32,  y: 230, w: 224, h: 10,  tier: 2 },
 
-    // Tier 3 — gap on RIGHT (50px above tier 2)
-    { x: 0,   y: 180, w: 224, h: 10,  tier: 3 },
+    // Tier 3 — gap on RIGHT (55px above tier 2)
+    { x: 0,   y: 175, w: 224, h: 10,  tier: 3 },
 
-    // Tier 4 — gap on LEFT (50px above tier 3)
-    { x: 32,  y: 130, w: 224, h: 10,  tier: 4 },
+    // Tier 4 — gap on LEFT (55px above tier 3)
+    { x: 32,  y: 120, w: 224, h: 10,  tier: 4 },
 
-    // Tier 5 — summit, gap on RIGHT (42px above tier 4)
-    { x: 0,   y: 88,  w: 224, h: 10,  tier: 5 },
+    // Tier 5 — summit, gap on RIGHT (55px above tier 4)
+    { x: 0,   y: 65,  w: 224, h: 10,  tier: 5 },
 
   ],
 
@@ -94,13 +94,13 @@ const Level1Data = {
     { x: 42,  topY: 230, bottomY: 285, w: 14 },
 
     // Tier 2 → Tier 3 (right side)
-    { x: 210, topY: 180, bottomY: 230, w: 14 },
+    { x: 210, topY: 175, bottomY: 230, w: 14 },
 
     // Tier 3 → Tier 4 (left side)
-    { x: 42,  topY: 130, bottomY: 180, w: 14 },
+    { x: 42,  topY: 120, bottomY: 175, w: 14 },
 
     // Tier 4 → Tier 5 (right side)
-    { x: 210, topY: 88,  bottomY: 130, w: 14 },
+    { x: 210, topY: 65,  bottomY: 120, w: 14 },
   ],
 
   // ── Enemy spawn markers ──────────────────────────────────────────────
@@ -108,9 +108,9 @@ const Level1Data = {
     { x: 130, y: 332, type: 'hollow_soldier' },   // Ground — mid patrol
     { x: 120, y: 277, type: 'hollow_soldier' },   // Tier 1 — mid patrol
     { x: 180, y: 222, type: 'hollow_archer'  },   // Tier 2 — guards right ladder
-    { x: 100, y: 172, type: 'hollow_soldier' },   // Tier 3 — mid patrol
-    { x: 160, y: 122, type: 'hollow_knight'  },   // Tier 4 — tough guard
-    { x: 130, y: 80,  type: 'hollow_knight'  },   // Tier 5 — guards checkpoint
+    { x: 100, y: 167, type: 'hollow_soldier' },   // Tier 3 — mid patrol
+    { x: 160, y: 112, type: 'hollow_knight'  },   // Tier 4 — tough guard
+    { x: 130, y: 57,  type: 'hollow_knight'  },   // Tier 5 — guards checkpoint
   ],
 
   // ── Decorative elements ──────────────────────────────────────────────
@@ -118,11 +118,11 @@ const Level1Data = {
     // Ruined pillar stumps along the edges
     { x: 232, y: 300, w: 12, h: 25, color: 0x2a2028, alpha: 0.9 },
     { x: 4,   y: 245, w: 10, h: 20, color: 0x2a2028, alpha: 0.8 },
-    { x: 232, y: 190, w: 12, h: 20, color: 0x2a2028, alpha: 0.9 },
-    { x: 4,   y: 142, w: 10, h: 18, color: 0x2a2028, alpha: 0.8 },
+    { x: 232, y: 185, w: 12, h: 20, color: 0x2a2028, alpha: 0.9 },
+    { x: 4,   y: 132, w: 10, h: 18, color: 0x2a2028, alpha: 0.8 },
 
     // Crumbled rubble at base of stone head
-    { x: 6,   y: 80,  w: 20, h: 5,  color: 0x3a3530, alpha: 0.7 },
+    { x: 6,   y: 57,  w: 20, h: 5,  color: 0x3a3530, alpha: 0.7 },
 
     // Distant ruin silhouettes (background)
     { x: 140, y: 0,   w: 16, h: 80, color: 0x1a1518, alpha: 0.5 },

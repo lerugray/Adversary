@@ -53,8 +53,17 @@ class InputManager {
     // Standard mapping: D-pad (12-15), A=0 (jump), X=2 (attack), Start=9
     // Left stick axis 0 = horizontal, axis 1 = vertical, threshold 0.5
     this._gpPlugin = scene.input.gamepad;
-    this._gpPrevButtons = {}; // track previous frame for "just pressed"
     this._STICK_THRESHOLD = 0.5;
+
+    // Prime previous-button state so buttons already held at construction
+    // don't register as "just pressed" on the first frame.
+    this._gpPrevButtons = {};
+    const gp = this._gp();
+    if (gp) {
+      for (let i = 0; i < gp.buttons.length; i++) {
+        this._gpPrevButtons[i] = gp.buttons[i] && gp.buttons[i].pressed;
+      }
+    }
   }
 
   /** @returns {Phaser.Input.Gamepad.Gamepad|null} */
@@ -113,8 +122,8 @@ class InputManager {
   isAttackHeld()        { return this._keys.attack.isDown || this._gpHeld(2)  || this._gpHeld(3); }
   isAttackJustPressed() { return Phaser.Input.Keyboard.JustDown(this._keys.attack) || this._gpJust(2)  || this._gpJust(3); }
 
-  // Pause: only keyboard Enter for now until we confirm gamepad mapping
-  isStartJustPressed()  { return Phaser.Input.Keyboard.JustDown(this._keys.start); }
+  // Pause: Enter on keyboard, Start (9) on gamepad
+  isStartJustPressed()  { return Phaser.Input.Keyboard.JustDown(this._keys.start) || this._gpJust(9); }
 
   // ── Debug shortcuts ───────────────────────────────────────────────────────
   isDebugGameOverPressed()    { return Phaser.Input.Keyboard.JustDown(this._keys.dbgGameOver); }

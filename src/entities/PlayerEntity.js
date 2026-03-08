@@ -691,6 +691,7 @@ class PlayerEntity {
     // Store in GameState for persistence
     GameState.soul    = { x: sx, y: sy };
     GameState.pendingXP += GameState.player.xp; // suspend XP
+    GameState.player.xp = 0;                    // clear until soul recovered
 
     this._spawnSoulOrb(sx, sy);
   }
