@@ -335,17 +335,29 @@ class LevelUpSystem {
     }
 
     this._destroyAll();
-    this.isActive = false;
-    this._phase = LVLUP_PHASE.NONE;
 
-    // Unfreeze everything — resume physics
-    this.scene.physics.world.resume();
+    // Brief "applied!" flash before resuming — gives the player a moment to orient
+    this.scene.cameras.main.flash(400, 100, 255, 100, false);
 
-    if (this.scene.player && this.scene.player.sprite) {
-      this.scene.player.sprite.body.setAllowGravity(true);
-    }
+    // Keep the game frozen for 800ms so the player can get their bearings,
+    // then resume with a short i-frame window for safety
+    this.scene.time.delayedCall(800, () => {
+      this.isActive = false;
+      this._phase = LVLUP_PHASE.NONE;
 
-    this.scene.cameras.main.flash(200, 100, 255, 100, false);
+      // Unfreeze everything — resume physics
+      this.scene.physics.world.resume();
+
+      if (this.scene.player && this.scene.player.sprite) {
+        this.scene.player.sprite.body.setAllowGravity(true);
+      }
+
+      // Grant 1.5s of i-frames so you don't get cheap-shotted on resume
+      if (this.scene.player) {
+        this.scene.player.isInvincible = true;
+        this.scene.player.iframeTimer = 1500;
+      }
+    });
   }
 
   // ── Element tracking & cleanup ──────────────────────────────────────────
