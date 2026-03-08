@@ -53,6 +53,7 @@ class Skeleton extends EnemyEntity {
     }
     return [
       { type: 'mana_shard', chance: SK_DROP_MANA_CHANCE },
+      { type: 'special',    chance: 0.08 },
     ];
   }
 

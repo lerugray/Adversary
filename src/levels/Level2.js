@@ -126,6 +126,32 @@ const Level2Data = {
     { x: 100, y: 102, type: 'hollow_knight' },
   ],
 
+  // ── Flying hazards (DK-style bats on a timer) ─────────────────────────
+  flyingHazard: {
+    interval: 6000,         // ms between bat spawns
+    speed: 65,              // px/s horizontal
+    damage: 1,
+    yOffset: [-30, 10],     // spawn near player height, biased slightly above
+  },
+
+  // ── Destructible containers (off the beaten path) ─────────────────────
+  breakables: [
+    // Ground far left — player heads right to the ladder, this rewards exploring left
+    { x: 16,  y: 410, type: 'barrel' },
+
+    // Tier 1 far right — past the end of the platform, player has to go right
+    { x: 225, y: 350, type: 'crate' },
+
+    // Tier 3 elevated sniper perch — reward for clearing the archers
+    { x: 240, y: 222, type: 'crate',
+      drops: [
+        { type: 'heart',   chance: 0.50 },
+        { type: 'weapon',  chance: 0.15 },
+        { type: 'special', chance: 0.12 },
+      ]
+    },
+  ],
+
   // ── Decorative elements ────────────────────────────────────────────────
   decorations: [
     // Crumbling tower silhouette — left background

@@ -113,6 +113,18 @@ const Level1Data = {
     { x: 130, y: 57,  type: 'hollow_knight'  },   // Tier 5 — guards checkpoint
   ],
 
+  // ── Destructible containers (off the beaten path) ────────────────────
+  breakables: [
+    // Ground far right — player spawns left, has to walk past the ladder to find this
+    { x: 245, y: 365, type: 'crate' },
+
+    // Tier 2 far left — ladder is on the right, this rewards going left first
+    { x: 44,  y: 245, type: 'barrel' },
+
+    // Tier 4 far right — ladder up is on the right but crate is past it at the edge
+    { x: 245, y: 125, type: 'crate' },
+  ],
+
   // ── Decorative elements ──────────────────────────────────────────────
   decorations: [
     // Ruined pillar stumps along the edges

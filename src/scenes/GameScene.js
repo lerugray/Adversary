@@ -91,6 +91,15 @@ class GameScene extends Phaser.Scene {
     // ── Hazard System (rolling skulls — Donkey Kong style) ────────────
     this.hazardSystem = new HazardSystem(this);
 
+    // ── Flying Hazard System (bats — DK-style, timer-based) ────────────
+    this.flyingHazardSystem = new FlyingHazardSystem(this);
+
+    // ── Trap System (pendulums, dart traps — Sen's Fortress style) ────
+    this.trapSystem = new TrapSystem(this);
+
+    // ── Breakable System (destructible containers) ──────────────────────
+    this.breakableSystem = new BreakableSystem(this);
+
     // ── Phantom System (anti-grinding ghost — skips Level 4) ─────────
     this.phantomSystem = new PhantomSystem(this);
 
@@ -415,6 +424,10 @@ class GameScene extends Phaser.Scene {
     // Destroy all existing enemies
     this.enemyManager.destroyAll();
 
+    // Clear flying bats and active darts
+    if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
+    if (this.trapSystem) this.trapSystem.destroyAll();
+
     // Respawn fresh enemies from level data
     this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
   }
@@ -633,6 +646,11 @@ class GameScene extends Phaser.Scene {
       this.scene.start('LoopCompleteScene');
       return;
     }
+    if (this.inputManager.isDebugSkipLevelPressed()) {
+      GameState.advanceLevel();
+      this.scene.start('GameScene');
+      return;
+    }
 
     // Player
     this.player.update(this.inputManager, delta);
@@ -652,6 +670,12 @@ class GameScene extends Phaser.Scene {
     // Rolling hazards
     this.hazardSystem.update(delta, this.player);
 
+    // Flying hazards (bats)
+    this.flyingHazardSystem.update(delta, this.player);
+
+    // Traps (pendulums, darts)
+    this.trapSystem.update(delta, this.player);
+
     // Phantom
     this.phantomSystem.update(delta, this.player);
 
@@ -667,6 +691,9 @@ class GameScene extends Phaser.Scene {
 
     // Attack hitbox → enemy collision
     this._checkAttackHitboxCollisions();
+
+    // Attack hitbox → breakable containers
+    this.breakableSystem.checkHits(this.player);
 
     // Special attack projectile → enemy collision
     this._checkProjectileCollisions();

@@ -1,34 +1,36 @@
 /**
- * Level3.js — "The Iron Gauntlet" level data definition.
+ * Level3.js — "The Iron Passage" level data definition.
  *
- * Theme: Iron architecture, riveted metal platforms, brutal tight climb.
- * The hardest non-boss level. Tallest level in the game.
+ * Theme: Sen's Fortress — iron architecture, pendulum blades, dart traps,
+ * narrow walkways. The trap gauntlet level. Fewer regular enemies,
+ * more environmental hazards that demand precise timing.
  *
  * Coordinate system:
  *   Origin (0,0) is top-left.  Y increases downward.
- *   World size: 256 × 360.
+ *   World size: 256 × 540.
  *
  * ── World layout sketch ────────────────────────────────────────────────────
  *
  *   y=0   ┌──────────────────────────────────────────┐
- *         │              BACKGROUND                   │
- *   y=30  │  [IRON GATE CHECKPOINT]                   │
+ *   y=40  │  [IRON GATE CHECKPOINT]                   │
  *         │  ██████████████  Tier 7 (summit)          │
- *   y=65  │         ████████████                      │
- *         │                      ████  Tier 6         │
- *   y=100 │  ██████████                               │
- *         │            ████████████████  Tier 5       │
- *   y=140 │  ████████████████                         │
- *         │                    ████████  Tier 4       │
- *   y=180 │  ██████████                               │
- *         │            ████████████████  Tier 3       │
- *   y=225 │  ████████████                             │
- *         │                  ██████████  Tier 2       │
- *   y=270 │  ████████████████                         │
- *         │                ████████████  Tier 1       │
- *   y=318 │  ██████████████████████████  GROUND       │
- *   y=360 └──────────────────────────────────────────┘
+ *   y=100 │     ████████████████                      │
+ *         │      Tier 6 — pendulum + dart trap        │
+ *   y=160 │  ██████████████████████                   │
+ *         │      Tier 5 — "The Gauntlet" wide combat  │
+ *   y=220 │     █████  ███  █████                     │
+ *         │      Tier 4 — triple island + pendulum    │
+ *   y=280 │  ██████████████████████████████           │
+ *         │      Tier 3 — dart crossfire corridor     │
+ *   y=340 │  ████████  ████████  ██████████           │
+ *         │      Tier 2 — pendulum bridge             │
+ *   y=400 │  ██████████████████████████████           │
+ *         │      Tier 1 — intro (darts only)          │
+ *   y=460 │  ████████████████████████████████████████ │
+ *         │                  GROUND                   │
+ *   y=540 └──────────────────────────────────────────┘
  *
+ *   Ladder zigzag: right → left → right → left → right → left → right
  */
 
 const Level3Data = {
@@ -36,136 +38,164 @@ const Level3Data = {
 
   // ── World dimensions ───────────────────────────────────────────────────
   worldWidth:  256,
-  worldHeight: 360,
+  worldHeight: 540,
 
   // ── Player spawn ───────────────────────────────────────────────────────
-  playerSpawn: { x: 28, y: 312 },
+  playerSpawn: { x: 28, y: 454 },
 
   // ── Checkpoint (heavy iron gate at summit) ─────────────────────────────
   checkpoint: {
     x: 36,
-    y: 28,
+    y: 32,
     radius: 8,
     type: 'iron_gate',
   },
 
-  // ── Platform tiers ─────────────────────────────────────────────────────
+  // ── Platform tiers (60px gaps for jump headroom) ──────────────────────
   platforms: [
 
-    // Tier 0 — Ground (iron floor)
-    { x: 0,   y: 318, w: 256, h: 42,  tier: 0 },
+    // Tier 0 — Ground (full width iron floor)
+    { x: 0,   y: 460, w: 256, h: 80,  tier: 0 },
 
-    // Tier 1 — Entry ledges (with stepping stones)
-    { x: 0,   y: 278, w: 90,  h: 10,  tier: 1 },
-    { x: 102, y: 277, w: 20,  h: 8,   tier: 1 },  // stepping stone
-    { x: 128, y: 276, w: 20,  h: 8,   tier: 1 },  // stepping stone
-    { x: 152, y: 275, w: 80,  h: 10,  tier: 1 },
-    { x: 230, y: 280, w: 26,  h: 10,  tier: 1 },
+    // Tier 1 — "First Test": long platform, dart trap fires across it
+    { x: 0,   y: 400, w: 230, h: 10,  tier: 1 },
 
-    // Tier 2 — Narrow iron grating (with stepping stones)
-    { x: 0,   y: 235, w: 70,  h: 10,  tier: 2 },
-    { x: 82,  y: 233, w: 20,  h: 8,   tier: 2 },  // stepping stone
-    { x: 110, y: 231, w: 20,  h: 8,   tier: 2 },  // stepping stone
-    { x: 138, y: 230, w: 70,  h: 10,  tier: 2 },
-    { x: 218, y: 238, w: 38,  h: 10,  tier: 2 },
+    // Tier 2 — "Pendulum Bridge": three sections separated by pendulums
+    { x: 0,   y: 340, w: 70,  h: 10,  tier: 2 },   // left safe zone
+    { x: 82,  y: 340, w: 70,  h: 10,  tier: 2 },   // middle (under pendulum)
+    { x: 164, y: 340, w: 92,  h: 10,  tier: 2 },   // right (ladder up)
 
-    // Tier 3 — GAUNTLET SECTION: wide connected platforms forcing combat
-    { x: 0,   y: 192, w: 256, h: 10,  tier: 3 },
+    // Tier 3 — "Dart Corridor": long platform, darts from both walls
+    { x: 0,   y: 280, w: 240, h: 10,  tier: 3 },
 
-    // Tier 4 — Tight climb continues (with stepping stone)
-    { x: 0,   y: 155, w: 55,  h: 10,  tier: 4 },
-    { x: 67,  y: 153, w: 20,  h: 8,   tier: 4 },  // stepping stone
-    { x: 93,  y: 150, w: 20,  h: 8,   tier: 4 },  // stepping stone
-    { x: 118, y: 148, w: 90,  h: 10,  tier: 4 },
-    { x: 220, y: 155, w: 36,  h: 10,  tier: 4 },
+    // Tier 4 — "Blade Walk": three narrow islands, pendulum guards the middle
+    { x: 0,   y: 220, w: 50,  h: 10,  tier: 4 },   // left island
+    { x: 80,  y: 220, w: 40,  h: 10,  tier: 4 },   // center island (under pendulum)
+    { x: 150, y: 220, w: 50,  h: 10,  tier: 4 },   // right island
 
-    // Tier 5 — More gauntlet: wide platform with enemies
-    { x: 0,   y: 110, w: 180, h: 10,  tier: 5 },
-    { x: 200, y: 115, w: 56,  h: 10,  tier: 5 },
+    // Tier 5 — "The Gauntlet": wide platform, enemy + dart traps
+    { x: 0,   y: 160, w: 200, h: 10,  tier: 5 },
+    { x: 216, y: 160, w: 40,  h: 10,  tier: 5 },   // small side platform
 
-    // Tier 6 — Narrow perches near summit
-    { x: 80,  y: 72,  w: 60,  h: 10,  tier: 6 },
-    { x: 200, y: 68,  w: 56,  h: 10,  tier: 6 },
+    // Tier 6 — "Death's Crossing": narrow bridge, pendulum + darts
+    { x: 40,  y: 100, w: 180, h: 10,  tier: 6 },
 
-    // Tier 7 — Summit platform (iron gate)
-    { x: 0,   y: 38,  w: 100, h: 10,  tier: 7 },
+    // Tier 7 — Summit platform (iron gate checkpoint)
+    { x: 0,   y: 40,  w: 120, h: 10,  tier: 7 },
 
   ],
 
   // ── Ladder zones ───────────────────────────────────────────────────────
   ladders: [
-    // Ladder A: Ground → Tier 1 left
-    { x: 14,  topY: 278, bottomY: 318, w: 14 },
+    // Ground → Tier 1 (right side)
+    { x: 215, topY: 400, bottomY: 460, w: 14 },
 
-    // Ladder B: Tier 1 right → Tier 2 right
-    { x: 235, topY: 235, bottomY: 280, w: 14 },
+    // Tier 1 → Tier 2 (left side)
+    { x: 14,  topY: 340, bottomY: 400, w: 14 },
 
-    // Ladder C: Tier 2 left → Tier 3 (gauntlet)
-    { x: 30,  topY: 192, bottomY: 245, w: 14 },
+    // Tier 2 → Tier 3 (right side)
+    { x: 228, topY: 280, bottomY: 340, w: 14 },
 
-    // Ladder D: Tier 3 → Tier 4 mid
-    { x: 150, topY: 148, bottomY: 202, w: 14 },
+    // Tier 3 → Tier 4 (left side)
+    { x: 14,  topY: 220, bottomY: 280, w: 14 },
 
-    // Ladder E: Tier 4 left → Tier 5
-    { x: 30,  topY: 110, bottomY: 165, w: 14 },
+    // Tier 4 → Tier 5 (right side)
+    { x: 180, topY: 160, bottomY: 220, w: 14 },
 
-    // Ladder F: Tier 5 → Tier 6
-    { x: 105, topY: 72,  bottomY: 120, w: 14 },
+    // Tier 5 → Tier 6 (left side)
+    { x: 55,  topY: 100, bottomY: 160, w: 14 },
 
-    // Ladder G: Tier 6 → Tier 7 summit
-    { x: 85,  topY: 38,  bottomY: 82,  w: 14 },
+    // Tier 6 → Tier 7 summit (right side)
+    { x: 200, topY: 40,  bottomY: 100, w: 14 },
   ],
 
-  // ── Enemy spawn markers ────────────────────────────────────────────────
+  // ── Traps (Sen's Fortress!) ───────────────────────────────────────────
+  traps: {
+    pendulums: [
+      // Tier 2 — pendulum between left and middle platforms
+      { anchorX: 76,  anchorY: 300, length: 34, speed: 1.8, damage: 1, startAngle: 0 },
+
+      // Tier 2 — pendulum between middle and right platforms
+      { anchorX: 158, anchorY: 300, length: 34, speed: 1.6, damage: 1, startAngle: 1.5 },
+
+      // Tier 4 — pendulum over center island
+      { anchorX: 100, anchorY: 182, length: 32, speed: 2.0, damage: 2, startAngle: 0.8 },
+
+      // Tier 6 — pendulum on the narrow bridge (fast!)
+      { anchorX: 130, anchorY: 62,  length: 32, speed: 2.4, damage: 2, startAngle: 0 },
+    ],
+
+    dartTraps: [
+      // Tier 1 — intro dart from right wall
+      { x: 250, y: 393, direction: -1, interval: 3000, speed: 110, damage: 1 },
+
+      // Tier 3 — crossfire! Darts from both sides
+      { x: 6,   y: 273, direction: 1,  interval: 2800, speed: 120, damage: 1 },
+      { x: 250, y: 273, direction: -1, interval: 2800, speed: 120, damage: 1 },
+
+      // Tier 5 — dart from left wall into the gauntlet
+      { x: 6,   y: 153, direction: 1,  interval: 2200, speed: 130, damage: 1 },
+
+      // Tier 6 — dart from right wall across the bridge (timed with pendulum)
+      { x: 250, y: 93,  direction: -1, interval: 2000, speed: 140, damage: 1 },
+    ],
+  },
+
+  // ── Enemy spawn markers (fewer than other levels — traps are the threat) ─
   enemySpawns: [
-    // Ground — soldier patrol
-    { x: 150, y: 310, type: 'hollow_soldier' },
+    // Ground — soldier patrol (warmup)
+    { x: 130, y: 452, type: 'hollow_soldier' },
 
-    // Tier 1 — archer on right ledge
-    { x: 170, y: 267, type: 'hollow_archer' },
+    // Tier 1 — skeleton at end of dart corridor
+    { x: 60,  y: 392, type: 'skeleton' },
 
-    // Tier 2 — skeleton lurks
-    { x: 50,  y: 227, type: 'skeleton' },
+    // Tier 3 — soldier patrols the dart crossfire corridor
+    { x: 120, y: 272, type: 'hollow_soldier' },
 
-    // Tier 3 — GAUNTLET: soldier + knight on wide platform forcing combat
-    { x: 60,  y: 184, type: 'hollow_soldier' },
-    { x: 180, y: 184, type: 'hollow_knight' },
+    // Tier 5 — knight guards the gauntlet
+    { x: 100, y: 152, type: 'hollow_knight' },
 
-    // Tier 4 — archer on elevated perch
-    { x: 230, y: 147, type: 'hollow_archer' },
+    // Tier 6 — archer on the bridge (shoot while dodging pendulum!)
+    { x: 180, y: 92,  type: 'hollow_archer' },
 
-    // Tier 5 — knight + gargoyle in open space
-    { x: 100, y: 102, type: 'hollow_knight' },
-    { x: 140, y: 90,  type: 'gargoyle', patrolLeft: 60, patrolRight: 200, patrolY: 90 },
+    // Near summit — gargoyle in open air
+    { x: 80,  y: 60,  type: 'gargoyle', patrolLeft: 30, patrolRight: 200, patrolY: 60 },
+  ],
 
-    // Tier 6 — gargoyle in open vertical space near summit
-    { x: 180, y: 52,  type: 'gargoyle', patrolLeft: 70, patrolRight: 240, patrolY: 52 },
+  // ── Destructible containers (off the beaten path) ─────────────────────
+  breakables: [
+    // Tier 2 far right — reward for jumping past the second pendulum
+    { x: 245, y: 340, type: 'crate' },
+
+    // Tier 5 side platform — have to jump across to get it
+    { x: 232, y: 160, type: 'barrel' },
   ],
 
   // ── Decorative elements ────────────────────────────────────────────────
   decorations: [
     // Iron girder silhouettes — background
-    { x: 0,   y: 0,   w: 20, h: 80, color: 0x2a2018, alpha: 0.5 },
-    { x: 240, y: 0,   w: 16, h: 90, color: 0x2a2018, alpha: 0.5 },
+    { x: 0,   y: 0,   w: 14, h: 120, color: 0x2a2018, alpha: 0.5 },
+    { x: 244, y: 0,   w: 12, h: 130, color: 0x2a2018, alpha: 0.5 },
 
-    // Riveted wall panel — left side
-    { x: 0,   y: 160, w: 8,  h: 30, color: 0x3a3028, alpha: 0.85 },
+    // Riveted wall panels
+    { x: 0,   y: 250, w: 6,  h: 40,  color: 0x3a3028, alpha: 0.85 },
+    { x: 250, y: 180, w: 6,  h: 40,  color: 0x3a3028, alpha: 0.85 },
 
-    // Rust streaks — between tiers
-    { x: 95,  y: 250, w: 20, h: 6,  color: 0x4a3c30, alpha: 0.7 },
-    { x: 200, y: 200, w: 15, h: 5,  color: 0x4a3c30, alpha: 0.65 },
+    // Rust streaks
+    { x: 95,  y: 350, w: 18, h: 5,   color: 0x4a3c30, alpha: 0.7 },
+    { x: 200, y: 290, w: 15, h: 5,   color: 0x4a3c30, alpha: 0.65 },
+    { x: 30,  y: 170, w: 20, h: 5,   color: 0x4a3c30, alpha: 0.6 },
 
     // Broken iron beam fragments
-    { x: 70,  y: 135, w: 25, h: 5,  color: 0x3a3028, alpha: 0.8 },
-    { x: 180, y: 100, w: 14, h: 8,  color: 0x3a3028, alpha: 0.7 },
+    { x: 70,  y: 130, w: 22, h: 4,   color: 0x3a3028, alpha: 0.8 },
 
-    // Distant iron tower silhouette
-    { x: 150, y: 0,   w: 12, h: 50, color: 0x2a2018, alpha: 0.35 },
-    { x: 120, y: 0,   w: 8,  h: 35, color: 0x2a2018, alpha: 0.3  },
+    // Distant iron tower silhouettes
+    { x: 160, y: 0,   w: 12, h: 60,  color: 0x2a2018, alpha: 0.35 },
+    { x: 120, y: 0,   w: 8,  h: 45,  color: 0x2a2018, alpha: 0.3  },
 
     // Heavy gate frame at summit
-    { x: 100, y: 30,  w: 6,  h: 18, color: 0x3a3028, alpha: 0.9 },
-    { x: 0,   y: 30,  w: 6,  h: 18, color: 0x3a3028, alpha: 0.9 },
+    { x: 120, y: 32,  w: 6,  h: 18,  color: 0x3a3028, alpha: 0.9 },
+    { x: 0,   y: 32,  w: 6,  h: 18,  color: 0x3a3028, alpha: 0.9 },
   ],
 
 };

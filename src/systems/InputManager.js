@@ -128,6 +128,7 @@ class InputManager {
   // ── Debug shortcuts ───────────────────────────────────────────────────────
   isDebugGameOverPressed()    { return Phaser.Input.Keyboard.JustDown(this._keys.dbgGameOver); }
   isDebugLoopCompletePressed(){ return Phaser.Input.Keyboard.JustDown(this._keys.dbgLoopComplete); }
+  isDebugSkipLevelPressed()   { return this._gpJust(5); }  // R1 = skip level
 
   // ── Utility ───────────────────────────────────────────────────────────────
 

@@ -70,6 +70,7 @@ class Gargoyle extends EnemyEntity {
   getDropTable() {
     return [
       { type: 'mana_shard', chance: GG_DROP_MANA_CHANCE },
+      { type: 'special',    chance: 0.07 },
     ];
   }
 

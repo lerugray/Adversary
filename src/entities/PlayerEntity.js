@@ -192,7 +192,7 @@ class PlayerEntity {
    * @param {number}       delta  ms since last frame
    */
   update(input, delta) {
-    if (this.state === STATE.DEAD) return;
+    if (this.state === STATE.DEAD || !this.sprite.body) return;
 
     // Tick cooldown/iframe timers
     this._tickTimers(delta);
@@ -212,6 +212,9 @@ class PlayerEntity {
     } else if (this.isPlunging) {
       // Only allow pause during plunge, no movement/attack
       this._handlePause(input);
+      // Enforce constant plunge speed every frame (no drift from physics)
+      this.sprite.body.setVelocityX(0);
+      this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
     }
 
     // Update hitbox position to follow the sprite
@@ -429,8 +432,8 @@ class PlayerEntity {
     this.state       = STATE.PLUNGE;
     this.attackCooldownTimer = ATTACK_COOLDOWN;
 
-    // Slam downward at fixed speed (disable gravity so it doesn't accelerate)
-    this.sprite.body.setAllowGravity(false);
+    // Slam downward at fixed speed — zero out per-body gravity so it doesn't accelerate
+    this.sprite.body.setGravityY(0);
     this.sprite.body.setVelocityX(0);
     this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
 
@@ -454,7 +457,7 @@ class PlayerEntity {
   _endPlunge() {
     this.isPlunging = false;
     this.state      = STATE.IDLE;
-    this.sprite.body.setAllowGravity(true);
+    this.sprite.body.setGravityY(PLAYER_GRAVITY);
     this.sprite.setTint(0x88ccff);
     this._deactivateHitbox();
 
@@ -623,6 +626,13 @@ class PlayerEntity {
     if (GameState.player.hp <= 0) {
       this._die();
       return;
+    }
+
+    // ── Cancel plunge if active ────────────────────────────────────────
+    if (this.isPlunging) {
+      this.isPlunging = false;
+      this.sprite.body.setGravityY(PLAYER_GRAVITY);
+      this._deactivateHitbox();
     }
 
     // ── Apply knockback ───────────────────────────────────────────────

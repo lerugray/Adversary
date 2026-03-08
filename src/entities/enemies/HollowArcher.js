@@ -40,6 +40,7 @@ class HollowArcher extends EnemyEntity {
   getDropTable() {
     return [
       { type: 'mana_shard', chance: HA_DROP_MANA_CHANCE },
+      { type: 'special',    chance: 0.06 },
     ];
   }
 
