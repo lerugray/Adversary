@@ -474,22 +474,6 @@ class GameScene extends Phaser.Scene {
 
     // Respawn fresh enemies from level data
     this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
-
-    // Level 4: re-trigger the boss on respawn
-    if (GameState.currentLevel === 4 && this._bossTriggered) {
-      this._bossTriggered = false;
-      this.boss = null;
-      this._weakPointsHit.clear();
-      // Reset weak point visuals
-      for (const wp of this._weakPoints) {
-        wp.hit = false;
-        if (wp.obj) {
-          wp.obj.setAlpha(1);
-          wp.obj.setScale(1);
-        }
-      }
-      this._triggerBoss();
-    }
   }
 
   // ── Soul clamping to platform geometry ─────────────────────────────────────

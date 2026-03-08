@@ -96,13 +96,19 @@ class EnemyManager {
 
   /**
    * Destroy all enemies and clear the array.
+   * Preserves the boss (HollowKingBoss) so it persists through player deaths.
    */
   destroyAll() {
+    const kept = [];
     for (const enemy of this.enemies) {
+      if (enemy instanceof HollowKingBoss) {
+        kept.push(enemy);
+        continue;
+      }
       if (enemy.sprite && enemy.sprite.active) {
         enemy.sprite.destroy();
       }
     }
-    this.enemies = [];
+    this.enemies = kept;
   }
 }
