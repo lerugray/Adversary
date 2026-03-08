@@ -63,10 +63,9 @@ const BODY_H = 22;
 const DUCK_H = 12;
 
 /** Dodge roll constants. */
-const DODGE_TAP_WINDOW    = 250;   // ms — double-tap must happen within this window
-const DODGE_ROLL_SPEED    = 120;   // px/s during roll
-const DODGE_ROLL_DURATION = 350;   // total roll time ms
-const DODGE_IFRAME_DURATION = 220; // i-frames active during the first part of the roll
+const DODGE_ROLL_SPEED    = 90;    // px/s during roll
+const DODGE_ROLL_DURATION = 250;   // total roll time ms
+const DODGE_IFRAME_DURATION = 160; // i-frames active during the first part of the roll
 const DODGE_COOLDOWN      = 500;   // ms before another dodge is allowed
 
 // ── Player states ──────────────────────────────────────────────────────────
@@ -129,8 +128,6 @@ class PlayerEntity {
     this.plungeHit     = false; // true once plunge contacted something
 
     // ── Dodge roll state ──────────────────────────────────────────────
-    this._lastLeftTap  = 0;   // timestamp of last left tap
-    this._lastRightTap = 0;   // timestamp of last right tap
     this.dodgeTimer    = 0;   // ms remaining in dodge roll
     this.dodgeCooldown = 0;   // ms remaining before next dodge allowed
     this.dodgeDir      = 0;   // -1 or 1 during active dodge
@@ -309,24 +306,13 @@ class PlayerEntity {
 
   _handleMovement(input) {
     const grounded = this.sprite.body.blocked.down;
-    const now = this.scene.time.now;
 
-    // ── Double-tap dodge detection (ground only) ─────────────────────
-    if (grounded && this.dodgeCooldown <= 0) {
-      if (input.isLeftJustPressed()) {
-        if (now - this._lastLeftTap < DODGE_TAP_WINDOW) {
-          this._startDodge(-1);
-          return;
-        }
-        this._lastLeftTap = now;
-      }
-      if (input.isRightJustPressed()) {
-        if (now - this._lastRightTap < DODGE_TAP_WINDOW) {
-          this._startDodge(1);
-          return;
-        }
-        this._lastRightTap = now;
-      }
+    // ── Dodge roll (C key / R1 button) ────────────────────────────────
+    if (grounded && this.dodgeCooldown <= 0 && input.isDodgeJustPressed()) {
+      // Roll in the direction being held, or facing direction if neutral
+      const dir = input.isLeftHeld() ? -1 : input.isRightHeld() ? 1 : this.facing;
+      this._startDodge(dir);
+      return;
     }
 
     // ── Duck (not while climbing a ladder) ─────────────────────────────

@@ -66,6 +66,7 @@ class PreloadScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize: '8px',
       color: '#aaaaaa',
+      padding: FONT_PAD,
     }).setOrigin(0.5, 0);
   }
 

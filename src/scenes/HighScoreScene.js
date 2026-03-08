@@ -26,6 +26,7 @@ class HighScoreScene extends Phaser.Scene {
       color:      '#f7b731',
       stroke:     '#000000',
       strokeThickness: 3,
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     // ── Load and display scores ───────────────────────────────────────────
@@ -37,6 +38,7 @@ class HighScoreScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '7px',
       color:      '#888888',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.tweens.add({ targets: prompt, alpha: 0, duration: 500, ease: 'Linear', yoyo: true, repeat: -1 });
@@ -63,24 +65,25 @@ class HighScoreScene extends Phaser.Scene {
         fontSize:   '8px',
         color:      '#555555',
         align:      'center',
+        padding:    FONT_PAD,
       }).setOrigin(0.5, 0);
       return;
     }
 
     // Column headers
-    this.add.text(28,   startY, '#',     { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
-    this.add.text(44,   startY, 'SCORE', { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
-    this.add.text(130,  startY, 'LOOP',  { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
-    this.add.text(170,  startY, 'LVL',   { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666' });
+    this.add.text(28,   startY, '#',     { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666', padding: FONT_PAD });
+    this.add.text(44,   startY, 'SCORE', { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666', padding: FONT_PAD });
+    this.add.text(130,  startY, 'LOOP',  { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666', padding: FONT_PAD });
+    this.add.text(170,  startY, 'LVL',   { fontFamily: GAME_FONT, fontSize: '7px', color: '#666666', padding: FONT_PAD });
 
     scores.slice(0, 10).forEach((entry, i) => {
       const y     = startY + rowH + i * rowH;
       const color = i === 0 ? '#f7b731' : '#cccccc';
 
-      this.add.text(28,  y, `${i + 1}.`,              { fontFamily: GAME_FONT, fontSize: '7px', color });
-      this.add.text(44,  y, `${entry.score}`,         { fontFamily: GAME_FONT, fontSize: '7px', color });
-      this.add.text(130, y, `${entry.loop || 1}`,     { fontFamily: GAME_FONT, fontSize: '7px', color });
-      this.add.text(170, y, `${entry.level || 1}`,    { fontFamily: GAME_FONT, fontSize: '7px', color });
+      this.add.text(28,  y, `${i + 1}.`,              { fontFamily: GAME_FONT, fontSize: '7px', color, padding: FONT_PAD });
+      this.add.text(44,  y, `${entry.score}`,         { fontFamily: GAME_FONT, fontSize: '7px', color, padding: FONT_PAD });
+      this.add.text(130, y, `${entry.loop || 1}`,     { fontFamily: GAME_FONT, fontSize: '7px', color, padding: FONT_PAD });
+      this.add.text(170, y, `${entry.level || 1}`,    { fontFamily: GAME_FONT, fontSize: '7px', color, padding: FONT_PAD });
     });
   }
 }

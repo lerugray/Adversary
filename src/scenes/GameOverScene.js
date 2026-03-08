@@ -27,12 +27,14 @@ class GameOverScene extends Phaser.Scene {
       color:      '#e63946',
       stroke:     '#000000',
       strokeThickness: 4,
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.add.text(cx, cy + 6, `Score: ${GameState.score}`, {
       fontFamily: GAME_FONT,
       fontSize:   '9px',
       color:      '#ffffff',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     // ── Persist score ─────────────────────────────────────────────────────

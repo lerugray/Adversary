@@ -24,6 +24,7 @@ class LoopCompleteScene extends Phaser.Scene {
       color:      '#fcbf49',
       stroke:     '#000000',
       strokeThickness: 3,
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     // currentLoop was already incremented by advanceLevel, so show it
@@ -31,12 +32,14 @@ class LoopCompleteScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '8px',
       color:      '#eeeeee',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     const prompt = this.add.text(cx, cy + 22, 'PRESS ANY KEY TO CONTINUE', {
       fontFamily: GAME_FONT,
       fontSize:   '7px',
       color:      '#aaaaaa',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.tweens.add({ targets: prompt, alpha: 0, duration: 500, ease: 'Linear', yoyo: true, repeat: -1 });

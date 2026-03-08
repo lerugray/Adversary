@@ -141,6 +141,7 @@ class PhantomSystem {
         color:      '#ff4444',
         stroke:     '#000000',
         strokeThickness: 2,
+        padding:    FONT_PAD,
       }
     ).setOrigin(0.5).setScrollFactor(0).setDepth(15);
   }

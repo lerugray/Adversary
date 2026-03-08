@@ -11,6 +11,9 @@ const GAME_FONT = '"Press Start 2P", monospace';
 /** Narrower font for the HUD where space is tight. */
 const HUD_FONT = '"Silkscreen", monospace';
 
+/** Standard padding to prevent pixel fonts from being clipped by Phaser. */
+const FONT_PAD = { top: 2, bottom: 2 };
+
 /**
  * Adds a small scene-name label in the top-left corner.
  * Used by placeholder scenes in Phase 1 to identify what's on screen.
@@ -25,5 +28,6 @@ function _addSceneLabel(scene, name) {
     fontSize:   '7px',
     color:      '#ffffff',
     alpha:      0.5,
+    padding:    FONT_PAD,
   }).setDepth(1000);
 }

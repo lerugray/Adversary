@@ -207,8 +207,10 @@ class LadderSystem {
       }
 
       // Visual feedback: cycle tint to suggest climbing animation
+      const baseTint = player._baseTint();
+      const dimTint  = GameState.soul ? 0x664488 : 0x66aadd;
       const phase = Math.floor(Date.now() / 200) % 2;
-      sprite.setTint(phase === 0 ? 0x88ccff : 0x66aadd);
+      sprite.setTint(phase === 0 ? baseTint : dimTint);
     }
   }
 
@@ -261,7 +263,7 @@ class LadderSystem {
       body.setVelocityY(-180);
     }
 
-    // Restore player tint
-    player.gameObject.setTint(0x88ccff);
+    // Restore player tint (respects soulless state)
+    player.gameObject.setTint(player._baseTint());
   }
 }

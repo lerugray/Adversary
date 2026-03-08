@@ -149,6 +149,7 @@ class GameScene extends Phaser.Scene {
       color: '#ffffff',
       stroke: '#000000',
       strokeThickness: 3,
+      padding: FONT_PAD,
       shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 2, fill: true },
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(50).setAlpha(0);
 
@@ -159,6 +160,7 @@ class GameScene extends Phaser.Scene {
       color: '#999999',
       stroke: '#000000',
       strokeThickness: 2,
+      padding: FONT_PAD,
     }).setOrigin(0.5, 0.5).setScrollFactor(0).setDepth(50).setAlpha(0);
 
     const elements = [topLine, bottomLine, nameText, subText];
@@ -284,11 +286,23 @@ class GameScene extends Phaser.Scene {
     // ── Make the player safe — nothing can hurt them after clearing the level ──
     this.player.isInvincible = true;
 
-    // Destroy all enemies, traps, darts, and flying hazards
+    // Destroy all enemies, traps, hazards, and flying hazards
     this.enemyManager.destroyAll();
+    if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
     if (this.phantomSystem) this.phantomSystem.reset();
+
+    // If soulless, restore the soul but forfeit the pending XP
+    if (GameState.soul) {
+      GameState.soul      = null;
+      GameState.pendingXP = 0;
+      if (this.player.soulOrb && this.player.soulOrb.active) {
+        this.player.soulOrb.destroy();
+      }
+      this.player.soulOrb = null;
+      this.player.sprite.setTint(this.player._baseTint());
+    }
 
     // Visual celebration
     this.tweens.killTweensOf(this.checkpointFlame);
@@ -410,7 +424,25 @@ class GameScene extends Phaser.Scene {
     if (this._bossVictory) return;
     this._bossVictory = true;
 
+    this.player.isInvincible = true;
     this.hud.hideBossHealth();
+
+    // Clear all remaining hazards so nothing can cheap-kill the player
+    this.enemyManager.destroyAll();
+    if (this.hazardSystem) this.hazardSystem.destroyAll();
+    if (this.trapSystem) this.trapSystem.destroyAll();
+    if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
+    if (this.phantomSystem) this.phantomSystem.reset();
+
+    // Restore soul if soulless (forfeit pending XP)
+    if (GameState.soul) {
+      GameState.soul      = null;
+      GameState.pendingXP = 0;
+      if (this.player.soulOrb && this.player.soulOrb.active) {
+        this.player.soulOrb.destroy();
+      }
+      this.player.soulOrb = null;
+    }
 
     // Dramatic death sequence
     this.cameras.main.shake(800, 0.015);

@@ -28,6 +28,7 @@ class TitleScene extends Phaser.Scene {
       color: '#e94560',
       stroke: '#000000',
       strokeThickness: 4,
+      padding: { top: 4, bottom: 4 },
     }).setOrigin(0.5);
 
     // Call to action
@@ -35,6 +36,7 @@ class TitleScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize: '8px',
       color: '#ffffff',
+      padding: FONT_PAD,
     }).setOrigin(0.5);
 
     // Blink the prompt

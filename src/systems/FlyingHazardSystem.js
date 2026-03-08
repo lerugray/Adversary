@@ -96,8 +96,17 @@ class FlyingHazardSystem {
     const c = this._config;
     const worldW = this.scene.currentLevelData.worldWidth;
 
-    // Pick a side to spawn from (random)
-    const fromLeft = Math.random() < 0.5;
+    // Pick a side to spawn from — force opposite side if player is near an edge
+    const edgeMargin = 40;  // px — if player is within this distance of an edge, bat comes from the other side
+    const px = player.x;
+    let fromLeft;
+    if (px < edgeMargin) {
+      fromLeft = false;  // player near left edge → bat comes from right
+    } else if (px > worldW - edgeMargin) {
+      fromLeft = true;   // player near right edge → bat comes from left
+    } else {
+      fromLeft = Math.random() < 0.5;
+    }
     const startX = fromLeft ? -FH_SIZE_W : worldW + FH_SIZE_W;
     const dir = fromLeft ? 1 : -1;
 
@@ -245,7 +254,7 @@ class FlyingHazardSystem {
             // Score popup
             const popup = this.scene.add.text(bat.x, bat.y - 10, `+${FH_KILL_SCORE}`, {
               fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
-              stroke: '#000000', strokeThickness: 2,
+              stroke: '#000000', strokeThickness: 2, padding: FONT_PAD,
             }).setOrigin(0.5, 1).setDepth(50);
             this.scene.tweens.add({
               targets: popup, y: popup.y - 16, alpha: 0,

@@ -32,12 +32,14 @@ class InterludeScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '12px',
       color:      '#c77dff',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.add.text(cx, cy + 10, `→ Level ${this._nextLevel}`, {
       fontFamily: GAME_FONT,
       fontSize:   '8px',
       color:      '#aaaaaa',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.inputManager = new InputManager(this);

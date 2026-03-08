@@ -177,7 +177,7 @@ class HollowArcher extends EnemyEntity {
           GameState.score += 50;
           const popup = this.scene.add.text(player.x, player.y - 20, '+50', {
             fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
-            stroke: '#000000', strokeThickness: 2,
+            stroke: '#000000', strokeThickness: 2, padding: FONT_PAD,
           }).setOrigin(0.5, 1).setDepth(50);
           this.scene.tweens.add({
             targets: popup, y: popup.y - 16, alpha: 0,

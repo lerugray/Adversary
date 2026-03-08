@@ -43,6 +43,7 @@ class InputManager {
       jump:   Phaser.Input.Keyboard.KeyCodes.Z,
       attack: Phaser.Input.Keyboard.KeyCodes.X,
       start:  Phaser.Input.Keyboard.KeyCodes.ENTER,
+      dodge:  Phaser.Input.Keyboard.KeyCodes.C,
       // Debug shortcuts (remove or gate behind a DEBUG flag in later phases)
       dbgGameOver:    Phaser.Input.Keyboard.KeyCodes.G,
       dbgLoopComplete: Phaser.Input.Keyboard.KeyCodes.L,
@@ -128,7 +129,9 @@ class InputManager {
   // ── Debug shortcuts ───────────────────────────────────────────────────────
   isDebugGameOverPressed()    { return Phaser.Input.Keyboard.JustDown(this._keys.dbgGameOver); }
   isDebugLoopCompletePressed(){ return Phaser.Input.Keyboard.JustDown(this._keys.dbgLoopComplete); }
-  isDebugSkipLevelPressed()   { return this._gpJust(5); }  // R1 = skip level
+  isDodgeJustPressed()        { return Phaser.Input.Keyboard.JustDown(this._keys.dodge) || this._gpJust(5); }  // C key / R1
+
+  isDebugSkipLevelPressed()   { return this._gpJust(4); }  // L1 = skip level (moved from R1)
 
   // ── Utility ───────────────────────────────────────────────────────────────
 

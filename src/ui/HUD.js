@@ -47,6 +47,7 @@ class HUD {
       fontSize:   '8px',
       stroke:     '#000000',
       strokeThickness: 2,
+      padding:    { top: 2, bottom: 2 },
       shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
     };
     const SMALL_STYLE = {
@@ -55,6 +56,7 @@ class HUD {
       color:      '#cccccc',
       stroke:     '#000000',
       strokeThickness: 2,
+      padding:    { top: 2, bottom: 2 },
       shadow: { offsetX: 1, offsetY: 1, color: '#000000', blur: 0, fill: true },
     };
 

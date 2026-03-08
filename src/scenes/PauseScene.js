@@ -31,6 +31,7 @@ class PauseScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '14px',
       color:      '#ffffff',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     // ── Item pickup legend ─────────────────────────────────────────────
@@ -51,6 +52,7 @@ class PauseScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '6px',
       color:      '#888888',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     for (let i = 0; i < legendItems.length; i++) {
@@ -65,6 +67,7 @@ class PauseScene extends Phaser.Scene {
         fontFamily: GAME_FONT,
         fontSize:   '6px',
         color:      '#cccccc',
+        padding:    FONT_PAD,
       }).setOrigin(0, 0.5);
     }
 
@@ -76,6 +79,7 @@ class PauseScene extends Phaser.Scene {
       fontFamily: GAME_FONT,
       fontSize:   '6px',
       color:      '#888888',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     const weaponName = gs.weapon ? gs.weapon.name : 'None';
@@ -83,21 +87,22 @@ class PauseScene extends Phaser.Scene {
     const accName    = gs.accessory ? gs.accessory.name : 'None';
 
     this.add.text(legendX, equipY + 14, `Wpn: ${weaponName}`, {
-      fontFamily: GAME_FONT, fontSize: '6px', color: '#aaaaaa',
+      fontFamily: GAME_FONT, fontSize: '6px', color: '#aaaaaa', padding: FONT_PAD,
     }).setOrigin(0, 0.5);
 
     this.add.text(legendX, equipY + 26, `Arm: ${armorName}`, {
-      fontFamily: GAME_FONT, fontSize: '6px', color: '#ddaa44',
+      fontFamily: GAME_FONT, fontSize: '6px', color: '#ddaa44', padding: FONT_PAD,
     }).setOrigin(0, 0.5);
 
     this.add.text(legendX, equipY + 38, `Rng: ${accName}`, {
-      fontFamily: GAME_FONT, fontSize: '6px', color: '#44ccaa',
+      fontFamily: GAME_FONT, fontSize: '6px', color: '#44ccaa', padding: FONT_PAD,
     }).setOrigin(0, 0.5);
 
     this.add.text(cx, 222, 'Press ENTER to resume', {
       fontFamily: GAME_FONT,
       fontSize:   '6px',
       color:      '#aaaaaa',
+      padding:    FONT_PAD,
     }).setOrigin(0.5);
 
     this.inputManager = new InputManager(this);
