@@ -17,6 +17,8 @@ const GAME_HEIGHT = 240;
 const config = {
   type: Phaser.AUTO,          // WebGL when available, Canvas fallback
 
+  parent: 'game-container',   // render inside the wrapper div
+
   width:  GAME_WIDTH,
   height: GAME_HEIGHT,
 
@@ -24,6 +26,7 @@ const config = {
   scale: {
     mode:            Phaser.Scale.FIT,          // maintain aspect ratio
     autoCenter:      Phaser.Scale.CENTER_BOTH,  // pillarbox / letterbox
+    parent:          'game-container',
     width:           GAME_WIDTH,
     height:          GAME_HEIGHT,
   },

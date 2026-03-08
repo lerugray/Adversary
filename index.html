@@ -26,9 +26,384 @@
       image-rendering: pixelated;
       image-rendering: crisp-edges;
     }
+
+    /* ── Game + Manual layout ── */
+    #game-wrapper {
+      display: flex;
+      align-items: center;
+      position: relative;
+      height: 100%;
+    }
+
+    #game-container {
+      flex-shrink: 0;
+    }
+
+    /* ── Manual toggle button ── */
+    #manual-toggle {
+      position: absolute;
+      left: -36px;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      background: #1a1408;
+      color: #aa8844;
+      border: 1px solid #554422;
+      border-right: none;
+      padding: 12px 6px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 7px;
+      cursor: pointer;
+      letter-spacing: 2px;
+      z-index: 100;
+      transition: background 0.2s;
+    }
+    #manual-toggle:hover {
+      background: #2a2010;
+      color: #ccaa55;
+    }
+
+    /* ── Manual panel ── */
+    #manual-panel {
+      width: 320px;
+      height: 480px;
+      background: #1a1408;
+      border: 2px solid #554422;
+      overflow-y: auto;
+      display: none;
+      flex-shrink: 0;
+      margin-right: 8px;
+      scrollbar-width: thin;
+      scrollbar-color: #554422 #0d0a04;
+    }
+    #manual-panel::-webkit-scrollbar { width: 6px; }
+    #manual-panel::-webkit-scrollbar-track { background: #0d0a04; }
+    #manual-panel::-webkit-scrollbar-thumb { background: #554422; }
+
+    #manual-panel.open { display: block; }
+
+    /* ── Manual content styles ── */
+    .manual-inner {
+      padding: 20px 18px 30px;
+      color: #ccbb88;
+      font-family: 'Silkscreen', 'Press Start 2P', monospace;
+      font-size: 9px;
+      line-height: 1.7;
+    }
+
+    .manual-inner h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: #cc3333;
+      text-align: center;
+      margin-bottom: 2px;
+      text-shadow: 1px 1px 0 #440000;
+    }
+
+    .manual-inner .subtitle {
+      text-align: center;
+      color: #887744;
+      font-size: 7px;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .manual-inner .wip-banner {
+      text-align: center;
+      color: #cc8833;
+      background: #2a1a08;
+      border: 1px dashed #665522;
+      padding: 6px 8px;
+      margin-bottom: 16px;
+      font-size: 7px;
+    }
+
+    .manual-inner h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #cc3333;
+      border-bottom: 1px solid #443322;
+      padding-bottom: 4px;
+      margin: 18px 0 8px;
+    }
+
+    .manual-inner h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #aa7744;
+      margin: 12px 0 4px;
+    }
+
+    .manual-inner p {
+      margin-bottom: 8px;
+    }
+
+    .manual-inner .flavor {
+      color: #887755;
+      font-style: italic;
+    }
+
+    .manual-inner table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6px 0 10px;
+    }
+    .manual-inner th {
+      color: #aa8844;
+      text-align: left;
+      border-bottom: 1px solid #443322;
+      padding: 3px 4px;
+      font-size: 8px;
+    }
+    .manual-inner td {
+      padding: 3px 4px;
+      border-bottom: 1px solid #221a0a;
+      font-size: 8px;
+      vertical-align: top;
+    }
+    .manual-inner td:first-child {
+      color: #ddcc99;
+      white-space: nowrap;
+    }
+
+    .manual-inner .key {
+      display: inline-block;
+      background: #2a2010;
+      border: 1px solid #554422;
+      padding: 1px 4px;
+      color: #ddcc88;
+      font-size: 8px;
+    }
+
+    .manual-inner .enemy-name {
+      color: #cc6644;
+    }
+
+    .manual-inner .warning {
+      color: #cc4444;
+    }
+
+    .manual-inner .divider {
+      border: none;
+      border-top: 1px solid #332a14;
+      margin: 14px 0;
+    }
+
+    .manual-inner .footer {
+      text-align: center;
+      color: #554422;
+      font-size: 7px;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #332a14;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ── Manual Panel ── -->
+  <div id="game-wrapper">
+    <button id="manual-toggle" onclick="document.getElementById('manual-panel').classList.toggle('open')">MANUAL</button>
+
+    <div id="manual-panel">
+      <div class="manual-inner">
+
+        <h1>ADVERSARY</h1>
+        <div class="subtitle">INSTRUCTION BOOKLET</div>
+
+        <div class="wip-banner">
+          This manual is a work in progress.<br>
+          Contents may change as development continues.
+        </div>
+
+        <!-- ── THE STORY ── -->
+        <h2>The Story</h2>
+        <p>You are the Adversary -- an undying warrior condemned to climb the cursed towers of a dying land. The hollowed remnants of a once-great kingdom stand between you and the one who sits atop the Pale Spire: the Hollow King, last sovereign of a broken world.</p>
+        <p>Death will find you. It always does. But death is not the end -- your soul lingers where you fell, holding everything you were. Return to it, reclaim what was lost. But die again before you reach it, and all is forfeit.</p>
+        <p class="flavor">The bonfires have gone cold. The gates are sealed. Only the Adversary remains.</p>
+
+        <hr class="divider">
+
+        <!-- ── CONTROLS ── -->
+        <h2>Controls</h2>
+
+        <h3>Keyboard</h3>
+        <table>
+          <tr><td><span class="key">Arrow Keys</span></td><td>Move / Climb</td></tr>
+          <tr><td><span class="key">Down</span></td><td>Duck</td></tr>
+          <tr><td><span class="key">Z</span></td><td>Jump</td></tr>
+          <tr><td><span class="key">X</span></td><td>Attack</td></tr>
+          <tr><td><span class="key">Up</span> + <span class="key">X</span></td><td>Special Attack</td></tr>
+          <tr><td><span class="key">Down</span> + <span class="key">X</span> (air)</td><td>Plunging Attack</td></tr>
+          <tr><td><span class="key">C</span></td><td>Dodge Roll</td></tr>
+          <tr><td><span class="key">Enter</span></td><td>Pause</td></tr>
+        </table>
+
+        <h3>Gamepad</h3>
+        <table>
+          <tr><td>D-Pad / Left Stick</td><td>Move / Climb</td></tr>
+          <tr><td>A Button (0)</td><td>Jump</td></tr>
+          <tr><td>X Button (2)</td><td>Attack</td></tr>
+          <tr><td>Start (9)</td><td>Pause</td></tr>
+        </table>
+
+        <hr class="divider">
+
+        <!-- ── HOW TO PLAY ── -->
+        <h2>How to Play</h2>
+        <p>Each world is a vertical gauntlet. Climb from the bottom to the top, fighting the hollow creatures that guard each tier. Reach the checkpoint to advance to the next world.</p>
+        <p><b>Attacking:</b> Strike enemies with your sword. You can attack while standing, ducking, jumping, or plunging downward. A plunging attack deals heavy damage and bounces you upward on contact.</p>
+        <p><b>Climbing:</b> Press Up or Down while near a ladder to climb. Press Left, Right, or Jump to dismount. You cannot attack while climbing.</p>
+        <p><b>Dodge Roll:</b> Press <span class="key">C</span> to roll through danger. You are briefly invincible during the roll, but the window is short -- time it well.</p>
+        <p><b>Jumping Hazards:</b> Leaping over rolling skulls and darts earns bonus points -- just like the old days.</p>
+
+        <hr class="divider">
+
+        <!-- ── DEATH & THE SOUL ── -->
+        <h2>Death &amp; The Soul</h2>
+        <p>When you die, a soul orb appears where you fell. You respawn at the start of the world with 1 HP. All your accumulated experience is held within the soul.</p>
+        <p>Reach your soul to reclaim your experience. But if you die again before reaching it -- <span class="warning">GAME OVER</span>.</p>
+        <p>Your equipment is never lost on death. Only your experience is at stake.</p>
+
+        <hr class="divider">
+
+        <!-- ── SPECIAL ATTACKS ── -->
+        <h2>Special Attacks</h2>
+        <p>Press <span class="key">Up</span> + <span class="key">X</span> to unleash your current special attack. Each one costs mana.</p>
+        <table>
+          <tr><th>Weapon</th><th>Mana</th><th>Effect</th></tr>
+          <tr><td>Knife</td><td>1</td><td>Fast straight throw, low damage</td></tr>
+          <tr><td>Axe</td><td>2</td><td>Arcs upward, hits airborne enemies</td></tr>
+          <tr><td>Holy Water</td><td>2</td><td>Lobs forward, creates damaging fire on the ground</td></tr>
+          <tr><td>Cross</td><td>2</td><td>Boomerang -- flies out and returns, hits twice</td></tr>
+          <tr><td>Skull Key</td><td>3</td><td>Slow spiralling projectile, pierces enemies</td></tr>
+          <tr><td>Ember Flask</td><td>4</td><td>Arcs forward, explodes on impact for area damage</td></tr>
+        </table>
+
+        <hr class="divider">
+
+        <!-- ── BESTIARY ── -->
+        <h2>Bestiary</h2>
+
+        <h3 class="enemy-name">Hollow Soldier</h3>
+        <p>Once proud warriors, now mindless husks. They patrol the ruins endlessly, attacking anything that draws near.</p>
+
+        <h3 class="enemy-name">Hollow Archer</h3>
+        <p>Stationary sentinels perched on ledges. They fire arrows from a distance. Close the gap quickly or time your jumps.</p>
+
+        <h3 class="enemy-name">Hollow Knight</h3>
+        <p>Armored and dangerous. These resilient fighters can climb ladders to pursue you between tiers. They hit hard -- do not underestimate them.</p>
+
+        <h3 class="enemy-name">Skeleton</h3>
+        <p>The bones remember what the flesh forgot. Destroy a skeleton and it will reassemble itself once. Only a second killing -- or a special attack -- puts it down for good.</p>
+
+        <h3 class="enemy-name">Gargoyle</h3>
+        <p>Stone sentinels that take to the air. They patrol above, then swoop down when you pass beneath. Low attacks cannot reach them.</p>
+
+        <h3 class="enemy-name">Bat</h3>
+        <p>Erratic fliers that cross the screen without warning. They bob unpredictably -- strike them down for a small reward, or dodge and keep moving.</p>
+
+        <h3 class="enemy-name">Mimic</h3>
+        <p>Not all treasure is what it seems. After your first journey through all four worlds, treasure chests may appear -- but some of them breathe. Attack a chest before opening it if you suspect treachery. Touch a mimic unarmed and it will punish you severely.</p>
+
+        <h3 class="enemy-name">The Hollow King</h3>
+        <p class="warning">The final challenge atop the Pale Spire.</p>
+        <p>A towering warrior with multiple attack patterns: slashing strikes, leaping slams, charging dashes, and on later journeys, a devastating shield bash. He cannot be staggered by normal attacks.</p>
+        <p>Four ancient weak points are hidden within his arena. Strike all four to stagger him, opening a brief window where he takes double damage. This is your opening -- do not waste it.</p>
+
+        <hr class="divider">
+
+        <!-- ── THE PHANTOM ── -->
+        <h2>The Phantom</h2>
+        <p class="warning">Do not linger.</p>
+        <p>If you remain in one place too long without progressing upward, a spectral presence will manifest. The Phantom cannot be harmed by any weapon. It passes through walls and platforms, pursuing you relentlessly.</p>
+        <p>The only escape is to climb higher. Advance upward and it will retreat. On later journeys, the Phantom grows impatient -- it arrives sooner and moves faster.</p>
+
+        <hr class="divider">
+
+        <!-- ── TRAPS & HAZARDS ── -->
+        <h2>Traps &amp; Hazards</h2>
+
+        <h3>Rolling Skulls</h3>
+        <p>Stone heads mounted on high platforms periodically disgorge skulls that roll across the tiers, falling from ledge to ledge. They can descend ladders to chase you. On later journeys, reddish "wild" skulls bounce erratically and loosely track your position. Jump over them for bonus points.</p>
+
+        <h3>Pendulum Blades</h3>
+        <p>Swinging blades hang from the ceiling in certain passages. Time your movement to pass beneath them at the peak of their swing.</p>
+
+        <h3>Dart Traps</h3>
+        <p>Wall-mounted launchers fire darts at regular intervals. Listen for the flash and jump over them for bonus points, or simply stay clear of their path.</p>
+
+        <h3>Breakable Objects</h3>
+        <p>Crates and barrels are scattered throughout the worlds. Strike them to break them open -- they often contain hearts, mana shards, or occasionally something rarer. Smashing them always earns a small score bonus.</p>
+
+        <hr class="divider">
+
+        <!-- ── ITEMS & EQUIPMENT ── -->
+        <h2>Items &amp; Equipment</h2>
+
+        <h3>Pickups</h3>
+        <table>
+          <tr><td>Mana Shard</td><td>Restores 1-2 mana</td></tr>
+          <tr><td>Heart</td><td>Restores 1 HP</td></tr>
+        </table>
+
+        <h3>Equipment</h3>
+        <p>Enemies occasionally drop weapons and armor. Picking one up automatically equips it.</p>
+        <table>
+          <tr><th>Weapons</th><th>Bonus</th></tr>
+          <tr><td>Rusty Sword</td><td>+1 damage</td></tr>
+          <tr><td>Iron Blade</td><td>+2 damage</td></tr>
+          <tr><td>Knight Saber</td><td>+3 damage</td></tr>
+        </table>
+        <table>
+          <tr><th>Armor</th><th>Bonus</th></tr>
+          <tr><td>Leather Vest</td><td>+1 defense</td></tr>
+          <tr><td>Chain Mail</td><td>+2 defense</td></tr>
+          <tr><td>Plate Armor</td><td>+3 defense</td></tr>
+        </table>
+
+        <h3>Level Up</h3>
+        <p>Gain enough experience and you will level up. Choose one reward:</p>
+        <table>
+          <tr><td>MAX HP +1</td><td>Increase maximum health</td></tr>
+          <tr><td>ATTACK +1</td><td>Deal more damage per hit</td></tr>
+          <tr><td>MAX MANA +3</td><td>Increase maximum mana</td></tr>
+        </table>
+
+        <hr class="divider">
+
+        <!-- ── THE WORLDS ── -->
+        <h2>The Worlds</h2>
+        <table>
+          <tr><td>I</td><td><b>The Ashen Hearth</b> -- A crumbling shrine where the last embers flicker. Your journey begins here.</td></tr>
+          <tr><td>II</td><td><b>Cresthollow</b> -- Fog-choked urban ruins. Archers watch from the ledges above.</td></tr>
+          <tr><td>III</td><td><b>The Iron Passage</b> -- Gears grind and blades swing in this merciless gauntlet of iron and stone.</td></tr>
+          <tr><td>IV</td><td><b>The Pale Spire</b> -- The cathedral at the top of the world. The Hollow King awaits.</td></tr>
+        </table>
+        <p>Defeat the Hollow King and the world resets -- but harder. Enemies grow stronger, new threats emerge, and the Phantom grows restless. How many loops can you survive?</p>
+
+        <hr class="divider">
+
+        <!-- ── DEBUG CONTROLS ── -->
+        <h2>Debug Controls</h2>
+        <p class="flavor">Development shortcuts. These will be removed in the final build.</p>
+        <table>
+          <tr><td><span class="key">G</span></td><td>Trigger Game Over</td></tr>
+          <tr><td><span class="key">L</span></td><td>Trigger Loop Complete</td></tr>
+          <tr><td>Gamepad <span class="key">L1</span></td><td>Skip Level</td></tr>
+        </table>
+
+        <div class="footer">
+          ADVERSARY &copy; 2025<br>
+          Built with Phaser 3
+        </div>
+
+      </div>
+    </div>
+    <div id="game-container"></div>
+  </div><!-- /game-wrapper -->
+
   <!--
     Phaser 3 via CDN.
     Phase 8+: Replace with a local bundled copy (Vite/Webpack) to support
