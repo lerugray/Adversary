@@ -159,9 +159,9 @@ class HollowArcher extends EnemyEntity {
         const dx = Math.abs(arrowData.obj.x - player.x);
         // Ducking lowers the player's effective center and shrinks hit zone
         const centerY = isDucking ? (player.y - 3) : (player.y - 11);
-        const hitH    = isDucking ? 6 : 12;
+        const hitH    = isDucking ? 5 : 9;
         const dy = Math.abs(arrowData.obj.y - centerY);
-        if (dx < 8 && dy < hitH) {
+        if (dx < 5 && dy < hitH) {
           player.takeDamage(this.damage, arrowData.obj.x);
           this._destroyArrow(arrowData);
           this.arrows.splice(i, 1);
