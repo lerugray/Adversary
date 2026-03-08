@@ -1,31 +1,33 @@
 /**
- * Level4.js — "The Ivory Spire" level data definition.
+ * Level4.js — "The Pale Spire" level data definition.
  *
  * Theme: Grand cathedral, cold white stone, the final ascent.
- * Shorter level — mostly boss arena. Wide open arena at top.
+ * Short DK-style ladder climb to a wide boss arena.
  *
  * Coordinate system:
  *   Origin (0,0) is top-left.  Y increases downward.
- *   World size: 256 × 280.
+ *   World size: 256 × 310.
  *
  * ── World layout sketch ────────────────────────────────────────────────────
  *
  *   y=0   ┌──────────────────────────────────────────┐
  *         │                                           │
- *         │  ████████████████████████████████████████  │
- *   y=20  │  █          BOSS ARENA              █    │
- *         │  █    (wide open space)              █    │
- *   y=60  │  █                                   █    │
- *         │  █                                   █    │
- *   y=100 │  ████████████████████████████████████████  │ ← bossThreshold
+ *   y=30  │  ████   center ledge (22px jump)    ████  │
  *         │                                           │
- *   y=140 │  ██████████████████                       │
- *         │                    ████████████  Tier 2   │
- *   y=185 │  ████████████████                         │
+ *   y=50  │ ████                            ████      │  upper arena ledges
  *         │                                           │
- *   y=230 │  ██████████████████████████  GROUND       │
- *   y=280 └──────────────────────────────────────────┘
+ *   y=70  │ ████████████████████████████████████████  │  ARENA FLOOR
+ *         │                bossThreshold              │
+ *   y=92  │ ████████████████████                      │  approach tier 3
+ *         │                                           │
+ *   y=114 │          ████████████████████████         │  approach tier 2
+ *         │                                           │
+ *   y=136 │ ████████████████████                      │  approach tier 1
+ *         │                                           │
+ *   y=160 │ ████████████████████████████████████████  │  GROUND
+ *   y=310 └──────────────────────────────────────────┘
  *
+ *   Ladder zigzag: right → left → right → left (up to arena)
  */
 
 const Level4Data = {
@@ -33,98 +35,103 @@ const Level4Data = {
 
   // ── World dimensions ───────────────────────────────────────────────────
   worldWidth:  256,
-  worldHeight: 280,
+  worldHeight: 310,
 
   // ── Player spawn ───────────────────────────────────────────────────────
-  playerSpawn: { x: 28, y: 224 },
+  playerSpawn: { x: 28, y: 154 },
 
   // ── No bonfire checkpoint — boss threshold triggers the boss ───────────
   checkpoint: null,
 
-  bossThreshold: { x: 0, y: 100, w: 256 },
+  bossThreshold: { x: 0, y: 70, w: 256 },
 
-  // ── Weak points for boss fight (Phase 5B builds these) ─────────────────
+  // ── Weak points for boss fight ─────────────────────────────────────────
   weakPoints: [
-    { x: 40,  y: 110, radius: 6 },
-    { x: 216, y: 110, radius: 6 },
-    { x: 30,  y: 140, radius: 6 },
-    { x: 226, y: 140, radius: 6 },
+    { x: 20,  y: 64,  radius: 6 },
+    { x: 236, y: 64,  radius: 6 },
+    { x: 20,  y: 44,  radius: 6 },
+    { x: 236, y: 44,  radius: 6 },
   ],
 
   // ── Platform tiers ─────────────────────────────────────────────────────
   platforms: [
 
-    // Tier 0 — Ground
-    { x: 0,   y: 230, w: 256, h: 50,  tier: 0 },
+    // Ground (full width cathedral floor)
+    { x: 0,   y: 160, w: 256, h: 150, tier: 0 },
 
-    // Tier 1 — Approach ledge left
-    { x: 0,   y: 190, w: 100, h: 10,  tier: 1 },
+    // Approach tier 1 — left side
+    { x: 0,   y: 136, w: 140, h: 10,  tier: 1 },
 
-    // Tier 2 — Approach ledge right (with stepping stones for short jump)
-    { x: 105, y: 178, w: 20,  h: 8,   tier: 2 },  // stepping stone
-    { x: 130, y: 165, w: 20,  h: 8,   tier: 2 },  // stepping stone
-    { x: 155, y: 155, w: 90,  h: 10,  tier: 2 },
+    // Approach tier 2 — right side
+    { x: 110, y: 114, w: 146, h: 10,  tier: 2 },
 
-    // Tier 3 — Approach ledge, leads to arena
-    { x: 0,   y: 120, w: 110, h: 10,  tier: 3 },
+    // Approach tier 3 — left side, leads to arena
+    { x: 0,   y: 92,  w: 150, h: 10,  tier: 3 },
 
-    // ── Boss Arena platforms ──────────────────────────────────────────
-    // Wide arena floor — the most open horizontal space in the game
-    { x: 0,   y: 92,  w: 256, h: 10,  tier: 4 },
+    // ── Boss Arena ──────────────────────────────────────────────────
+    // Arena floor — full width, the main fighting platform
+    { x: 0,   y: 70,  w: 256, h: 10,  tier: 4 },
 
-    // Arena upper ledges — low platforms for vertical play during boss
-    { x: 0,   y: 55,  w: 70,  h: 8,   tier: 5 },
-    { x: 186, y: 55,  w: 70,  h: 8,   tier: 5 },
+    // Arena upper ledges — 20px above floor (jumpable)
+    { x: 0,   y: 50,  w: 60,  h: 8,   tier: 5 },
+    { x: 196, y: 50,  w: 60,  h: 8,   tier: 5 },
 
-    // Arena ceiling ledge — center
-    { x: 90,  y: 22,  w: 76,  h: 8,   tier: 6 },
+    // Arena center ledge — 20px above side ledges (jumpable)
+    { x: 95,  y: 30,  w: 66,  h: 8,   tier: 6 },
 
   ],
 
-  // ── Ladder zones ───────────────────────────────────────────────────────
+  // ── Ladder zones (DK-style zigzag approach) ────────────────────────────
   ladders: [
-    // Ladder A: Ground → Tier 1 (simple approach)
-    { x: 14,  topY: 190, bottomY: 230, w: 14 },
+    // Ground → Tier 1 (right side)
+    { x: 215, topY: 136, bottomY: 160, w: 14 },
 
-    // Ladder B: Tier 2 → Tier 3
-    { x: 90,  topY: 120, bottomY: 165, w: 14 },
+    // Tier 1 → Tier 2 (left side)
+    { x: 14,  topY: 114, bottomY: 136, w: 14 },
+
+    // Tier 2 → Tier 3 (right side)
+    { x: 228, topY: 92,  bottomY: 114, w: 14 },
+
+    // Tier 3 → Arena floor (left side)
+    { x: 14,  topY: 70,  bottomY: 92,  w: 14 },
   ],
 
-  // ── Enemy spawn markers (below boss threshold only) ────────────────────
+  // ── Enemy spawn markers (approach only — boss owns the arena) ─────────
   enemySpawns: [
-    // Tier 0 — ground knight
-    { x: 160, y: 222, type: 'hollow_knight' },
+    // Ground — knight patrol
+    { x: 160, y: 152, type: 'hollow_knight' },
 
     // Tier 1 — archer on approach ledge
-    { x: 60,  y: 182, type: 'hollow_archer' },
+    { x: 80,  y: 128, type: 'hollow_archer' },
 
-    // Tier 2 — knight guards the final approach
-    { x: 170, y: 147, type: 'hollow_knight' },
+    // Tier 2 — knight guards the upper approach
+    { x: 180, y: 106, type: 'hollow_knight' },
   ],
 
   // ── Decorative elements ────────────────────────────────────────────────
   decorations: [
     // Cathedral pillars — left
-    { x: 0,   y: 0,   w: 14, h: 92, color: 0x4a4858, alpha: 0.7 },
+    { x: 0,   y: 0,   w: 14, h: 70, color: 0x4a4858, alpha: 0.7 },
     // Cathedral pillars — right
-    { x: 242, y: 0,   w: 14, h: 92, color: 0x4a4858, alpha: 0.7 },
+    { x: 242, y: 0,   w: 14, h: 70, color: 0x4a4858, alpha: 0.7 },
 
     // Stained glass window suggestion — upper center
     { x: 110, y: 5,   w: 36, h: 12, color: 0x585668, alpha: 0.5 },
 
     // Cold stone wall panels — approach area
-    { x: 0,   y: 140, w: 8,  h: 50, color: 0x3a3845, alpha: 0.8 },
-    { x: 248, y: 140, w: 8,  h: 50, color: 0x3a3845, alpha: 0.8 },
+    { x: 0,   y: 100, w: 8,  h: 50, color: 0x3a3845, alpha: 0.8 },
+    { x: 248, y: 100, w: 8,  h: 50, color: 0x3a3845, alpha: 0.8 },
 
     // Rubble at arena edge
-    { x: 110, y: 86,  w: 36, h: 5,  color: 0x4a4858, alpha: 0.6 },
+    { x: 70,  y: 64,  w: 30, h: 5,  color: 0x4a4858, alpha: 0.6 },
+    { x: 156, y: 64,  w: 30, h: 5,  color: 0x4a4858, alpha: 0.6 },
 
     // Distant spire silhouettes
-    { x: 60,  y: 0,   w: 10, h: 30, color: 0x3a3845, alpha: 0.35 },
-    { x: 186, y: 0,   w: 10, h: 30, color: 0x3a3845, alpha: 0.35 },
+    { x: 60,  y: 0,   w: 10, h: 25, color: 0x3a3845, alpha: 0.35 },
+    { x: 186, y: 0,   w: 10, h: 25, color: 0x3a3845, alpha: 0.35 },
 
     // Floor tile accent — ground level
-    { x: 80,  y: 226, w: 90, h: 4,  color: 0x585668, alpha: 0.5 },
+    { x: 80,  y: 156, w: 90, h: 4,  color: 0x585668, alpha: 0.5 },
   ],
 
 };

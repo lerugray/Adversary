@@ -648,8 +648,8 @@ class PlayerEntity {
       scene.physics.add.existing(proj);
       proj.body.setAllowGravity(true);
       proj.body.setGravityY(400);
-      // Strong upward arc, moderate forward speed
-      proj.body.setVelocity(facing * 80, -280);
+      // Short toss arc — scaled to DK-style jump height
+      proj.body.setVelocity(facing * 45, -160);
       proj._damage = SPECIAL_DAMAGE[type];
       // Spin the axe visually
       proj._spinTimer = 0;
@@ -670,8 +670,8 @@ class PlayerEntity {
       scene.physics.add.existing(proj);
       proj.body.setAllowGravity(true);
       proj.body.setGravityY(500);
-      // Short forward lob
-      proj.body.setVelocity(facing * 60, -180);
+      // Short forward lob — drops close to feet
+      proj.body.setVelocity(facing * 35, -110);
       proj._damage = SPECIAL_DAMAGE[type];
       proj._isHolyWater = true;
       // Add platform collision so it hits the ground
@@ -693,7 +693,7 @@ class PlayerEntity {
       const proj = scene.add.rectangle(px, py, 7, 7, color);
       scene.physics.add.existing(proj);
       proj.body.setAllowGravity(false);
-      proj.body.setVelocity(facing * 140, 0);
+      proj.body.setVelocity(facing * 90, 0);
       proj._damage = SPECIAL_DAMAGE[type];
       proj._returning = false;
       proj._originX = px;
@@ -705,12 +705,12 @@ class PlayerEntity {
         if (!proj._returning) {
           // Decelerate
           const curVx = proj.body.velocity.x;
-          const decel = facing * -180 * (delta / 1000);
+          const decel = facing * -200 * (delta / 1000);
           const newVx = curVx + decel;
           // If velocity has reversed direction, start returning
           if ((facing > 0 && newVx <= 0) || (facing < 0 && newVx >= 0)) {
             proj._returning = true;
-            proj.body.setVelocity(-facing * 140, 0);
+            proj.body.setVelocity(-facing * 90, 0);
           } else {
             proj.body.setVelocityX(newVx);
           }
@@ -734,14 +734,14 @@ class PlayerEntity {
       const proj = scene.add.rectangle(px, py, 6, 6, color);
       scene.physics.add.existing(proj);
       proj.body.setAllowGravity(false);
-      proj.body.setVelocity(facing * 70, 0);
+      proj.body.setVelocity(facing * 45, 0);
       proj._damage = SPECIAL_DAMAGE[type];
       proj._spiralTimer = 0;
       proj._piercing = true; // won't destroy on enemy hit
       proj._updateSpiral = (delta) => {
         proj._spiralTimer += delta / 1000;
         // Spiral up and down while moving forward
-        const spiralY = Math.sin(proj._spiralTimer * 5) * 50;
+        const spiralY = Math.sin(proj._spiralTimer * 5) * 28;
         proj.body.setVelocityY(spiralY);
         proj.rotation = proj._spiralTimer * 4;
       };
@@ -758,7 +758,7 @@ class PlayerEntity {
       scene.physics.add.existing(proj);
       proj.body.setAllowGravity(true);
       proj.body.setGravityY(450);
-      proj.body.setVelocity(facing * 90, -220);
+      proj.body.setVelocity(facing * 50, -140);
       proj._damage = SPECIAL_DAMAGE[type];
       proj._isEmberFlask = true;
       // Explode on platform collision
