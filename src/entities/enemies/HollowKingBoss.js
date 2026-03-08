@@ -81,6 +81,9 @@ class HollowKingBoss extends EnemyEntity {
       gravity:     BOSS_GRAVITY,
     });
 
+    // Boss must stay inside the arena
+    this.sprite.setCollideWorldBounds(true);
+
     // ── Loop-scaled values ────────────────────────────────────────────
     this._loop          = loop;
     this._loopScale     = loopScale;
