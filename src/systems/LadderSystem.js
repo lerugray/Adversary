@@ -134,7 +134,7 @@ class LadderSystem {
     // Foot and mid positions for overlap checks
     const px  = sprite.x;
     const py  = sprite.y;            // feet (origin is at feet)
-    const midY = py - 11;            // approximate body mid-point
+    const midY = body ? body.center.y : py - 11;  // actual body centre
 
     // Check which zone the player's body centre is inside
     const zone = this.getZoneAt(px, midY);

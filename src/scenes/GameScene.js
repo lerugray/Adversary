@@ -428,6 +428,9 @@ class GameScene extends Phaser.Scene {
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
 
+    // Reset phantom idle timer so it doesn't carry over from before death
+    if (this.phantomSystem) this.phantomSystem.reset();
+
     // Respawn fresh enemies from level data
     this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
   }

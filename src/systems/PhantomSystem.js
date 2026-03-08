@@ -182,6 +182,17 @@ class PhantomSystem {
     });
   }
 
+  /** Full reset — call on player death/respawn to restart the idle clock. */
+  reset() {
+    this.idleTimer = 0;
+    this.highestY  = 9999;
+    this.triggerY  = 9999;
+    this.telegraphing = false;
+    this.telegraphTimer = 0;
+    if (this.warningText) { this.warningText.destroy(); this.warningText = null; }
+    if (this.phantomActive) this._despawnPhantom();
+  }
+
   _despawnPhantom() {
     this.phantomActive = false;
     this.idleTimer     = 0;

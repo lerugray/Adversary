@@ -274,8 +274,8 @@ class PlayerEntity {
   _handleMovement(input) {
     const grounded = this.sprite.body.blocked.down;
 
-    // ── Duck ──────────────────────────────────────────────────────────
-    if (grounded && input.isDownHeld() && !this.isPlunging) {
+    // ── Duck (not while climbing a ladder) ─────────────────────────────
+    if (grounded && input.isDownHeld() && !this.isPlunging && !this._isClimbing) {
       this._enterDuck();
       // Castlevania 1: no horizontal movement while ducking
       this.sprite.body.setVelocityX(0);
