@@ -1,48 +1,50 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Level 3 checkpoint fix, summit content, visual breathing room
+- Level 3 fixes (checkpoint, summit content, breathing room, dart easing)
 - Level 4 boss arena redesign (multiple iterations)
 - Special weapon trajectory scaling
 - Ladder jump fix
+- Boss persistence and visibility fixes
 
 ## What got done
 
-1. **Level 3 checkpoint fix** — Summit platform (Tier 7) extended to full width so the ladder exit at x=200 lands on solid ground. Checkpoint now reachable.
+1. **Level 3 checkpoint fix** — Summit platform (Tier 7) extended to full width so ladder exit lands on solid ground. Added 2 dart traps (crossfire) and a skeleton guard on summit. Shifted entire level down 30px (world height 540 → 570) for visual breathing room. Tier 6 dart interval eased from 2500ms → 2900ms.
 
-2. **Level 3 Tier 6 dart eased** — Final dart trap interval 2500ms → 2900ms.
+2. **Level 4 redesigned as boss-only arena** — Removed approach section entirely. Player spawns on arena floor, boss triggers immediately. Arena has full-width floor at y=210 and two raised side platforms at y=165 with short ladders. 4 weak points at arena edges. No regular enemies. World size 256×270.
 
-3. **Level 3 summit content** — Added 2 dart traps (crossfire) and a skeleton guard on Tier 7 so the walk to the checkpoint isn't empty.
+3. **Boss fixes** — Enabled world bounds collision so boss can't charge off-screen. Boss now persists through player death (keeps current HP, doesn't reset). Boss color brightened from 0x442244 to 0x8844aa for visibility against dark background.
 
-4. **Level 3 visual breathing room** — Shifted entire level down 30px (world height 540 → 570) for more sky above the summit.
+4. **Ladder jump fix** — Jumping off a ladder now gives horizontal velocity in facing direction (60px/s) plus upward kick (-155).
 
-5. **Level 4 redesigned as boss-only arena** — Removed approach section entirely. Player spawns on arena floor, boss triggers immediately. Arena has full-width floor at y=210 and two raised side platforms at y=165 with short ladders for tactical positioning. 4 weak points at arena edges. No regular enemies.
-
-6. **Ladder jump fix** — Jumping off a ladder now gives horizontal velocity in the player's facing direction (60px/s) plus upward kick (-155), so sideways ladder jumps work.
-
-7. **Special weapon trajectory scaling** — All arcing/lobbing weapons scaled down to match DK physics:
-   - Axe: 80/−280 → 45/−160 (short toss)
-   - Holy water: 60/−180 → 35/−110 (drops at feet)
-   - Cross: 140 → 90 (tighter boomerang)
-   - Skull key: 70 → 45, spiral 50 → 28 (smaller wave)
-   - Ember flask: 90/−220 → 50/−140 (shorter arc)
+5. **Special weapon trajectory scaling** — All arcing weapons scaled down to match DK physics:
+   - Axe: 80/−280 → 45/−160
+   - Holy water: 60/−180 → 35/−110
+   - Cross: 140 → 90
+   - Skull key: 70 → 45, spiral 50 → 28
+   - Ember flask: 90/−220 → 50/−140
    - Knife: unchanged
 
-### Files Modified
-- src/levels/Level3.js (checkpoint fix, summit content, 30px shift, dart easing)
-- src/levels/Level4.js (full redesign — boss-only arena)
-- src/entities/PlayerEntity.js (special weapon trajectories scaled down)
-- src/scenes/GameScene.js (boss spawn position updated)
+6. **Mimics confirmed done** — Mimic.js and ChestSystem.js already built, activate on loop 2+.
+
+### Key files modified
+- src/levels/Level3.js
+- src/levels/Level4.js
+- src/entities/PlayerEntity.js (special weapon trajectories)
+- src/entities/enemies/HollowKingBoss.js (world bounds, color, persist through death)
+- src/scenes/GameScene.js (boss spawn position, boss re-trigger removed)
+- src/systems/EnemyManager.js (destroyAll skips boss)
 - src/systems/LadderSystem.js (ladder jump horizontal velocity)
 
 ## Current state
-- Levels 1-3 playable, Level 3 checkpoint reachable with summit gauntlet
-- Level 4 is boss-only arena, boss spawns immediately
-- Ladder jumps work sideways now
+- Levels 1-3 playable, Level 3 checkpoint reachable
+- Level 4 is boss-only arena, boss spawns immediately and persists through death
+- Ladder jumps work sideways
 - All special weapons have proportional trajectories
-- Mimics confirmed already built (activate on loop 2+)
+- Mimics activate on loop 2+
 
 ## What's next
-- Playtesting Level 4 boss fight balance and feel
+- Playtesting Level 4 boss fight — balance, feel, weak points
+- Boss may still need tuning (damage, speed, attack patterns)
 - Phase 7: UI & Screens (pause/inventory, interludes, high score initials)
-- Further tweaks as needed from playtesting
+- General polish and balance from playtesting
