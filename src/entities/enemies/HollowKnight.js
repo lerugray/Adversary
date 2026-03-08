@@ -14,7 +14,7 @@
 const HK_PATROL_SPEED    = 22;   // px/s patrolling (slow, heavy)
 const HK_CHASE_SPEED     = 38;   // px/s chasing
 const HK_DETECT_RANGE_X  = 80;   // horizontal detection range
-const HK_DETECT_RANGE_Y  = 30;   // vertical detection range
+const HK_DETECT_RANGE_Y  = 40;   // vertical detection range
 const HK_ATTACK_RANGE    = 16;   // distance to start attack
 const HK_ATTACK_WINDUP   = 550;  // longer windup — telegraphed
 const HK_ATTACK_COOLDOWN = 1200; // ms between attacks

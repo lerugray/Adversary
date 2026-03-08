@@ -14,7 +14,7 @@
 const HS_PATROL_SPEED    = 30;   // px/s while patrolling
 const HS_CHASE_SPEED     = 50;   // px/s when pursuing player
 const HS_DETECT_RANGE_X  = 60;   // horizontal detection range
-const HS_DETECT_RANGE_Y  = 25;   // vertical detection range (same tier)
+const HS_DETECT_RANGE_Y  = 40;   // vertical detection range (same tier)
 const HS_ATTACK_RANGE    = 14;   // distance to start attack
 const HS_ATTACK_WINDUP   = 400;  // ms before hit lands
 const HS_ATTACK_COOLDOWN = 900;  // ms between attacks

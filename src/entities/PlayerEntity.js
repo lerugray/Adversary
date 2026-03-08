@@ -279,10 +279,9 @@ class PlayerEntity {
     }
 
     // ── Horizontal movement ───────────────────────────────────────────
-    const speedBonus = (GameState.player.speedBonus || 0) * 5;
     const acc = GameState.player.accessory;
     const ringSpeed = (acc && acc.effect === 'speed') ? 6 : 0;
-    const moveSpeed = PLAYER_SPEED + speedBonus + ringSpeed;
+    const moveSpeed = PLAYER_SPEED + ringSpeed;
 
     if (input.isLeftHeld()) {
       this.sprite.body.setVelocityX(-moveSpeed);
@@ -395,8 +394,7 @@ class PlayerEntity {
 
   _startAttack(isDucking, isAir) {
     this.state = STATE.ATTACK;
-    const speedReduction = (GameState.player.speedBonus || 0) * 25;
-    this.attackCooldownTimer = Math.max(200, ATTACK_COOLDOWN - speedReduction);
+    this.attackCooldownTimer = ATTACK_COOLDOWN;
 
     // Determine hitbox zone
     let hbW = 16, hbH = 8;

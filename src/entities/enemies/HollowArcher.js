@@ -85,7 +85,7 @@ class HollowArcher extends EnemyEntity {
 
     // Create arrow projectile
     const ax = this.sprite.x + this.facing * 8;
-    const ay = this.sprite.y - 10; // mid-body height
+    const ay = this.sprite.y - 13; // upper-body height (duckable at same tier)
 
     const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
     this.scene.physics.add.existing(arrow);
@@ -129,11 +129,15 @@ class HollowArcher extends EnemyEntity {
         continue;
       }
 
-      // Check overlap with player
+      // Check overlap with player (ducking shrinks hitbox — arrow flies over)
       if (player && player.gameObject && player.gameObject.active) {
+        const isDucking = player.state === 'duck';
         const dx = Math.abs(arrowData.obj.x - player.x);
-        const dy = Math.abs(arrowData.obj.y - (player.y - 11));
-        if (dx < 8 && dy < 12) {
+        // Ducking lowers the player's effective center and shrinks hit zone
+        const centerY = isDucking ? (player.y - 3) : (player.y - 11);
+        const hitH    = isDucking ? 6 : 12;
+        const dy = Math.abs(arrowData.obj.y - centerY);
+        if (dx < 8 && dy < hitH) {
           player.takeDamage(this.damage, arrowData.obj.x);
           this._destroyArrow(arrowData);
           this.arrows.splice(i, 1);

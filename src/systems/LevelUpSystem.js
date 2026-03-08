@@ -43,7 +43,6 @@ const LEVELUP_CHOICES = [
   { key: 'hp',     label: 'MAX HP +1',       desc: 'Increase maximum health' },
   { key: 'attack', label: 'ATTACK +1',       desc: 'Deal more damage per hit' },
   { key: 'mana',   label: 'MAX MANA +3',     desc: 'Increase maximum mana' },
-  { key: 'speed',  label: 'SPEED BOOST',     desc: 'Move and attack faster' },
 ];
 
 // UI phases
@@ -250,12 +249,13 @@ class LevelUpSystem {
   }
 
   _updateChoose(input, delta) {
+    const count = LEVELUP_CHOICES.length;
     if (input.isUpHeld()) {
-      this._selectedIndex = (this._selectedIndex + 3) % 4;
+      this._selectedIndex = (this._selectedIndex + count - 1) % count;
       this._updateChooseCursor();
       this._inputCooldown = 180;
     } else if (input.isDownHeld()) {
-      this._selectedIndex = (this._selectedIndex + 1) % 4;
+      this._selectedIndex = (this._selectedIndex + 1) % count;
       this._updateChooseCursor();
       this._inputCooldown = 180;
     }
@@ -331,9 +331,6 @@ class LevelUpSystem {
       case 'mana':
         p.maxMana += 3;
         p.mana = p.maxMana;
-        break;
-      case 'speed':
-        p.speedBonus += 1;
         break;
     }
 
