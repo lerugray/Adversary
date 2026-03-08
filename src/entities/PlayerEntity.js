@@ -40,8 +40,8 @@ const PLAYER_GRAVITY      = 650;
 const PLUNGE_VELOCITY     = 160;
 
 /** Knockback velocities on taking a hit. X is in the away-direction. */
-const KNOCKBACK_VX        = 120;
-const KNOCKBACK_VY        = -160;
+const KNOCKBACK_VX        = 60;
+const KNOCKBACK_VY        = -90;
 
 /** Invincibility frame duration in milliseconds (~1.5 s). */
 const IFRAME_DURATION     = 1500;
@@ -203,11 +203,14 @@ class PlayerEntity {
       this.lastSafeY = this.sprite.y;
     }
 
-    // Input is ignored during knockback
-    if (!this.knockbackActive) {
+    // Input is ignored during knockback and plunge
+    if (!this.knockbackActive && !this.isPlunging) {
       this._handleMovement(input);
       this._handleJump(input);
       this._handleAttack(input);
+      this._handlePause(input);
+    } else if (this.isPlunging) {
+      // Only allow pause during plunge, no movement/attack
       this._handlePause(input);
     }
 
@@ -428,6 +431,7 @@ class PlayerEntity {
 
     // Slam downward at fixed speed (disable gravity so it doesn't accelerate)
     this.sprite.body.setAllowGravity(false);
+    this.sprite.body.setVelocityX(0);
     this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
 
     // Activate hitbox below the player — stays active for entire plunge
@@ -738,6 +742,9 @@ class PlayerEntity {
     this.isInvincible = true;
     this.iframeTimer  = 2000; // 2 seconds of protection
     this._startFlash();
+
+    // Notify the scene so enemies can respawn too
+    this.scene.events.emit('player-respawn');
   }
 
   /** Called when the player walks over the soul orb. */

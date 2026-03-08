@@ -94,6 +94,9 @@ class GameScene extends Phaser.Scene {
     // ── Phantom System (anti-grinding ghost — skips Level 4) ─────────
     this.phantomSystem = new PhantomSystem(this);
 
+    // ── Respawn enemies when player dies and respawns ──────────────────
+    this.events.on('player-respawn', this._respawnEnemies, this);
+
     // ── Attack hit-list (prevent multi-hit per swing) ─────────────────
     this._attackHitList = new Set();
 
@@ -401,6 +404,19 @@ class GameScene extends Phaser.Scene {
     this.time.delayedCall(2000, () => {
       this.scene.start('LoopCompleteScene');
     });
+  }
+
+  // ── Enemy respawn on player death ──────────────────────────────────────────
+
+  _respawnEnemies() {
+    const data = this.currentLevelData;
+    if (!data || !data.enemySpawns) return;
+
+    // Destroy all existing enemies
+    this.enemyManager.destroyAll();
+
+    // Respawn fresh enemies from level data
+    this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
   }
 
   // ── Soul clamping to platform geometry ─────────────────────────────────────
