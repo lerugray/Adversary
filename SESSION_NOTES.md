@@ -1,40 +1,36 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Bug fixes, polish, and Level 1 redesign with rolling hazards
+- Level 2 redesign, bug fixes (knockback, plunge, enemy respawn)
 
 ## What got done
 
+### Level 2 Redesign
+1. **Distinct tier challenges** — removed repetitive stepping stones, gave each tier a unique identity:
+   - Tier 1 "Soldier's Walk": long platform, pure combat
+   - Tier 2 "Broken Bridge": three islands with real gaps (jump challenge + skeleton)
+   - Tier 3 "Archer's Alley": cross a gap under two archers' crossfire
+   - Tier 4 "The Gauntlet": archer + soldier on two platforms
+   - Tier 5 "Knight's Watch": single platform, knight guards final climb
+2. **Fixed traversal** — flipped ladder zigzag (right→left→right→left→right→left) so every tier forces full traversal. Player always arrives on one side, exits on the other. No more skipping tiers.
+3. **Removed dead-end platforms** — old Tier 3 far-right perch and Tier 5 right platform had no purpose
+
 ### Bug Fixes
-1. **Enemy body-null crash** — added null guard in EnemyEntity.update() so dead enemies with destroyed sprites don't freeze the game
-2. **Level-up freezes enemies** — LevelUpSystem now pauses/resumes physics.world so nothing moves during the menu
-3. **Plunge attack too fast** — reduced from 240 to 160 px/s
+4. **Enemy respawn on death** — enemies now respawn when player dies (player emits 'player-respawn' event, GameScene listens and calls enemyManager.destroyAll() + spawn())
+5. **Plunge attack speed boost removed** — horizontal velocity zeroed on plunge start, all input locked during plunge (only pause allowed)
+6. **Knockback reduced** — KNOCKBACK_VX 120→60, KNOCKBACK_VY -160→-90 (less punishing, skulls and enemies shouldn't launch you as far)
 
-### Polish
-4. **HUD text readability** — bumped font sizes, added black stroke + drop shadow to all HUD text, boss label, and soul arrow
-5. **Dark Souls-style level name overlay** — fade-in/hold/fade-out with decorative lines when entering any level
-6. **Original level names** — The Ashen Hearth, Cresthollow, The Iron Passage, The Pale Spire (added `name` property to all level data)
-7. **Phantom timer relaxed** — base 20s→35s, minimum 8s→15s (less brutal with rolling hazards in play)
-
-### Level 1 Redesign (DK-style)
-8. **New platform layout** — 6 wide platforms (224px) with alternating 32px gaps, zigzag ladder pattern (right/left/right/left/right)
-9. **More vertical space** — 50-55px between tiers (was ~45px), world height now 350
-10. **Rolling skull hazards** (HazardSystem.js) — stone head at top-left of tier 5 spawns skulls every 3.5s that roll right, fall off edges, reverse direction on landing, cascading all the way down
-11. **Manual position tracking** — skulls don't use Arcade physics (which breaks off-camera), instead manually simulate gravity and check platform data directly
-12. **Sweep-based landing** — checks if skull passed through any platform between frames to prevent fast-fall overshooting
-13. **Jump-over bonus** — +100 score with floating gold popup when player jumps over a rolling skull (DK style)
-
-### Files Changed/Created
-- **New:** src/systems/HazardSystem.js
-- **Rewritten:** src/levels/Level1.js (DK-style layout)
-- **Modified:** EnemyEntity.js, PlayerEntity.js, GameScene.js, HUD.js, LevelUpSystem.js, PhantomSystem.js, Level2-4.js (names), index.html
+### Files Changed
+- **Rewritten:** src/levels/Level2.js (full redesign)
+- **Modified:** src/entities/PlayerEntity.js (plunge fix, knockback, respawn event)
+- **Modified:** src/scenes/GameScene.js (enemy respawn listener + method)
 
 ## Current state
-- Everything through Phase 6 + cross-phase items + Level 1 redesign complete
-- Skull hazards spawning and cascading — may still need tuning (speed, interval, etc.)
-- User wants more polish before Phase 7
+- Level 2 redesign is in — needs playtesting to confirm gaps are jumpable and difficulty feels right
+- Tier 2 gaps are 20-25px, Tier 3 gap is 22px, Tier 4 gap is 25px — all should be jumpable but tight
+- Knockback values may need further tuning after testing
 
 ## What's next
-- User has additional polish ideas to test
-- May need skull tuning after playtesting
+- Playtest Level 2 redesign, tweak gaps/enemies if needed
+- More polish ideas from user
 - Phase 7: UI & Screens (pause/inventory, interludes, high score initials)
