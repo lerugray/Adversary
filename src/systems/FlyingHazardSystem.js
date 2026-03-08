@@ -200,14 +200,16 @@ class FlyingHazardSystem {
       // ── Player contact damage ───────────────────────────────────
       if (bat.alive && player && player.state !== 'dead' &&
           !player.isInvincible && this._contactCooldown <= 0) {
-        const px = player.x;
-        const py = player.y - 11;
-        const dx = Math.abs(px - bat.x);
-        const dy = Math.abs(py - bat.y);
+        const pb = player.body;
+        if (pb) {
+          const dx = Math.abs(pb.center.x - bat.x);
+          const dy = Math.abs(pb.center.y - bat.y);
 
-        if (dx < 10 && dy < 10) {
-          player.takeDamage(this._config.damage || 1, bat.x);
-          this._contactCooldown = FH_CONTACT_CD;
+          if (dx < pb.halfWidth + FH_SIZE_W / 2 &&
+              dy < pb.halfHeight + FH_SIZE_H / 2) {
+            player.takeDamage(this._config.damage || 1, bat.x);
+            this._contactCooldown = FH_CONTACT_CD;
+          }
         }
       }
 
