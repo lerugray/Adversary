@@ -357,8 +357,8 @@ class GameScene extends Phaser.Scene {
   _triggerBoss() {
     this._bossTriggered = true;
 
-    // Spawn boss in center of arena (just above arena floor at y=80)
-    this.boss = new HollowKingBoss(this, 180, 72);
+    // Spawn boss on arena floor (right side of arena)
+    this.boss = new HollowKingBoss(this, 200, 200);
     this.physics.add.collider(this.boss.gameObject, this.platforms);
     this.enemyManager.enemies.push(this.boss);
 
