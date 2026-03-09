@@ -99,6 +99,7 @@
   <script src="src/systems/ChestSystem.js"></script>
   <script src="src/systems/LevelUpSystem.js"></script>
   <script src="src/systems/HazardSystem.js"></script>
+  <script src="src/systems/ElevatorSystem.js"></script>
   <script src="src/systems/FlyingHazardSystem.js"></script>
   <script src="src/systems/TrapSystem.js"></script>
   <script src="src/systems/BreakableSystem.js"></script>
@@ -221,15 +222,21 @@
   // ─────────────────────────────────────────────────────────────────────
   // LEVEL 2 — "Cresthollow" (Single Screen)
   //
-  // Original: 7 tiers, 60px gaps, 256x460
-  // Single screen: 4 tiers (ground + 3), 56px gaps
+  // DK 75m (Elevator Stage) inspired redesign.
+  // Two elevator shafts in the center: left goes UP, right goes DOWN.
+  // Small static platforms on the sides at different heights.
+  // NO LADDERS — elevators are the only way up.
+  // Bats fly across the screen as the primary hazard (replacing DK springs).
   //
-  // Each tier has one clear identity. Summit clears HUD.
+  //   y=32  [============================]  Summit (checkpoint gate)
   //
-  //   y=32  [GATE]==================         T3 (Knight's Watch / summit)
-  //   y=94  =============  ==============    T2 (Archer's Alley)
-  //   y=156 =========  =======  =========    T1 (Broken Bridge)
-  //   y=218 ================================ GROUND
+  //   y=75  [======]              [======]  Upper ledges (enemies)
+  //                  [====]                  Center stepping stone (y=90)
+  //              ↑(x=85)    ↓(x=171)        Elevator shafts
+  //
+  //   y=140 [=========]        [=========]  Mid landings
+  //              ↑                  ↓
+  //   y=218 [================================] GROUND
   //   y=230 ════════════ HUD BAR ═══════════
   // ─────────────────────────────────────────────────────────────────────
 
@@ -239,60 +246,84 @@
 
   Level2Data.playerSpawn = { x: 28, y: 212 };
 
-  Level2Data.checkpoint = { x: 88, y: 24, radius: 8, type: 'gate' };
+  Level2Data.checkpoint = { x: 200, y: 24, radius: 8, type: 'gate' };
 
   Level2Data.platforms = [
     // Ground — full width
     { x: 0,   y: 218, w: 256, h: 22,  tier: 0 },
 
-    // Tier 1 — Broken Bridge: three islands with real gaps
-    { x: 165, y: 156, w: 65,  h: 10,  tier: 1 },   // right (arrive from ladder)
-    { x: 85,  y: 156, w: 55,  h: 10,  tier: 1 },   // middle (skeleton waits)
-    { x: 0,   y: 156, w: 65,  h: 10,  tier: 1 },   // left (ladder out)
+    // Mid landings — jump off elevators here
+    { x: 0,   y: 140, w: 60,  h: 10,  tier: 1 },   // left landing
+    { x: 196, y: 140, w: 60,  h: 10,  tier: 1 },   // right landing
 
-    // Tier 2 — Archer's Alley: cross under arrow fire
-    { x: 0,   y: 94,  w: 100, h: 10,  tier: 2 },   // left safe zone
-    { x: 120, y: 94,  w: 110, h: 10,  tier: 2 },   // right (archer zone)
-    { x: 230, y: 86,  w: 26,  h: 10,  tier: 2 },   // elevated sniper perch
+    // Center stepping stone — small, risky jump between shafts
+    { x: 113, y: 90,  w: 30,  h: 8,   tier: 2 },
 
-    // Tier 3 — Knight's Watch + summit gate
-    { x: 0,   y: 32,  w: 200, h: 10,  tier: 3 },
+    // Upper ledges — enemies guard these
+    { x: 0,   y: 75,  w: 55,  h: 10,  tier: 2 },   // left upper (archer)
+    { x: 201, y: 75,  w: 55,  h: 10,  tier: 2 },   // right upper (skeleton)
+
+    // Summit — full width, checkpoint gate
+    { x: 0,   y: 32,  w: 256, h: 10,  tier: 3 },
   ];
 
-  Level2Data.ladders = [
-    { x: 210, topY: 156, bottomY: 218, w: 14 },  // Ground → T1 (right)
-    { x: 14,  topY: 94,  bottomY: 156, w: 14 },  // T1 → T2 (left)
-    { x: 195, topY: 32,  bottomY: 94,  w: 14 },  // T2 → T3 (right)
+  // NO LADDERS — elevators are the only way up!
+  Level2Data.ladders = [];
+
+  // Two elevator shafts: left goes UP, right goes DOWN
+  // 3 platforms per shaft, evenly spaced across the vertical range
+  Level2Data.elevators = [
+    {
+      x: 85,           // left-center shaft
+      w: 28,
+      h: 6,
+      minY: 42,        // just below summit
+      maxY: 212,       // just above ground
+      speed: -38,      // going UP (negative = upward)
+      count: 3,
+      color: 0x5577aa,
+      hlColor: 0x7799cc,
+    },
+    {
+      x: 171,          // right-center shaft
+      w: 28,
+      h: 6,
+      minY: 42,
+      maxY: 212,
+      speed: 38,       // going DOWN (positive = downward)
+      count: 3,
+      color: 0x5577aa,
+      hlColor: 0x7799cc,
+    },
   ];
 
   Level2Data.enemySpawns = [
-    // Ground — warmup patrols (away from player spawn at x=28)
-    { x: 170, y: 210, type: 'hollow_soldier' },
-    { x: 120, y: 210, type: 'skeleton' },
+    // Ground — one soldier patrol (away from spawn)
+    { x: 180, y: 210, type: 'hollow_soldier' },
 
-    // Tier 1 — skeleton on middle island
-    { x: 110, y: 148, type: 'skeleton' },
+    // Left mid landing — skeleton (reassembles once = extra danger)
+    { x: 30,  y: 132, type: 'skeleton' },
 
-    // Tier 2 — archer crossfire
-    { x: 160, y: 86,  type: 'hollow_archer' },
-    { x: 240, y: 78,  type: 'hollow_archer' },
-    { x: 40,  y: 86,  type: 'hollow_soldier' },   // pressure from left
+    // Left upper ledge — archer fires across the elevator gap
+    { x: 25,  y: 67,  type: 'hollow_archer' },
 
-    // Tier 3 — knight guards summit
-    { x: 100, y: 24,  type: 'hollow_knight' },
-    { x: 50,  y: 24,  type: 'hollow_archer' },
+    // Right upper ledge — skeleton guards the approach to summit
+    { x: 225, y: 67,  type: 'skeleton' },
+
+    // Summit — knight guards the checkpoint gate
+    { x: 130, y: 24,  type: 'hollow_knight' },
   ];
 
   Level2Data.flyingHazard = {
-    interval: 4500,
-    speed: 65,
+    interval: 3800,      // slightly faster than before — bats are the main hazard
+    speed: 70,
     damage: 1,
     yOffset: [-30, 10],
   };
 
   Level2Data.breakables = [
-    { x: 16,  y: 218, type: 'barrel' },
-    { x: 240, y: 86,  type: 'crate',
+    { x: 240, y: 218, type: 'barrel' },   // ground far right
+    { x: 8,   y: 140, type: 'crate',      // left mid landing
       drops: [
         { type: 'heart',   chance: 0.50 },
         { type: 'weapon',  chance: 0.15 },
@@ -302,11 +333,15 @@
   ];
 
   Level2Data.decorations = [
-    { x: 0,   y: 0,   w: 18, h: 58,  color: 0x1a2030, alpha: 0.5 },
-    { x: 240, y: 0,   w: 16, h: 68,  color: 0x242838, alpha: 0.5 },
-    { x: 210, y: 156, w: 12, h: 32,  color: 0x2a3040, alpha: 0.85 },
-    { x: 105, y: 88,  w: 12, h: 6,   color: 0x242838, alpha: 0.75 },
-    { x: 180, y: 0,   w: 14, h: 48,  color: 0x1a2030, alpha: 0.35 },
+    // Elevator shaft backdrops (dark vertical strips)
+    { x: 77,  y: 42,  w: 16, h: 176, color: 0x141822, alpha: 0.4 },
+    { x: 163, y: 42,  w: 16, h: 176, color: 0x141822, alpha: 0.4 },
+    // Wall pillars
+    { x: 0,   y: 0,   w: 10, h: 75,  color: 0x1a2030, alpha: 0.5 },
+    { x: 246, y: 0,   w: 10, h: 75,  color: 0x1a2030, alpha: 0.5 },
+    // Distant ruin silhouettes
+    { x: 120, y: 0,   w: 16, h: 32,  color: 0x1a1822, alpha: 0.35 },
+    { x: 200, y: 0,   w: 10, h: 32,  color: 0x1a1822, alpha: 0.25 },
   ];
 
 

@@ -91,6 +91,9 @@ class GameScene extends Phaser.Scene {
     // ── Hazard System (rolling skulls — Donkey Kong style) ────────────
     this.hazardSystem = new HazardSystem(this);
 
+    // ── Elevator System (DK-style moving platforms) ────────────────────
+    this.elevatorSystem = new ElevatorSystem(this);
+
     // ── Flying Hazard System (bats — DK-style, timer-based) ────────────
     this.flyingHazardSystem = new FlyingHazardSystem(this);
 
@@ -292,6 +295,7 @@ class GameScene extends Phaser.Scene {
     if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
+    if (this.elevatorSystem) this.elevatorSystem.destroyAll();
     if (this.phantomSystem) this.phantomSystem.reset();
 
     // If soulless, restore the soul but forfeit the pending XP
@@ -445,6 +449,7 @@ class GameScene extends Phaser.Scene {
     if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
+    if (this.elevatorSystem) this.elevatorSystem.destroyAll();
     if (this.phantomSystem) this.phantomSystem.reset();
 
     // Restore soul if soulless (forfeit pending XP)
@@ -804,6 +809,9 @@ class GameScene extends Phaser.Scene {
 
     // Chests & Mimics
     this.chestSystem.update(delta, this.player);
+
+    // Elevators
+    if (this.elevatorSystem) this.elevatorSystem.update(delta);
 
     // Rolling hazards
     this.hazardSystem.update(delta, this.player);

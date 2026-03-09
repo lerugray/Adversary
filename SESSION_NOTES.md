@@ -1,54 +1,47 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Single-screen fixes: bugs, balance, plunge rework, tier positioning
+- Level 2 redesign for single-screen variant (DK 75m elevator-stage inspired)
 
 ## What got done
 
-1. **Jumping off ladders fixed**: PlayerEntity was consuming the "jump just pressed" input before LadderSystem could read it. Now movement/jump input is skipped in PlayerEntity when climbing, so LadderSystem gets first dibs.
+1. **New ElevatorSystem** (`src/systems/ElevatorSystem.js`):
+   - DK-style cycling elevator platforms that wrap around shaft bounds
+   - Configurable per-level via `levelData.elevators` array
+   - Each shaft has multiple platforms cycling continuously (up or down)
+   - One-way collision (top only) so player can jump up through them
+   - Handles player riding downward elevators (manual Y nudge since Arcade physics won't pull player down)
+   - Integrated into GameScene create/update/cleanup lifecycle
 
-2. **Plunging near ladders fixed**: Ladder entry guard now blocks plunge and dodge states — holding Down during a plunge no longer grabs you onto a ladder mid-flight.
+2. **Level 2 single-screen redesign** — "Cresthollow" now plays like DK 75m:
+   - Two elevator shafts in the center: left goes UP (x=85), right goes DOWN (x=171)
+   - 3 platforms per shaft, evenly spaced, speed 38px/s
+   - Scattered static platforms on sides at different heights: ground, mid landings (y=140), upper ledges (y=75), summit (y=32)
+   - Small center stepping stone (y=90, 30px wide) for risky cross-shaft jumps
+   - **NO LADDERS** — elevators are the only way up, making it feel totally different from L1
+   - Bats are the main hazard (interval tightened to 3800ms, speed 70px/s)
+   - Enemies on static platforms: soldier on ground, skeleton on left landing, archer on left upper ledge firing across the gap, skeleton on right upper ledge, knight guarding summit
+   - Elevator shaft backdrops as decorative dark strips
 
-3. **Plunge attack reworked to Zelda 2 downthrust style**:
-   - Normal gravity fall (no more forced 160px/s dive bomb)
-   - Retain horizontal momentum from before the plunge
-   - Bounce actually works now — hitting an enemy kicks you upward (-180 velocity) and properly ends the plunge. Before, bounce was completely broken (forced velocity overwrote it every frame)
-   - No cooldown after bounce — immediate re-plunge for "jackhammer" pogo chains
-   - Boss still capped at 2 bounces
-
-4. **All levels shifted down 8px** for better visibility at summit:
-   - Summit: y=32, T2: y=94, T1: y=156, Ground: y=218
-   - 62px gaps preserved, ground platform height reduced to 22px
-   - HUD stays at y=230, boss health bar at y=224
-   - Top world bound disabled so player can hop above screen briefly (like DK)
-   - Boss spawn overridden to y=208 to match new ground
-
-5. **Level-up XP farming fix**: Respawned enemies (after death) give 0 XP. Prevents death-cycle XP exploitation that was causing 6 HP by level 3.
-
-6. **Level 2**: Ground→T1 ladder moved from x=230 (platform edge) to x=210 (centered).
-
-7. **Level 3 pendulum bridge rework**:
-   - Gaps narrowed from 36px to 20px (quick hop, not long jump)
-   - Platforms widened (64/72/80px)
-   - Pendulum arms shortened (16px) and slowed (0.6 speed)
-   - Still threatening but passable with timing
-
-8. **Debug text**: Gamepad debug text moved to top-left in single-screen (was overlapping bottom HUD).
+3. **Script/build changes**:
+   - Added `src/systems/ElevatorSystem.js` script tag to both `index.html` and `singlescreen.html`
+   - GameScene: elevator create, update, and cleanup on checkpoint/boss victory
 
 ### Key files changed
-- `src/entities/PlayerEntity.js` — ladder input fix, plunge rework
-- `src/systems/LadderSystem.js` — plunge/dodge guard on ladder entry
-- `src/scenes/GameScene.js` — plunge bounce method, respawn XP fix
-- `src/entities/EnemyEntity.js` — xpReward 0 handling (was falsy-defaulting to 10)
-- `singlescreen.html` — all level geometry shifts, debug text, world bounds, boss spawn
+- `src/systems/ElevatorSystem.js` — NEW: moving platform system
+- `src/scenes/GameScene.js` — elevator system integration (create, update, cleanup)
+- `singlescreen.html` — Level 2 data completely redesigned
+- `index.html` — ElevatorSystem script tag added
 
 ## Current state
-- Main game core files changed (plunge rework, ladder fixes, XP farming fix apply to both)
-- Single-screen has shifted tiers, reworked L3 pendulums, fixed ladders
+- Level 2 single-screen is now an elevator-based platforming challenge
+- Level 2 in the main (scrolling) game is unchanged (no elevators defined = system does nothing)
+- ElevatorSystem is generic and reusable for any level that defines `elevators` in its data
 
 ## What's next
-- User wants to try one more change after context clear
-- L2 may still need difficulty tuning (feels easier than L1)
+- Playtest L2 elevators: feel, timing, difficulty
+- May need tuning: elevator speed, platform count, spacing, bat frequency
+- May want to add visual indicators for elevator shaft boundaries (rails/guides)
 - L3 pendulums need playtesting to confirm passable
 - Plunge attack needs playtesting (Zelda 2 feel check)
-- Phase 7: UI & Screens (pause/inventory polish, interludes, high score initials)
+- Phase 7: UI & Screens (pause/inventory, interludes, high score initials)
