@@ -5,19 +5,14 @@
  * Left shaft goes UP, right shaft goes DOWN (classic DK 75m layout).
  * Platforms wrap around when they pass the shaft bounds.
  *
- * Configured per-level via levelData.elevators:
- *   [
- *     {
- *       x: 85,        // center X of shaft
- *       w: 28,        // platform width
- *       h: 6,         // platform height
- *       minY: 40,     // top of shaft (platforms wrap here)
- *       maxY: 210,    // bottom of shaft
- *       speed: -40,   // px/s (negative = up, positive = down)
- *       count: 3,     // number of platforms in this shaft
- *       color: 0x6688aa,  // optional platform color
- *     },
- *   ]
+ * Uses velocity-based movement so Phaser Arcade physics resolves
+ * collisions properly (manual position updates break collision).
+ *
+ * Levels can also define `shaftBlockers` — static platforms placed
+ * inside elevator shafts that force the player to jump off and
+ * traverse the level rather than riding straight to the top.
+ *
+ * Configured per-level via levelData.elevators and levelData.shaftBlockers.
  *
  * Usage:
  *   // In GameScene.create(), after player is created:
@@ -30,7 +25,7 @@
 // ── Tuning ──────────────────────────────────────────────────────────────────
 const ELEV_DEFAULT_COLOR     = 0x5577aa;
 const ELEV_HIGHLIGHT_COLOR   = 0x7799cc;
-const ELEV_RIDE_TOLERANCE    = 5;   // px tolerance for "standing on" detection
+const ELEV_RIDE_TOLERANCE    = 6;   // px tolerance for "standing on" detection
 const ELEV_X_TOLERANCE       = 3;   // px leeway for horizontal overlap
 
 class ElevatorSystem {
@@ -43,13 +38,17 @@ class ElevatorSystem {
     const data = scene.currentLevelData;
     if (data && data.elevators) {
       this._build(data.elevators);
+      this._buildBlockers(data.shaftBlockers);
     }
   }
 
   // ── Build elevator shafts from level data ─────────────────────────────────
 
   _build(elevatorDefs) {
-    this._group = this.scene.physics.add.group();
+    this._group = this.scene.physics.add.group({
+      immovable: true,
+      allowGravity: false,
+    });
 
     for (const def of elevatorDefs) {
       const range = def.maxY - def.minY;
@@ -68,9 +67,13 @@ class ElevatorSystem {
         this.scene.physics.add.existing(rect, false);
         rect.body.setImmovable(true);
         rect.body.setAllowGravity(false);
-        rect.body.checkCollision.down = false;  // one-way: only collide on top
+        // One-way platform: only collide on top
+        rect.body.checkCollision.down = false;
         rect.body.checkCollision.left = false;
         rect.body.checkCollision.right = false;
+
+        // Set velocity for movement (physics engine needs this for collision)
+        rect.body.setVelocityY(def.speed);
 
         // Top highlight (NES-style edge)
         const highlight = this.scene.add.rectangle(
@@ -80,7 +83,6 @@ class ElevatorSystem {
         const platform = {
           rect,
           highlight,
-          y: startY,
           x: def.x,
           w: def.w,
           h: def.h,
@@ -103,6 +105,34 @@ class ElevatorSystem {
     }
   }
 
+  // ── Build shaft blockers (static geometry that forces player off) ─────────
+
+  _buildBlockers(blockerDefs) {
+    if (!blockerDefs || blockerDefs.length === 0) return;
+
+    // Add blockers to the scene's existing static platform group
+    // so they behave identically to normal platforms
+    const platforms = this.scene.platforms;
+
+    for (const b of blockerDefs) {
+      const color = b.color || 0x3a3545;
+
+      const rect = this.scene.add.rectangle(
+        b.x + b.w / 2, b.y + b.h / 2, b.w, b.h, color
+      ).setDepth(2);
+
+      // Top highlight
+      this.scene.add.rectangle(
+        b.x + b.w / 2, b.y + 1, b.w, 2,
+        Phaser.Display.Color.IntegerToColor(color).lighten(15).color
+      ).setDepth(3);
+
+      platforms.add(rect);
+    }
+
+    platforms.refresh();
+  }
+
   // ── Frame update ──────────────────────────────────────────────────────────
 
   update(delta) {
@@ -113,36 +143,39 @@ class ElevatorSystem {
     const pb = player && player.sprite ? player.sprite.body : null;
 
     for (const plat of this._platforms) {
-      const oldY = plat.y;
+      const rect = plat.rect;
+      const y = rect.y;
 
-      // Move platform
-      plat.y += plat.speed * dt;
-
-      // Wrap around at shaft bounds
-      if (plat.speed < 0 && plat.y < plat.minY) {
-        plat.y = plat.maxY;
-      } else if (plat.speed > 0 && plat.y > plat.maxY) {
-        plat.y = plat.minY;
+      // Wrap around at shaft bounds (teleport to other end)
+      let wrapped = false;
+      if (plat.speed < 0 && y < plat.minY) {
+        rect.setY(plat.maxY);
+        rect.body.updateFromGameObject();
+        wrapped = true;
+      } else if (plat.speed > 0 && y > plat.maxY) {
+        rect.setY(plat.minY);
+        rect.body.updateFromGameObject();
+        wrapped = true;
       }
 
-      // Update visual + physics positions
-      plat.rect.setPosition(plat.x, plat.y);
-      plat.highlight.setPosition(plat.x, plat.y - plat.h / 2 + 1);
-      plat.rect.body.updateFromGameObject();
+      // Keep velocity set (Phaser can reset it on collision)
+      rect.body.setVelocityY(plat.speed);
 
-      // ── Player riding detection ─────────────────────────────────
-      // For downward elevators, Arcade physics won't pull the player
-      // down automatically. We detect if the player is standing on
-      // this platform and nudge them along.
-      if (pb && plat.speed > 0 && player.state !== 'dead') {
-        const platTop = plat.y - plat.h / 2;
+      // Sync highlight visual with platform position
+      plat.highlight.setPosition(rect.x, rect.y - plat.h / 2 + 1);
+
+      // ── Player riding detection for downward elevators ─────────
+      // Arcade physics pushes player UP when on a rising platform,
+      // but for descending platforms the player floats. Detect and
+      // nudge the player downward.
+      if (pb && plat.speed > 0 && player.state !== 'dead' && !wrapped) {
+        const platTop = rect.y - plat.h / 2;
         const playerBottom = pb.bottom;
         const isOnTop = Math.abs(playerBottom - platTop) < ELEV_RIDE_TOLERANCE;
-        const isWithinX = pb.center.x > plat.x - plat.w / 2 - ELEV_X_TOLERANCE &&
-                          pb.center.x < plat.x + plat.w / 2 + ELEV_X_TOLERANCE;
+        const isWithinX = pb.center.x > rect.x - plat.w / 2 - ELEV_X_TOLERANCE &&
+                          pb.center.x < rect.x + plat.w / 2 + ELEV_X_TOLERANCE;
 
         if (isOnTop && isWithinX && pb.velocity.y >= -10) {
-          // Nudge player down with the platform
           player.sprite.y += plat.speed * dt;
         }
       }

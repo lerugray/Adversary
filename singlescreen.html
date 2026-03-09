@@ -224,22 +224,25 @@
   //
   // DK 75m (Elevator Stage) inspired redesign.
   // Two elevator shafts: left goes UP, right goes DOWN.
-  // MOSTLY OPEN PIT — fall and you die. Small platforms are your
-  // only safe ground. Elevators are the only way up.
-  // Bats fly across as the primary hazard (replacing DK's springs).
+  // MOSTLY OPEN PIT — fall and you die.
+  // Shaft blockers FORCE you off elevators — can't free-ride to the top.
   //
-  // Navigation (left elevator = main upward path):
-  //   Start bottom-left → hop on left elevator going UP →
-  //   jump off at left-mid → ride again to left-high →
-  //   ride to summit → jump onto summit platform
+  // Required path (zigzag between shafts):
+  //   1. Start bottom-left → ride LEFT elevator UP
+  //   2. Blocker at y=148 forces you RIGHT → cross to right-mid
+  //   3. Ride RIGHT elevator UP from right-mid area
+  //   4. Blocker at y=78 forces you LEFT → cross to left-upper
+  //   5. Ride LEFT elevator UP again from left-upper
+  //   6. Jump onto summit
   //
   //   y=35  [========summit========]              Summit + checkpoint
-  //
+  //         ████                                  Blocker (left shaft)
   //   y=78  [=====]              [=====]          Upper ledges
-  //              ↑(x=80)    ↓(x=176)
-  //   y=120                 [=====]               Right mid (optional)
+  //                              ████             Blocker (right shaft)
+  //   y=120               [======]                Center stepping stone
+  //         ████                                  Blocker (left shaft)
   //   y=148 [========]                            Left mid (key stop)
-  //              ↑              ↓
+  //                              ████             Blocker (right shaft)
   //   y=200 [==========]  [=========]             Bottom platforms
   //
   //         ═══════ DEATH PIT (y>222) ═══════
@@ -258,21 +261,21 @@
   Level2Data.deathPitY = 222;
 
   Level2Data.platforms = [
-    // Bottom platforms — small islands, NOT full-width ground
+    // Bottom platforms — small islands over the death pit
     { x: 0,   y: 200, w: 72,  h: 10,  tier: 0 },   // left start (spawn here)
     { x: 184, y: 200, w: 72,  h: 10,  tier: 0 },   // right bottom
 
-    // Left mid — key landing from left elevator
+    // Left mid — forced stop from left elevator (blocker above)
     { x: 0,   y: 148, w: 62,  h: 10,  tier: 1 },
 
-    // Right mid — optional platform, archer perch
-    { x: 194, y: 120, w: 62,  h: 10,  tier: 1 },
+    // Center stepping stone — risky jump between shafts
+    { x: 104, y: 120, w: 48,  h: 8,   tier: 1 },
 
     // Upper ledges — high stops before summit
     { x: 0,   y: 78,  w: 52,  h: 10,  tier: 2 },   // left upper
     { x: 204, y: 78,  w: 52,  h: 10,  tier: 2 },   // right upper
 
-    // Summit — NOT full width, centered. Must jump from elevator.
+    // Summit — centered, must jump from elevator or upper ledge
     { x: 50,  y: 35,  w: 156, h: 10,  tier: 3 },
   ];
 
@@ -294,27 +297,50 @@
       hlColor: 0x7799cc,
     },
     {
-      x: 176,           // right shaft — goes DOWN (danger/repositioning)
+      x: 176,           // right shaft — goes DOWN but also usable going up
       w: 28,
       h: 6,
       minY: 42,
       maxY: 206,
-      speed: 35,        // going DOWN
+      speed: 35,        // going DOWN (wraps to top, so also goes up after wrap)
       count: 3,
       color: 0x5577aa,
       hlColor: 0x7799cc,
     },
   ];
 
+  // Shaft blockers — solid platforms placed INSIDE the elevator shafts.
+  // The elevator platforms pass through them (they're just sprites),
+  // but the PLAYER hits them and must jump off to a side platform.
+  // This forces zigzag traversal instead of a free ride to the top.
+  Level2Data.shaftBlockers = [
+    // Block left shaft at y=132 — forces player RIGHT to center/right-mid
+    // Player riding left elev UP hits this, must jump to left-mid (y=148)
+    // then cross to center stone (y=120) or right side
+    { x: 62,  y: 132, w: 36, h: 8,  color: 0x3a3545 },
+
+    // Block right shaft at y=165 — prevents riding right elev from bottom
+    // Forces player to use left elevator first
+    { x: 158, y: 165, w: 36, h: 8,  color: 0x3a3545 },
+
+    // Block right shaft at y=90 — forces player LEFT to left-upper
+    // After reaching right side, can't ride straight to summit
+    { x: 158, y: 90,  w: 36, h: 8,  color: 0x3a3545 },
+
+    // Block left shaft at y=55 — forces jump to summit platform
+    // Can't ride left elev all the way past summit
+    { x: 62,  y: 55,  w: 36, h: 8,  color: 0x3a3545 },
+  ];
+
   Level2Data.enemySpawns = [
     // Left mid — skeleton blocks the landing (reassembles once!)
     { x: 30,  y: 140, type: 'skeleton' },
 
-    // Right mid — archer fires across the open pit toward left elevator
-    { x: 220, y: 112, type: 'hollow_archer' },
+    // Center stone — soldier pressures the risky crossing
+    { x: 124, y: 112, type: 'hollow_soldier' },
 
-    // Right upper — skeleton guards the high ground
-    { x: 225, y: 70,  type: 'skeleton' },
+    // Right upper — archer fires across toward left elevator
+    { x: 225, y: 70,  type: 'hollow_archer' },
 
     // Summit — knight guards the checkpoint gate
     { x: 130, y: 27,  type: 'hollow_knight' },
