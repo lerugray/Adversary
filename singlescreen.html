@@ -534,10 +534,13 @@
     }
   };
 
-  // Increase base timer for single-screen (45s instead of 35s)
+  // Override trigger time calc for single-screen (45s base, 20s min)
   // The screen is smaller so players move around more — be fair.
-  PHANTOM_BASE_TRIGGER_TIME = 45000;
-  PHANTOM_MIN_TRIGGER_TIME = 20000;
+  PhantomSystem.prototype._calcTriggerTime = function() {
+    const loop = GameState.currentLoop || 1;
+    const time = 45000 - (loop - 1) * 3000;
+    return Math.max(20000, time);
+  };
 
 
   // ─────────────────────────────────────────────────────────────────────
