@@ -369,8 +369,6 @@
     ],
 
     dartTraps: [
-      // Tier 1 — dart from right wall across the bridge
-      { x: 250, y: 147, direction: -1, interval: 3200, speed: 100, damage: 1 },
       // Tier 2 — crossfire! Darts from both walls
       { x: 6,   y: 91,  direction: 1,  interval: 3000, speed: 110, damage: 1 },
       { x: 250, y: 91,  direction: -1, interval: 3000, speed: 110, damage: 1 },
@@ -541,6 +539,147 @@
   // The screen is smaller so players move around more — be fair.
   PHANTOM_BASE_TRIGGER_TIME = 45000;
   PHANTOM_MIN_TRIGGER_TIME = 20000;
+
+
+  // ─────────────────────────────────────────────────────────────────────
+  // SHORTER PLAYER — DK-style proportions for single-screen
+  //
+  // Original player: 12x26 visual, 10x22 hitbox, 12 duck hitbox
+  // Single-screen:   12x20 visual, 10x16 hitbox, 10 duck hitbox
+  //
+  // ~6px shorter gives more headroom on every tier and feels more
+  // like a DK/classic-arcade character. Archer arrows are lowered
+  // to compensate so they still threaten the shorter player.
+  // ─────────────────────────────────────────────────────────────────────
+
+  const SS_BODY_W = 10;
+  const SS_BODY_H = 16;
+  const SS_DUCK_H = 10;
+
+  // Override _buildSprite to draw a shorter player
+  const _origBuildSprite = PlayerEntity.prototype._buildSprite;
+  PlayerEntity.prototype._buildSprite = function(x, y) {
+    const texW = SS_BODY_W + 2;  // 12
+    const texH = SS_BODY_H + 4;  // 20
+
+    const gfx = this.scene.add.graphics();
+    gfx.fillStyle(0xeeeeee);
+    gfx.fillRect(1, 0, 10, 6);     // head (shorter)
+    gfx.fillStyle(0xcccccc);
+    gfx.fillRect(1, 6, 10, 8);     // torso (shorter)
+    gfx.fillStyle(0x999999);
+    gfx.fillRect(1, 14, 4, 6);     // left leg
+    gfx.fillRect(7, 14, 4, 6);     // right leg
+    gfx.generateTexture('player_placeholder', texW, texH);
+    gfx.destroy();
+
+    this.sprite = this.scene.physics.add.sprite(x, y, 'player_placeholder');
+    this.sprite.setOrigin(0.5, 1);
+    this.sprite.setCollideWorldBounds(true);
+
+    this.sprite.body.setSize(SS_BODY_W, SS_BODY_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_BODY_H
+    );
+
+    this.sprite.body.setGravityY(600); // same as PLAYER_GRAVITY
+    this.sprite.setTint(this._baseTint());
+  };
+
+  // Override duck/stand body transitions to use shorter dimensions
+  const _origStartDuck = PlayerEntity.prototype._startDuck;
+  PlayerEntity.prototype._startDuck = function() {
+    _origStartDuck.call(this);
+    // Re-apply shorter body after original sets the const DUCK_H
+    this.sprite.body.setSize(SS_BODY_W, SS_DUCK_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_DUCK_H
+    );
+  };
+
+  const _origEndDuck = PlayerEntity.prototype._endDuck;
+  PlayerEntity.prototype._endDuck = function() {
+    _origEndDuck.call(this);
+    this.sprite.body.setSize(SS_BODY_W, SS_BODY_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_BODY_H
+    );
+  };
+
+  // _exitDuck also resets to standing size
+  const _origExitDuck = PlayerEntity.prototype._exitDuck;
+  PlayerEntity.prototype._exitDuck = function() {
+    _origExitDuck.call(this);
+    this.sprite.body.setSize(SS_BODY_W, SS_BODY_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_BODY_H
+    );
+  };
+
+  // Dodge uses duck height, then endDodge resets to standing
+  const _origStartDodge = PlayerEntity.prototype._startDodge;
+  PlayerEntity.prototype._startDodge = function(dir) {
+    _origStartDodge.call(this, dir);
+    this.sprite.body.setSize(SS_BODY_W, SS_DUCK_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_DUCK_H
+    );
+  };
+
+  const _origEndDodge = PlayerEntity.prototype._endDodge;
+  PlayerEntity.prototype._endDodge = function() {
+    _origEndDodge.call(this);
+    this.sprite.body.setSize(SS_BODY_W, SS_BODY_H);
+    this.sprite.body.setOffset(
+      (this.sprite.width - SS_BODY_W) / 2,
+      this.sprite.height - SS_BODY_H
+    );
+  };
+
+  // Override archer arrow Y so it still hits shorter player.
+  // Original: sprite.y - 13 (upper body of 18px archer).
+  // Shorter player stands ~6px lower relative to platform, so
+  // arrows need to fire lower to threaten them: sprite.y - 9.
+  const _origFireArrow = HollowArcher.prototype._fireArrow;
+  HollowArcher.prototype._fireArrow = function(player, shootDown) {
+    this.fireCooldown = HA_FIRE_COOLDOWN;
+    this.state = ENEMY_STATE.ATTACK;
+
+    this.sprite.setTint(0xffffff);
+    this.scene.time.delayedCall(150, () => {
+      if (!this._dead) this._restoreTint();
+    });
+
+    const ax = this.sprite.x + this.facing * 8;
+    const ay = this.sprite.y - 9;  // lowered for shorter player
+
+    const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
+    this.scene.physics.add.existing(arrow);
+    arrow.body.setAllowGravity(false);
+
+    if (shootDown) {
+      arrow.body.setVelocityX(this.facing * HA_ARROW_SPEED * 0.6);
+      arrow.body.setVelocityY(HA_ARROW_SPEED * 0.8);
+      arrow.setRotation(this.facing > 0 ? 0.6 : -0.6);
+    } else {
+      arrow.body.setVelocityX(this.facing * HA_ARROW_SPEED);
+    }
+
+    arrow.body.setSize(8, 3);
+    arrow.setDepth(4);
+
+    this.arrows.push({
+      obj: arrow,
+      lifetime: HA_ARROW_LIFETIME,
+    });
+  };
+
+  console.log('[SINGLE SCREEN] Shorter player (16px hitbox) + lowered archer arrows');
 
 
   // ─────────────────────────────────────────────────────────────────────

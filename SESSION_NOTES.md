@@ -1,28 +1,29 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Single-screen level design experiment (DK-style, no scrolling)
+- Single-screen variant polish: Level 3 dart cleanup + shorter player sprite
 
 ## What got done
 
-1. **Single-screen variant (v2)** — Created `singlescreen.html`, a standalone experiment that overrides all 4 level layouts to fit 256x240 with no camera scrolling. Main game (`index.html`) is untouched.
+1. **Level 3 — removed Tier 1 dart trap**: The first dart trap (right wall, shooting across the pendulum bridge) was removed. Tier 2 crossfire darts and summit darts are still in place. Summit darts are flagged as "maybe remove" — needs playtesting.
 
-   - **All levels**: 4 tiers (ground + 3 platforms), 56px gaps — close to the original 60px
-   - **Level 1**: Soldier tier → Archer tier → Knight summit. Rolling skulls cascade from top.
-   - **Level 2**: Broken Bridge (islands) → Archer's Alley (crossfire) → Knight's Watch (summit). Bats fly across.
-   - **Level 3**: Pendulum Bridge → Dart Crossfire + Knight → Summit (pendulum + darts). Each tier has one clear hazard combo.
-   - **Level 4**: Unchanged — was already nearly single-screen. Floor kept at y=210 for hardcoded boss spawn.
-   - **HUD clearance**: Summit platforms at y=42, well below the 18px HUD bar. Game board starts cleanly under HUD like original DK.
-   - **Enemy spacing**: Ground enemies placed far from player spawn point.
-   - **Phantom override**: Reworked to simple fair timer — tracks any movement (not just vertical), 45s base timer, dismisses after sustained movement.
+2. **Shorter player sprite for single-screen variant**: Player hitbox shrunk from 10x22 to 10x16 (6px shorter). Visual sprite shrunk from 12x26 to 12x20. Duck hitbox shrunk from 12 to 10. This gives more headroom on every tier, makes the character feel more DK-proportioned, and reduces the "crowded top" feeling.
 
-### Key files
-- singlescreen.html (standalone experiment, all changes self-contained)
+3. **Archer arrow height adjusted**: Arrow fire position lowered from `sprite.y - 13` to `sprite.y - 9` so arrows still threaten the shorter player instead of sailing over their head.
+
+4. **All body-size transitions overridden**: Duck, stand, dodge start, dodge end — all patched in singlescreen.html to use the shorter dimensions so the player doesn't snap back to full height mid-game.
+
+### Key files changed
+- singlescreen.html (all changes self-contained, main game untouched)
 
 ## Current state
 - Main game fully intact and unchanged
-- Single-screen experiment on v2 (spacious layout, HUD-cleared, fair phantom)
-- Needs continued playtesting
+- Single-screen experiment has shorter player, cleaned-up Level 3 traps
+- Needs playtesting to verify:
+  - Does 16px player feel right? (vs original 22px)
+  - Are archer arrows still dangerous enough at the lower height?
+  - Is Level 3 summit still too crowded, or does shorter player fix it?
+  - Should summit dart traps also be removed?
 
 ## Discussion topics still open
 - Enemy freezing behavior (need specifics: which enemies, which levels)
@@ -32,7 +33,6 @@
 - Single-screen: does 3 tiers per level feel right, or should some levels have 4?
 
 ## What's next
-- Continue playtesting single-screen variant
-- Decide: replace main layouts, keep as variant, or find middle ground
+- Playtest the shorter player + Level 3 changes
+- Continue single-screen refinement based on feedback
 - Phase 7: UI & Screens (pause/inventory polish, interludes, high score initials)
-- General polish and balance from playtesting
