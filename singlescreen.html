@@ -664,31 +664,30 @@
   // SHORTER PLAYER — DK-style proportions for single-screen
   //
   // Original player: 12x26 visual, 10x22 hitbox, 12 duck hitbox
-  // Single-screen:   12x16 visual, 10x12 hitbox, 8 duck hitbox
+  // Single-screen:   12x18 visual, 10x14 hitbox, 9 duck hitbox
   //
-  // ~10px shorter gives big headroom on every tier and feels like
-  // a DK/Jumpman-style arcade character. Archer arrows lowered to
-  // compensate so they still threaten the shorter player.
+  // ~8px shorter — DK/Jumpman proportions. Archer arrows lowered
+  // to compensate so they still threaten the shorter player.
   // ─────────────────────────────────────────────────────────────────────
 
   const SS_BODY_W = 10;
-  const SS_BODY_H = 12;
-  const SS_DUCK_H = 8;
+  const SS_BODY_H = 14;
+  const SS_DUCK_H = 9;
 
   // Override _buildSprite to draw a shorter player
   const _origBuildSprite = PlayerEntity.prototype._buildSprite;
   PlayerEntity.prototype._buildSprite = function(x, y) {
     const texW = SS_BODY_W + 2;  // 12
-    const texH = SS_BODY_H + 4;  // 16
+    const texH = SS_BODY_H + 4;  // 18
 
     const gfx = this.scene.add.graphics();
     gfx.fillStyle(0xeeeeee);
-    gfx.fillRect(1, 0, 10, 4);     // head
+    gfx.fillRect(1, 0, 10, 5);     // head
     gfx.fillStyle(0xcccccc);
-    gfx.fillRect(1, 4, 10, 6);     // torso
+    gfx.fillRect(1, 5, 10, 7);     // torso
     gfx.fillStyle(0x999999);
-    gfx.fillRect(1, 10, 4, 6);     // left leg
-    gfx.fillRect(7, 10, 4, 6);     // right leg
+    gfx.fillRect(1, 12, 4, 6);     // left leg
+    gfx.fillRect(7, 12, 4, 6);     // right leg
     gfx.generateTexture('player_placeholder', texW, texH);
     gfx.destroy();
 
@@ -775,7 +774,7 @@
     });
 
     const ax = this.sprite.x + this.facing * 8;
-    const ay = this.sprite.y - 5;  // lowered for 12px player
+    const ay = this.sprite.y - 7;  // lowered for 14px player
 
     const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
     this.scene.physics.add.existing(arrow);
@@ -798,7 +797,7 @@
     });
   };
 
-  console.log('[SINGLE SCREEN] Shorter player (12px hitbox) + lowered archer arrows');
+  console.log('[SINGLE SCREEN] Shorter player (14px hitbox) + lowered archer arrows');
 
 
   // ─────────────────────────────────────────────────────────────────────
