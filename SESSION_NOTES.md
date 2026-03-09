@@ -5,31 +5,34 @@
 
 ## What got done
 
-1. **Single-screen variant** — Created `singlescreen.html`, a standalone experiment file that overrides all 4 level layouts to fit within 256x240 (no camera scrolling). Opens separately from the main game — `index.html` is completely untouched.
+1. **Single-screen variant (v2)** — Created `singlescreen.html`, a standalone experiment that overrides all 4 level layouts to fit 256x240 with no camera scrolling. Main game (`index.html`) is untouched.
 
-   - **Level 1**: Same 6 tiers, gaps compressed from 60px to 36px. Rolling skulls cascade faster in the tighter space.
-   - **Level 2**: Reduced from 7 to 6 tiers. Merged "Soldier's Walk" into ground (added third patrol). Kept broken bridge, archer crossfire, knight guard.
-   - **Level 3**: Biggest change — 8 tiers down to 6. Combined trap sections so each tier is denser. Pendulums + darts still present, just packed tighter (fits Sen's Fortress vibe).
-   - **Level 4**: Nearly unchanged — was already close to single-screen. Floor kept at y=210 because boss spawn position is hardcoded in GameScene.js.
+   - **All levels**: 4 tiers (ground + 3 platforms), 56px gaps — close to the original 60px
+   - **Level 1**: Soldier tier → Archer tier → Knight summit. Rolling skulls cascade from top.
+   - **Level 2**: Broken Bridge (islands) → Archer's Alley (crossfire) → Knight's Watch (summit). Bats fly across.
+   - **Level 3**: Pendulum Bridge → Dart Crossfire + Knight → Summit (pendulum + darts). Each tier has one clear hazard combo.
+   - **Level 4**: Unchanged — was already nearly single-screen. Floor kept at y=210 for hardcoded boss spawn.
+   - **HUD clearance**: Summit platforms at y=42, well below the 18px HUD bar. Game board starts cleanly under HUD like original DK.
+   - **Enemy spacing**: Ground enemies placed far from player spawn point.
+   - **Phantom override**: Reworked to simple fair timer — tracks any movement (not just vertical), 45s base timer, dismisses after sustained movement.
 
-### Key files created
-- singlescreen.html (standalone experiment, loads all game code + overrides level data)
+### Key files
+- singlescreen.html (standalone experiment, all changes self-contained)
 
 ## Current state
-- Main game (`index.html`) fully intact and unchanged
-- Single-screen experiment ready for playtesting via `singlescreen.html`
-- Needs playtesting to evaluate: spacing feel, pendulum clipping, Phantom behavior, enemy positioning
+- Main game fully intact and unchanged
+- Single-screen experiment on v2 (spacious layout, HUD-cleared, fair phantom)
+- Needs continued playtesting
 
 ## Discussion topics still open
 - Enemy freezing behavior (need specifics: which enemies, which levels)
 - Double-jump accessory ("Cat Ring")
 - DK "waddle" feel (waiting for Phase 8 sprites, or prototype Y-bob now?)
-- Checkpoints in levels 2-3 (remove on loop 2+?)
-- Based on single-screen playtest: decide if this replaces the original layouts or stays as a variant
+- Checkpoints in levels 2-3 for main game (remove on loop 2+?)
+- Single-screen: does 3 tiers per level feel right, or should some levels have 4?
 
 ## What's next
-- Playtest single-screen variant and compare feel to original
-- If single-screen works well, could become the default layout direction
-- If too cramped, consider the 1.5-screen middle ground (minimal scrolling)
+- Continue playtesting single-screen variant
+- Decide: replace main layouts, keep as variant, or find middle ground
 - Phase 7: UI & Screens (pause/inventory polish, interludes, high score initials)
 - General polish and balance from playtesting

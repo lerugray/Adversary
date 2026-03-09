@@ -124,40 +124,40 @@
   -->
   <script>
   /**
-   * SINGLE SCREEN LEVEL VARIANTS
+   * SINGLE SCREEN LEVEL VARIANTS — v2 (spacious)
    *
    * Design philosophy:
    *   - Everything visible at once (no scrolling), like Donkey Kong
    *   - 256x240 world = 256x240 camera = what you see is all there is
-   *   - Player starts bottom-left, goal is top — same as original DK
-   *   - Tier spacing compressed from 60px to ~36px
-   *   - Ladders remain the primary ascent method (zigzag pattern preserved)
+   *   - FEWER TIERS than the scrolling version, not the same number crammed in
+   *   - Each tier has breathing room (~50-55px gaps) for jumping and dodging
    *   - Each level's identity preserved: L1=skulls, L2=archers+bats,
    *     L3=traps, L4=boss arena
-   *   - Fewer tiers where needed (L2: 7→5, L3: 8→6) to avoid cramming
-   *   - HUD occupies top ~16px, so top platform sits at y=22 minimum
+   *   - Phantom reworked to a simple fair timer (no vertical-progress tracking)
    *
    * Vertical budget (240px total):
-   *   y=0-16    HUD area (score, HP, etc)
-   *   y=22      Highest reachable platform
+   *   y=0-18    HUD bar (dark background, hearts, MP, XP, score)
+   *   y=42      Highest platform (clears HUD with breathing room)
    *   y=210     Ground surface
    *   y=210-240 Ground thickness + offscreen
+   *
+   *   4 tiers per level: Ground(210) → T1(154) → T2(98) → Summit(42)
+   *   56px gaps — close to the original 60px, plenty of room
    */
 
   // ─────────────────────────────────────────────────────────────────────
   // LEVEL 1 — "The Ashen Hearth" (Single Screen)
   //
   // Original: 6 tiers, 60px gaps, 256x405
-  // Single screen: 6 tiers, 36px gaps, 256x240
+  // Single screen: 4 tiers (ground + 3), 56px gaps
   //
-  // Same DK zigzag with rolling skulls. The tighter spacing actually
-  // makes the skulls MORE threatening since they cascade faster.
+  // Classic DK zigzag with rolling skulls. Three platforms above
+  // ground, each one a real challenge. Summit clears the HUD bar.
   //
-  //   y=22  [SKULL]========================  T5 (summit/checkpoint)
-  //   y=58     ========================[L]  T4
-  //   y=94  [L]========================     T3
-  //   y=130    ========================[L]  T2
-  //   y=166 [L]========================     T1
+  //   HUD   ================================ (y=0-18)
+  //   y=42  [SKULL]========================  T3 (summit/checkpoint)
+  //   y=98     ========================[L]  T2 (archer tier)
+  //   y=154 [L]========================     T1 (soldier tier)
   //   y=210 ================================ GROUND
   // ─────────────────────────────────────────────────────────────────────
 
@@ -167,10 +167,10 @@
 
   Level1Data.playerSpawn = { x: 28, y: 204 };
 
-  Level1Data.checkpoint = { x: 80, y: 14, radius: 8 };
+  Level1Data.checkpoint = { x: 80, y: 34, radius: 8 };
 
   Level1Data.hazardSpawner = {
-    x: 16, y: 22,
+    x: 16, y: 42,
     speed: 52,
     interval: 3500,
     initialDelay: 1500,
@@ -181,68 +181,57 @@
   Level1Data.platforms = [
     // Ground — full width
     { x: 0,   y: 210, w: 256, h: 30,  tier: 0 },
-    // Tier 1 — gap RIGHT
-    { x: 0,   y: 166, w: 224, h: 10,  tier: 1 },
-    // Tier 2 — gap LEFT
-    { x: 32,  y: 130, w: 224, h: 10,  tier: 2 },
-    // Tier 3 — gap RIGHT
-    { x: 0,   y: 94,  w: 224, h: 10,  tier: 3 },
-    // Tier 4 — gap LEFT
-    { x: 32,  y: 58,  w: 224, h: 10,  tier: 4 },
-    // Tier 5 — summit, gap RIGHT
-    { x: 0,   y: 22,  w: 224, h: 10,  tier: 5 },
+    // Tier 1 — gap RIGHT (soldier patrol)
+    { x: 0,   y: 154, w: 224, h: 10,  tier: 1 },
+    // Tier 2 — gap LEFT (archer guards the ladder)
+    { x: 32,  y: 98,  w: 224, h: 10,  tier: 2 },
+    // Tier 3 — summit, gap RIGHT (knight guards checkpoint)
+    { x: 0,   y: 42,  w: 224, h: 10,  tier: 3 },
   ];
 
   Level1Data.ladders = [
-    { x: 210, topY: 166, bottomY: 210, w: 14 },  // Ground → T1 (right)
-    { x: 42,  topY: 130, bottomY: 166, w: 14 },  // T1 → T2 (left)
-    { x: 210, topY: 94,  bottomY: 130, w: 14 },  // T2 → T3 (right)
-    { x: 42,  topY: 58,  bottomY: 94,  w: 14 },  // T3 → T4 (left)
-    { x: 210, topY: 22,  bottomY: 58,  w: 14 },  // T4 → T5 (right)
+    { x: 210, topY: 154, bottomY: 210, w: 14 },  // Ground → T1 (right)
+    { x: 42,  topY: 98,  bottomY: 154, w: 14 },  // T1 → T2 (left)
+    { x: 210, topY: 42,  bottomY: 98,  w: 14 },  // T2 → T3 (right)
   ];
 
   Level1Data.enemySpawns = [
-    { x: 130, y: 202, type: 'hollow_soldier' },   // Ground
-    { x: 120, y: 158, type: 'hollow_soldier' },   // Tier 1
-    { x: 180, y: 122, type: 'hollow_archer'  },   // Tier 2
-    { x: 100, y: 86,  type: 'hollow_soldier' },   // Tier 3
-    { x: 160, y: 50,  type: 'hollow_knight'  },   // Tier 4
-    { x: 130, y: 14,  type: 'hollow_knight'  },   // Tier 5 (guards checkpoint)
+    { x: 160, y: 202, type: 'hollow_soldier' },   // Ground — far from spawn
+    { x: 100, y: 202, type: 'skeleton' },          // Ground — mid patrol
+    { x: 120, y: 146, type: 'hollow_soldier' },   // Tier 1 — patrol
+    { x: 180, y: 90,  type: 'hollow_archer'  },   // Tier 2 — guards ladder
+    { x: 80,  y: 90,  type: 'hollow_soldier' },   // Tier 2 — patrol pressure
+    { x: 130, y: 34,  type: 'hollow_knight'  },   // Tier 3 — guards checkpoint
   ];
 
   Level1Data.breakables = [
     { x: 245, y: 210, type: 'crate'  },   // Ground far right
-    { x: 44,  y: 130, type: 'barrel' },   // Tier 2 far left
-    { x: 245, y: 58,  type: 'crate'  },   // Tier 4 far right
+    { x: 44,  y: 98,  type: 'barrel' },   // Tier 2 far left
   ];
 
   Level1Data.decorations = [
-    { x: 232, y: 175, w: 12, h: 25, color: 0x2a2028, alpha: 0.9 },
-    { x: 4,   y: 140, w: 10, h: 20, color: 0x2a2028, alpha: 0.8 },
-    { x: 232, y: 100, w: 12, h: 20, color: 0x2a2028, alpha: 0.9 },
-    { x: 4,   y: 65,  w: 10, h: 18, color: 0x2a2028, alpha: 0.8 },
-    { x: 6,   y: 14,  w: 20, h: 5,  color: 0x3a3530, alpha: 0.7 },
+    { x: 232, y: 164, w: 12, h: 30, color: 0x2a2028, alpha: 0.9 },
+    { x: 4,   y: 108, w: 10, h: 30, color: 0x2a2028, alpha: 0.8 },
+    { x: 6,   y: 34,  w: 20, h: 5,  color: 0x3a3530, alpha: 0.7 },
+    // Distant ruin silhouettes
+    { x: 140, y: 0,   w: 16, h: 40, color: 0x1a1518, alpha: 0.5 },
+    { x: 240, y: 0,   w: 8,  h: 50, color: 0x1a1518, alpha: 0.35 },
   ];
 
 
   // ─────────────────────────────────────────────────────────────────────
   // LEVEL 2 — "Cresthollow" (Single Screen)
   //
-  // Original: 7 tiers (ground + 6), 60px gaps, 256x460
-  // Single screen: 6 tiers (ground + 5), 36px gaps, 256x240
+  // Original: 7 tiers, 60px gaps, 256x460
+  // Single screen: 4 tiers (ground + 3), 56px gaps
   //
-  // Reduced from 7 to 6 tiers. Merged "Soldier's Walk" into ground
-  // (soldier patrols on ground instead of separate tier).
-  // Kept: broken bridge islands, archer crossfire, knight guard, summit.
-  // Bats are even scarier in single-screen — you can see them coming
-  // but there's nowhere to hide.
+  // Each tier has one clear identity. Summit clears HUD.
   //
-  //   y=22  [GATE]===============           T5 (summit/checkpoint)
-  //   y=58  ====================             T4 (Knight's Watch)
-  //   y=94  ==============  ============     T3 (The Gauntlet)
-  //   y=130 =============  ===============   T2 (Archer's Alley)
-  //   y=166 =========  =======  =========    T1 (Broken Bridge)
-  //   y=210 ================================ GROUND (+ soldiers)
+  //   HUD   ================================ (y=0-18)
+  //   y=42  [GATE]==================         T3 (Knight's Watch / summit)
+  //   y=98  =============  ==============    T2 (Archer's Alley)
+  //   y=154 =========  =======  =========    T1 (Broken Bridge)
+  //   y=210 ================================ GROUND
   // ─────────────────────────────────────────────────────────────────────
 
   Level2Data.name = 'Cresthollow';
@@ -251,66 +240,48 @@
 
   Level2Data.playerSpawn = { x: 28, y: 204 };
 
-  Level2Data.checkpoint = { x: 88, y: 14, radius: 8, type: 'gate' };
+  Level2Data.checkpoint = { x: 88, y: 34, radius: 8, type: 'gate' };
 
   Level2Data.platforms = [
-    // Ground — full width (merged Soldier's Walk here)
+    // Ground — full width
     { x: 0,   y: 210, w: 256, h: 30,  tier: 0 },
 
-    // Tier 1 — Broken Bridge: three islands
-    { x: 165, y: 166, w: 65,  h: 10,  tier: 1 },   // right (arrive)
-    { x: 85,  y: 166, w: 55,  h: 10,  tier: 1 },   // middle (skeleton)
-    { x: 0,   y: 166, w: 65,  h: 10,  tier: 1 },   // left (ladder out)
+    // Tier 1 — Broken Bridge: three islands with real gaps
+    { x: 165, y: 154, w: 65,  h: 10,  tier: 1 },   // right (arrive from ladder)
+    { x: 85,  y: 154, w: 55,  h: 10,  tier: 1 },   // middle (skeleton waits)
+    { x: 0,   y: 154, w: 65,  h: 10,  tier: 1 },   // left (ladder out)
 
     // Tier 2 — Archer's Alley: cross under arrow fire
-    { x: 0,   y: 130, w: 90,  h: 10,  tier: 2 },   // left safe zone
-    { x: 112, y: 130, w: 100, h: 10,  tier: 2 },   // right (archer zone)
-    { x: 218, y: 124, w: 38,  h: 10,  tier: 2 },   // elevated sniper perch
+    { x: 0,   y: 98,  w: 100, h: 10,  tier: 2 },   // left safe zone
+    { x: 120, y: 98,  w: 110, h: 10,  tier: 2 },   // right (archer zone)
+    { x: 230, y: 90,  w: 26,  h: 10,  tier: 2 },   // elevated sniper perch
 
-    // Tier 3 — The Gauntlet: archer + soldier combo
-    { x: 125, y: 94,  w: 80,  h: 10,  tier: 3 },   // right (arrive)
-    { x: 0,   y: 94,  w: 100, h: 10,  tier: 3 },   // left (fight through)
-
-    // Tier 4 — Knight's Watch
-    { x: 0,   y: 58,  w: 200, h: 10,  tier: 4 },
-    { x: 218, y: 50,  w: 30,  h: 10,  tier: 4 },   // sniper perch
-
-    // Tier 5 — Summit
-    { x: 0,   y: 22,  w: 110, h: 10,  tier: 5 },
-    { x: 130, y: 14,  w: 30,  h: 10,  tier: 5 },   // sniper perch
+    // Tier 3 — Knight's Watch + summit gate
+    { x: 0,   y: 42,  w: 200, h: 10,  tier: 3 },
   ];
 
   Level2Data.ladders = [
-    { x: 230, topY: 166, bottomY: 210, w: 14 },  // Ground → T1 (right)
-    { x: 14,  topY: 130, bottomY: 166, w: 14 },  // T1 → T2 (left, past islands)
-    { x: 195, topY: 94,  bottomY: 130, w: 14 },  // T2 → T3 (right)
-    { x: 25,  topY: 58,  bottomY: 94,  w: 14 },  // T3 → T4 (left)
-    { x: 180, topY: 22,  bottomY: 58,  w: 14 },  // T4 → T5 (right)
+    { x: 230, topY: 154, bottomY: 210, w: 14 },  // Ground → T1 (right)
+    { x: 14,  topY: 98,  bottomY: 154, w: 14 },  // T1 → T2 (left)
+    { x: 195, topY: 42,  bottomY: 98,  w: 14 },  // T2 → T3 (right)
   ];
 
   Level2Data.enemySpawns = [
-    // Ground — two patrols (absorbed Soldier's Walk enemies)
+    // Ground — warmup patrols (away from player spawn at x=28)
     { x: 170, y: 202, type: 'hollow_soldier' },
-    { x: 100, y: 202, type: 'skeleton' },
-    { x: 60,  y: 202, type: 'hollow_soldier' },
+    { x: 120, y: 202, type: 'skeleton' },
 
     // Tier 1 — skeleton on middle island
-    { x: 110, y: 158, type: 'skeleton' },
+    { x: 110, y: 146, type: 'skeleton' },
 
     // Tier 2 — archer crossfire
-    { x: 150, y: 122, type: 'hollow_archer' },
-    { x: 232, y: 116, type: 'hollow_archer' },
+    { x: 160, y: 90,  type: 'hollow_archer' },
+    { x: 240, y: 82,  type: 'hollow_archer' },
+    { x: 40,  y: 90,  type: 'hollow_soldier' },   // pressure from left
 
-    // Tier 3 — archer + soldier gauntlet
-    { x: 40,  y: 86,  type: 'hollow_archer' },
-    { x: 165, y: 86,  type: 'hollow_soldier' },
-
-    // Tier 4 — knight guard
-    { x: 100, y: 50,  type: 'hollow_knight' },
-    { x: 230, y: 42,  type: 'hollow_archer', canShootDown: true },
-
-    // Tier 5 — summit sniper
-    { x: 142, y: 6,   type: 'hollow_archer', canShootDown: true },
+    // Tier 3 — knight guards summit
+    { x: 100, y: 34,  type: 'hollow_knight' },
+    { x: 50,  y: 34,  type: 'hollow_archer' },
   ];
 
   Level2Data.flyingHazard = {
@@ -322,8 +293,7 @@
 
   Level2Data.breakables = [
     { x: 16,  y: 210, type: 'barrel' },
-    { x: 225, y: 166, type: 'crate' },
-    { x: 240, y: 124, type: 'crate',
+    { x: 240, y: 90,  type: 'crate',
       drops: [
         { type: 'heart',   chance: 0.50 },
         { type: 'weapon',  chance: 0.15 },
@@ -333,35 +303,27 @@
   ];
 
   Level2Data.decorations = [
-    { x: 0,   y: 0,   w: 18, h: 50,  color: 0x1a2030, alpha: 0.5 },
-    { x: 240, y: 0,   w: 16, h: 60,  color: 0x242838, alpha: 0.5 },
-    { x: 210, y: 172, w: 12, h: 28,  color: 0x2a3040, alpha: 0.85 },
-    { x: 95,  y: 120, w: 15, h: 6,   color: 0x242838, alpha: 0.75 },
-    { x: 110, y: 18,  w: 25, h: 5,   color: 0x2a3040, alpha: 0.8 },
+    { x: 0,   y: 18,  w: 18, h: 50,  color: 0x1a2030, alpha: 0.5 },
+    { x: 240, y: 18,  w: 16, h: 60,  color: 0x242838, alpha: 0.5 },
+    { x: 210, y: 162, w: 12, h: 32,  color: 0x2a3040, alpha: 0.85 },
+    { x: 105, y: 92,  w: 12, h: 6,   color: 0x242838, alpha: 0.75 },
+    { x: 180, y: 18,  w: 14, h: 40,  color: 0x1a2030, alpha: 0.35 },
   ];
 
 
   // ─────────────────────────────────────────────────────────────────────
   // LEVEL 3 — "The Iron Passage" (Single Screen)
   //
-  // Original: 8 tiers (ground + 7), 60px gaps, 256x570
-  // Single screen: 6 tiers (ground + 5), 36px gaps, 256x240
+  // Original: 8 tiers, 60px gaps, 256x570
+  // Single screen: 4 tiers (ground + 3), 56px gaps
   //
-  // This is the biggest compression. Merged some trap sections:
-  //   - Combined "First Test" and "Pendulum Bridge" into one tier
-  //     with both darts and a pendulum
-  //   - Combined "Blade Walk" islands with dart crossfire
-  //   - Kept the pendulum+dart bridge ("Death's Crossing") as the
-  //     climax tier before the summit
+  // The trap gauntlet. Each tier has ONE clear hazard combo.
+  // Summit clears HUD.
   //
-  // Fewer tiers but each one is DENSER with traps = same Sen's
-  // Fortress pressure in a tighter package.
-  //
-  //   y=22  [IRON GATE]===================== T5 (summit, darts)
-  //   y=58     ██████████████████            T4 (pendulum + dart bridge)
-  //   y=94  ██████████████████████           T3 (gauntlet: knight + darts)
-  //   y=130    █████  ███  █████             T2 (blade walk islands + pendulum)
-  //   y=166 █████████  ████████  ████████    T1 (pendulum bridge + dart)
+  //   HUD   ================================ (y=0-18)
+  //   y=42  [IRON GATE]===================== T3 (summit: pendulum + darts)
+  //   y=98  ██████████████████████           T2 (dart crossfire + knight)
+  //   y=154 ████████  ████████  ████████     T1 (pendulum bridge)
   //   y=210 ================================ GROUND
   // ─────────────────────────────────────────────────────────────────────
 
@@ -371,90 +333,75 @@
 
   Level3Data.playerSpawn = { x: 28, y: 204 };
 
-  Level3Data.checkpoint = { x: 36, y: 14, radius: 8, type: 'iron_gate' };
+  Level3Data.checkpoint = { x: 36, y: 34, radius: 8, type: 'iron_gate' };
 
   Level3Data.platforms = [
     // Ground
     { x: 0,   y: 210, w: 256, h: 30,  tier: 0 },
 
-    // Tier 1 — Pendulum Bridge (3 sections) + dart from right
-    { x: 0,   y: 166, w: 70,  h: 10,  tier: 1 },   // left safe zone
-    { x: 82,  y: 166, w: 70,  h: 10,  tier: 1 },   // middle (under pendulum)
-    { x: 164, y: 166, w: 92,  h: 10,  tier: 1 },   // right (ladder up)
+    // Tier 1 — Pendulum Bridge: three sections with pendulums between
+    { x: 0,   y: 154, w: 70,  h: 10,  tier: 1 },   // left safe zone
+    { x: 82,  y: 154, w: 70,  h: 10,  tier: 1 },   // middle (under pendulum)
+    { x: 164, y: 154, w: 92,  h: 10,  tier: 1 },   // right (ladder up)
 
-    // Tier 2 — Blade Walk: three islands with pendulum over center
-    { x: 0,   y: 130, w: 60,  h: 10,  tier: 2 },   // left
-    { x: 72,  y: 130, w: 50,  h: 10,  tier: 2 },   // center (under pendulum)
-    { x: 140, y: 130, w: 60,  h: 10,  tier: 2 },   // right
+    // Tier 2 — Dart Corridor + Knight: wide platform with crossfire darts
+    { x: 0,   y: 98,  w: 210, h: 10,  tier: 2 },
+    { x: 224, y: 98,  w: 32,  h: 10,  tier: 2 },   // side platform (breakable)
 
-    // Tier 3 — The Gauntlet: wide platform, enemy + dart traps
-    { x: 0,   y: 94,  w: 200, h: 10,  tier: 3 },
-    { x: 216, y: 94,  w: 40,  h: 10,  tier: 3 },   // side platform
-
-    // Tier 4 — Death's Crossing: narrow bridge, pendulum + dart
-    { x: 40,  y: 58,  w: 180, h: 10,  tier: 4 },
-
-    // Tier 5 — Summit (iron gate checkpoint)
-    { x: 0,   y: 22,  w: 256, h: 10,  tier: 5 },
+    // Tier 3 — Summit: pendulum + dart crossfire, the final test
+    { x: 0,   y: 42,  w: 256, h: 10,  tier: 3 },
   ];
 
   Level3Data.ladders = [
-    { x: 215, topY: 166, bottomY: 210, w: 14 },  // Ground → T1 (right)
-    { x: 14,  topY: 130, bottomY: 166, w: 14 },  // T1 → T2 (left)
-    { x: 180, topY: 94,  bottomY: 130, w: 14 },  // T2 → T3 (right)
-    { x: 55,  topY: 58,  bottomY: 94,  w: 14 },  // T3 → T4 (left)
-    { x: 200, topY: 22,  bottomY: 58,  w: 14 },  // T4 → T5 (right)
+    { x: 215, topY: 154, bottomY: 210, w: 14 },  // Ground → T1 (right)
+    { x: 14,  topY: 98,  bottomY: 154, w: 14 },  // T1 → T2 (left)
+    { x: 200, topY: 42,  bottomY: 98,  w: 14 },  // T2 → T3 (right)
   ];
 
   Level3Data.traps = {
     pendulums: [
       // Tier 1 — between left and middle bridge sections
-      { anchorX: 76,  anchorY: 130, length: 30, speed: 1.1, damage: 1, startAngle: 0 },
+      { anchorX: 76,  anchorY: 118, length: 30, speed: 1.1, damage: 1, startAngle: 0 },
       // Tier 1 — between middle and right bridge sections
-      { anchorX: 158, anchorY: 130, length: 30, speed: 1.0, damage: 1, startAngle: 1.5 },
-      // Tier 2 — over center island
-      { anchorX: 97,  anchorY: 96,  length: 28, speed: 1.2, damage: 2, startAngle: 0.8 },
-      // Tier 4 — on the narrow bridge
-      { anchorX: 130, anchorY: 24,  length: 28, speed: 1.4, damage: 2, startAngle: 0 },
+      { anchorX: 158, anchorY: 118, length: 30, speed: 1.0, damage: 1, startAngle: 1.5 },
+      // Tier 3 — summit pendulum (anchored to HUD bar area, swings below)
+      { anchorX: 128, anchorY: 18,  length: 20, speed: 1.3, damage: 2, startAngle: 0 },
     ],
 
     dartTraps: [
-      // Tier 1 — intro dart from right wall
-      { x: 250, y: 159, direction: -1, interval: 3200, speed: 100, damage: 1 },
-      // Tier 2 — crossfire from both walls
-      { x: 6,   y: 123, direction: 1,  interval: 3200, speed: 110, damage: 1 },
-      { x: 250, y: 123, direction: -1, interval: 3200, speed: 110, damage: 1 },
-      // Tier 3 — dart from left into gauntlet
-      { x: 6,   y: 87,  direction: 1,  interval: 2800, speed: 120, damage: 1 },
-      // Tier 4 — dart across bridge (timed with pendulum)
-      { x: 250, y: 51,  direction: -1, interval: 2900, speed: 130, damage: 1 },
-      // Tier 5 — summit crossfire
-      { x: 250, y: 15,  direction: -1, interval: 2800, speed: 110, damage: 1 },
-      { x: 6,   y: 15,  direction: 1,  interval: 2800, speed: 110, damage: 1 },
+      // Tier 1 — dart from right wall across the bridge
+      { x: 250, y: 147, direction: -1, interval: 3200, speed: 100, damage: 1 },
+      // Tier 2 — crossfire! Darts from both walls
+      { x: 6,   y: 91,  direction: 1,  interval: 3000, speed: 110, damage: 1 },
+      { x: 250, y: 91,  direction: -1, interval: 3000, speed: 110, damage: 1 },
+      // Tier 3 — summit crossfire (staggered with pendulum)
+      { x: 250, y: 35,  direction: -1, interval: 2800, speed: 120, damage: 1 },
+      { x: 6,   y: 35,  direction: 1,  interval: 2800, speed: 120, damage: 1 },
     ],
   };
 
   Level3Data.enemySpawns = [
-    { x: 130, y: 202, type: 'hollow_soldier' },   // Ground
-    { x: 60,  y: 158, type: 'skeleton' },          // Tier 1
-    { x: 120, y: 86,  type: 'hollow_knight' },     // Tier 3 (gauntlet)
-    { x: 180, y: 50,  type: 'hollow_archer' },     // Tier 4 (bridge)
-    { x: 80,  y: 30,  type: 'gargoyle', patrolLeft: 30, patrolRight: 200, patrolY: 30 },
-    { x: 130, y: 14,  type: 'skeleton' },          // Tier 5 (summit)
+    { x: 150, y: 202, type: 'hollow_soldier' },   // Ground — away from spawn
+    { x: 60,  y: 146, type: 'skeleton' },          // Tier 1 — on bridge
+    { x: 120, y: 90,  type: 'hollow_knight' },     // Tier 2 — in the crossfire
+    { x: 50,  y: 90,  type: 'hollow_archer' },     // Tier 2 — adds pressure
+    { x: 80,  y: 55,  type: 'gargoyle', patrolLeft: 30, patrolRight: 200, patrolY: 55 },
+    { x: 130, y: 34,  type: 'skeleton' },          // Tier 3 — summit guard
   ];
 
   Level3Data.breakables = [
-    { x: 245, y: 166, type: 'crate'  },   // Tier 1 far right
-    { x: 232, y: 94,  type: 'barrel' },   // Tier 3 side platform
+    { x: 245, y: 154, type: 'crate'  },   // Tier 1 far right
+    { x: 232, y: 98,  type: 'barrel' },   // Tier 2 side platform
   ];
 
   Level3Data.decorations = [
-    { x: 0,   y: 0,   w: 14, h: 80,  color: 0x2a2018, alpha: 0.5 },
-    { x: 244, y: 0,   w: 12, h: 90,  color: 0x2a2018, alpha: 0.5 },
-    { x: 0,   y: 155, w: 6,  h: 30,  color: 0x3a3028, alpha: 0.85 },
-    { x: 250, y: 110, w: 6,  h: 30,  color: 0x3a3028, alpha: 0.85 },
-    { x: 120, y: 14,  w: 6,  h: 14,  color: 0x3a3028, alpha: 0.9 },
-    { x: 0,   y: 14,  w: 6,  h: 14,  color: 0x3a3028, alpha: 0.9 },
+    { x: 0,   y: 18,  w: 14, h: 100, color: 0x2a2018, alpha: 0.5 },
+    { x: 244, y: 18,  w: 12, h: 110, color: 0x2a2018, alpha: 0.5 },
+    { x: 0,   y: 164, w: 6,  h: 30,  color: 0x3a3028, alpha: 0.85 },
+    { x: 250, y: 108, w: 6,  h: 30,  color: 0x3a3028, alpha: 0.85 },
+    // Heavy gate frame at summit
+    { x: 60,  y: 34,  w: 6,  h: 16,  color: 0x3a3028, alpha: 0.9 },
+    { x: 0,   y: 34,  w: 6,  h: 16,  color: 0x3a3028, alpha: 0.9 },
   ];
 
 
@@ -464,8 +411,7 @@
   // Original: 256x270 — already nearly single screen!
   // NOTE: Boss spawns at hardcoded (200, 200) in GameScene._triggerBoss,
   // so the arena floor MUST be at y >= 205 for the boss to land on it.
-  // This means Level 4 is almost identical to the original — just
-  // worldHeight changes to 240 and the bottom is cropped.
+  // Unchanged from v1 — this already works well.
   //
   //   y=165 ████                            ████   side platforms
   //   y=210 ████████████████████████████████████████  ARENA FLOOR
@@ -475,7 +421,6 @@
   Level4Data.worldWidth = 256;
   Level4Data.worldHeight = 240;
 
-  // Keep original positions — they fit in 240 with the floor at 210
   Level4Data.playerSpawn = { x: 40, y: 204 };
 
   Level4Data.checkpoint = null;
@@ -483,18 +428,15 @@
   Level4Data.bossThreshold = { x: 0, y: 210, w: 256 };
 
   Level4Data.weakPoints = [
-    { x: 18,  y: 204, radius: 6 },   // floor left
-    { x: 238, y: 204, radius: 6 },   // floor right
-    { x: 18,  y: 159, radius: 6 },   // platform left
-    { x: 238, y: 159, radius: 6 },   // platform right
+    { x: 18,  y: 204, radius: 6 },
+    { x: 238, y: 204, radius: 6 },
+    { x: 18,  y: 159, radius: 6 },
+    { x: 238, y: 159, radius: 6 },
   ];
 
   Level4Data.platforms = [
-    // Arena floor (same Y as original)
     { x: 0,   y: 210, w: 256, h: 30,  tier: 0 },
-    // Left raised platform
     { x: 0,   y: 165, w: 60,  h: 8,   tier: 1 },
-    // Right raised platform
     { x: 196, y: 165, w: 60,  h: 8,   tier: 1 },
   ];
 
@@ -506,33 +448,110 @@
   Level4Data.enemySpawns = [];
 
   Level4Data.decorations = [
-    // Cathedral pillars
     { x: 0,   y: 0,   w: 14, h: 210, color: 0x4a4858, alpha: 0.7 },
     { x: 242, y: 0,   w: 14, h: 210, color: 0x4a4858, alpha: 0.7 },
-    // Inner pillars
     { x: 60,  y: 120, w: 8,  h: 90,  color: 0x3a3845, alpha: 0.5 },
     { x: 188, y: 120, w: 8,  h: 90,  color: 0x3a3845, alpha: 0.5 },
-    // Stained glass
     { x: 100, y: 20,  w: 56, h: 24,  color: 0x585668, alpha: 0.5 },
     { x: 20,  y: 40,  w: 24, h: 16,  color: 0x484060, alpha: 0.4 },
     { x: 212, y: 40,  w: 24, h: 16,  color: 0x484060, alpha: 0.4 },
-    // Distant spires
     { x: 70,  y: 0,   w: 10, h: 40,  color: 0x3a3845, alpha: 0.3 },
     { x: 176, y: 0,   w: 10, h: 40,  color: 0x3a3845, alpha: 0.3 },
-    // Floor accent
     { x: 80,  y: 206, w: 96, h: 4,   color: 0x585668, alpha: 0.5 },
   ];
 
 
   // ─────────────────────────────────────────────────────────────────────
-  // Re-register all levels with the overridden data
+  // PHANTOM OVERRIDE — Simple fair timer for single-screen
+  //
+  // The original Phantom tracks vertical progress ("climb higher to
+  // dismiss"). That doesn't work well in single-screen where the total
+  // vertical space is tiny. Instead: simple timer, and any significant
+  // movement (horizontal or vertical) resets it.
+  // ─────────────────────────────────────────────────────────────────────
+
+  // Override the PhantomSystem prototype to use a simple position-change
+  // tracker instead of vertical-only progress.
+  const _origPhantomUpdate = PhantomSystem.prototype.update;
+  PhantomSystem.prototype.update = function(delta, player) {
+    // Skip boss level (same as original)
+    if (GameState.currentLevel === 4) return;
+    if (!player || player.state === 'dead') {
+      this.idleTimer = 0;
+      this.telegraphing = false;
+      this.telegraphTimer = 0;
+      if (this.warningText) { this.warningText.destroy(); this.warningText = null; }
+      if (this.phantomActive) this._despawnPhantom();
+      this._lastX = null;
+      this._lastY = null;
+      return;
+    }
+
+    // Track player position — any meaningful movement resets the timer
+    if (this._lastX == null) {
+      this._lastX = player.x;
+      this._lastY = player.y;
+    }
+    const dx = Math.abs(player.x - this._lastX);
+    const dy = Math.abs(player.y - this._lastY);
+    if (dx > 20 || dy > 20) {
+      // Player moved significantly — reset idle timer
+      this.idleTimer = 0;
+      this._lastX = player.x;
+      this._lastY = player.y;
+
+      // If phantom is chasing, dismiss it after sustained movement
+      if (this.phantomActive) {
+        this._moveCredit = (this._moveCredit || 0) + dx + dy;
+        if (this._moveCredit > 80) {
+          this._despawnPhantom();
+          this._moveCredit = 0;
+          return;
+        }
+      }
+    }
+
+    // ── Phantom already active — chase player ──
+    if (this.phantomActive) {
+      this._updatePhantom(delta, player);
+      return;
+    }
+
+    // ── Telegraph phase ──
+    if (this.telegraphing) {
+      this.telegraphTimer -= delta;
+      if (this.warningText) {
+        const flash = Math.floor(Date.now() / 200) % 2;
+        this.warningText.setAlpha(flash === 0 ? 0.3 : 1.0);
+      }
+      if (this.telegraphTimer <= 0) {
+        this._spawnPhantom(player);
+      }
+      return;
+    }
+
+    // ── Idle timer — just counts up, no vertical check ──
+    this.idleTimer += delta;
+    if (this.idleTimer >= this.triggerTime) {
+      this._startTelegraph(player);
+    }
+  };
+
+  // Increase base timer for single-screen (45s instead of 35s)
+  // The screen is smaller so players move around more — be fair.
+  PHANTOM_BASE_TRIGGER_TIME = 45000;
+  PHANTOM_MIN_TRIGGER_TIME = 20000;
+
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Re-register all levels
   // ─────────────────────────────────────────────────────────────────────
   LevelRegistry[1] = Level1Data;
   LevelRegistry[2] = Level2Data;
   LevelRegistry[3] = Level3Data;
   LevelRegistry[4] = Level4Data;
 
-  console.log('[SINGLE SCREEN] Level data overridden — all levels are now 256x240');
+  console.log('[SINGLE SCREEN v2] Level data overridden — spacious layouts, fair phantom timer');
   </script>
 
   <!-- Game entry point (must come last) -->
