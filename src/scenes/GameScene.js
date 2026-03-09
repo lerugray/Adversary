@@ -112,6 +112,7 @@ class GameScene extends Phaser.Scene {
     // ── Phase 5B: Boss system (Level 4 only) ──────────────────────────
     this.boss = null;
     this._bossTriggered = false;
+    this._bossDeathTimer = 0;
     this._weakPoints = [];
     this._weakPointsHit = new Set();
 
@@ -409,14 +410,25 @@ class GameScene extends Phaser.Scene {
   }
 
   _updateBoss(delta) {
-    if (!this.boss || this.boss.isDead) return;
+    if (!this.boss) return;
 
-    // Update boss health bar
-    this.hud.setBossHealth(this.boss.hp, this.boss.maxHp);
+    // Update boss health bar while alive
+    if (!this.boss._dead) {
+      this.hud.setBossHealth(this.boss.hp, this.boss.maxHp);
+    }
 
-    // Check boss death → victory
-    if (this.boss._dead) {
-      this._onBossDefeated();
+    // Check boss death → wait for death sequence to finish before triggering victory
+    if (this.boss._dead && !this._bossVictory) {
+      // Wait 2 seconds for the death animation to play out before victory
+      if (!this._bossDeathTimer) {
+        this._bossDeathTimer = 2000; // match the death sequence timing
+        // Set health bar to 0 immediately
+        this.hud.setBossHealth(0, this.boss.maxHp);
+      }
+      this._bossDeathTimer -= delta;
+      if (this._bossDeathTimer <= 0) {
+        this._onBossDefeated();
+      }
     }
   }
 
@@ -428,6 +440,7 @@ class GameScene extends Phaser.Scene {
     this.hud.hideBossHealth();
 
     // Clear all remaining hazards so nothing can cheap-kill the player
+    // (boss already handled its own death animation — destroyAll is safe now)
     this.enemyManager.destroyAll();
     if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
@@ -591,9 +604,20 @@ class GameScene extends Phaser.Scene {
           this.chestSystem.onEnemyKilled(enemy.x, enemy.y);
         }
 
-        if (this.player.isPlunging && !this.player.plungeHit) {
-          this.player.plungeHit = true;
-          this.player.body.setVelocityY(-150);
+        if (this.player.isPlunging) {
+          this.player.plungeBounceCount++;
+
+          // Boss: only allow 2 bounces, then plunge falls through
+          const isBoss = enemy instanceof HollowKingBoss;
+          if (isBoss && this.player.plungeBounceCount > 2) {
+            // Too many bounces — end plunge, don't bounce
+            this.player.plungeHit = true;
+          } else {
+            // Bounce upward, maintaining horizontal direction of travel
+            this.player.plungeHit = true;
+            this.player.body.setVelocityY(-150);
+            this.player.body.setVelocityX(this.player.facing * 30);
+          }
         }
       }
     }
@@ -640,6 +664,67 @@ class GameScene extends Phaser.Scene {
           proj.destroy();
           projs.splice(i, 1);
           break;
+        }
+      }
+    }
+  }
+
+  // ── Projectile → flying hazard (bat) collision ──────────────────────────────
+
+  _checkProjectileVsBats() {
+    const projs = this.player.projectiles;
+    if (!projs || projs.length === 0) return;
+    if (!this.flyingHazardSystem || !this.flyingHazardSystem._bats) return;
+
+    const bats = this.flyingHazardSystem._bats;
+
+    for (let i = projs.length - 1; i >= 0; i--) {
+      const proj = projs[i];
+      if (!proj || !proj.active) {
+        projs.splice(i, 1);
+        continue;
+      }
+
+      for (const bat of bats) {
+        if (!bat.alive || !bat.sprite || !bat.sprite.active) continue;
+
+        const dx = Math.abs(proj.x - bat.x);
+        const dy = Math.abs(proj.y - bat.y);
+
+        if (dx < FH_SIZE_W / 2 + 4 && dy < FH_SIZE_H / 2 + 4) {
+          // Kill the bat
+          bat.alive = false;
+          GameState.score += FH_KILL_SCORE;
+          GameState.player.xp += FH_KILL_XP;
+
+          // Death flash and fade
+          bat.sprite.setTint(0xffffff);
+          this.tweens.add({
+            targets: bat.sprite,
+            alpha: 0, scaleX: 1.5, scaleY: 1.5,
+            duration: 300, ease: 'Cubic.easeOut',
+            onComplete: () => {
+              if (bat.sprite && bat.sprite.active) bat.sprite.destroy();
+            }
+          });
+
+          // Score popup
+          const popup = this.add.text(bat.x, bat.y - 10, `+${FH_KILL_SCORE}`, {
+            fontFamily: GAME_FONT, fontSize: '7px', color: '#ffdd44',
+            stroke: '#000000', strokeThickness: 2, padding: FONT_PAD,
+          }).setOrigin(0.5, 1).setDepth(50);
+          this.tweens.add({
+            targets: popup, y: popup.y - 16, alpha: 0,
+            duration: 800, ease: 'Power2',
+            onComplete: () => popup.destroy(),
+          });
+
+          // Destroy projectile (unless piercing)
+          if (!proj._piercing) {
+            proj.destroy();
+            projs.splice(i, 1);
+            break;
+          }
         }
       }
     }
@@ -749,6 +834,9 @@ class GameScene extends Phaser.Scene {
 
     // Special attack projectile → enemy collision
     this._checkProjectileCollisions();
+
+    // Special attack projectile → flying hazard (bat) collision
+    this._checkProjectileVsBats();
 
     // Enemy body → player contact damage
     this._checkEnemyContactDamage();

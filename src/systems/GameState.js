@@ -33,6 +33,8 @@ const GameState = {
     weapon:    null,
     armor:     null,
     accessory: null,
+    // All collected accessories (for switching in pause menu)
+    accessoryInventory: [],
     // Special attack currently equipped
     specialAttack: 'knife',
     // Level-up bonuses (accumulated from choices)
@@ -67,6 +69,7 @@ const GameState = {
       weapon:        null,
       armor:         null,
       accessory:     null,
+      accessoryInventory: [],
       specialAttack: 'knife',
       attackPowerBonus: 0,
       speedBonus:       0,

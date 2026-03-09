@@ -1,5 +1,5 @@
 /**
- * HollowKingBoss.js — The Dark Knight, Level 4 boss.
+ * HollowKingBoss.js — The Hollow King, Level 4 boss.
  *
  * Behaviour:
  *   - Moves like the player: can walk, jump, attack

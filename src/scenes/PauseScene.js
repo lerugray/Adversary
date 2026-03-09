@@ -1,11 +1,8 @@
 /**
  * PauseScene.js — Pause overlay, runs on top of GameScene.
  *
- * Phase 1: Stub only.
- *
- * Future phases:
- *  - Phase 9: Semi-transparent overlay, resume / quit options, settings.
- *  - Phase 10: Full pause menu with controller navigation.
+ * Shows equipped gear, pickup legend, and accessory switching.
+ * Press Left/Right on the accessory line to cycle through collected rings.
  *
  * Note: PauseScene is launched with scene.launch() (not scene.start()) so
  * GameScene continues to exist underneath it.  When unpausing, call
@@ -84,7 +81,6 @@ class PauseScene extends Phaser.Scene {
 
     const weaponName = gs.weapon ? gs.weapon.name : 'None';
     const armorName  = gs.armor  ? gs.armor.name  : 'None';
-    const accName    = gs.accessory ? gs.accessory.name : 'None';
 
     this.add.text(legendX, equipY + 14, `Wpn: ${weaponName}`, {
       fontFamily: GAME_FONT, fontSize: '6px', color: '#aaaaaa', padding: FONT_PAD,
@@ -94,9 +90,29 @@ class PauseScene extends Phaser.Scene {
       fontFamily: GAME_FONT, fontSize: '6px', color: '#ddaa44', padding: FONT_PAD,
     }).setOrigin(0, 0.5);
 
-    this.add.text(legendX, equipY + 38, `Rng: ${accName}`, {
+    // ── Accessory line (switchable with Left/Right) ─────────────────
+    const accY = equipY + 38;
+    const accName = gs.accessory ? gs.accessory.name : 'None';
+    const inv = gs.accessoryInventory || [];
+    const hasMultiple = inv.length > 1;
+
+    const arrows = hasMultiple ? '< ' : '  ';
+    const arrowsR = hasMultiple ? ' >' : '';
+    this._accText = this.add.text(legendX, accY, `Rng: ${arrows}${accName}${arrowsR}`, {
       fontFamily: GAME_FONT, fontSize: '6px', color: '#44ccaa', padding: FONT_PAD,
     }).setOrigin(0, 0.5);
+
+    if (hasMultiple) {
+      this.add.text(legendX, accY + 10, '(Left/Right to switch)', {
+        fontFamily: GAME_FONT, fontSize: '5px', color: '#337766', padding: FONT_PAD,
+      }).setOrigin(0, 0.5);
+    }
+
+    // Track accessory effect description
+    const accDesc = gs.accessory ? gs.accessory.desc : '';
+    this._accDescText = this.add.text(cx, accY + 20, accDesc, {
+      fontFamily: GAME_FONT, fontSize: '5px', color: '#66aa99', padding: FONT_PAD,
+    }).setOrigin(0.5, 0.5);
 
     this.add.text(cx, 222, 'Press ENTER to resume', {
       fontFamily: GAME_FONT,
@@ -106,14 +122,45 @@ class PauseScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     this.inputManager = new InputManager(this);
+    this._switchCooldown = 0;
   }
 
-  update() {
+  update(time, delta) {
+    if (this._switchCooldown > 0) this._switchCooldown -= delta;
+
     if (this.inputManager.isStartJustPressed()) {
       // Emit event so GameScene can perform any cleanup before resuming.
       this.events.emit('resume-game');
       this.scene.stop();
       this.scene.resume('GameScene');
+      return;
+    }
+
+    // ── Accessory switching with Left/Right ────────────────────────
+    const gs = GameState.player;
+    const inv = gs.accessoryInventory || [];
+    if (inv.length > 1 && this._switchCooldown <= 0) {
+      let switched = false;
+      const curIdx = gs.accessory
+        ? inv.findIndex(a => a.name === gs.accessory.name)
+        : -1;
+
+      if (this.inputManager.isRightHeld()) {
+        const next = (curIdx + 1) % inv.length;
+        gs.accessory = { ...inv[next] };
+        switched = true;
+      } else if (this.inputManager.isLeftHeld()) {
+        const prev = (curIdx - 1 + inv.length) % inv.length;
+        gs.accessory = { ...inv[prev] };
+        switched = true;
+      }
+
+      if (switched) {
+        this._switchCooldown = 200;
+        const name = gs.accessory ? gs.accessory.name : 'None';
+        this._accText.setText(`Rng: < ${name} >`);
+        this._accDescText.setText(gs.accessory ? gs.accessory.desc : '');
+      }
     }
   }
 }

@@ -126,6 +126,7 @@ class PlayerEntity {
     // ── Plunge ───────────────────────────────────────────────────────
     this.isPlunging    = false;
     this.plungeHit     = false; // true once plunge contacted something
+    this.plungeBounceCount = 0; // track bounces (max 2 on boss)
 
     // ── Dodge roll state ──────────────────────────────────────────────
     this.dodgeTimer    = 0;   // ms remaining in dodge roll
@@ -233,7 +234,10 @@ class PlayerEntity {
       // Only allow pause during plunge, no movement/attack
       this._handlePause(input);
       // Enforce constant plunge speed every frame (no drift from physics)
-      this.sprite.body.setVelocityX(0);
+      // After a bounce, maintain horizontal momentum; otherwise go straight down
+      if (!this.plungeHit) {
+        this.sprite.body.setVelocityX(0);
+      }
       this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
     }
 
@@ -459,8 +463,8 @@ class PlayerEntity {
   _handleJump(input) {
     const grounded = this.sprite.body.blocked.down;
 
-    // Initiate jump
-    if (input.isJumpJustPressed() && grounded && !this.isPlunging) {
+    // Initiate jump — blocked during knockback and hurt state
+    if (input.isJumpJustPressed() && grounded && !this.isPlunging && !this.knockbackActive && this.state !== STATE.HURT) {
       this.sprite.body.setVelocityY(JUMP_VELOCITY);
       this.isJumping      = true;
       this.jumpHoldFrames = 0;
@@ -544,9 +548,10 @@ class PlayerEntity {
   }
 
   _startPlunge() {
-    this.isPlunging  = true;
-    this.plungeHit   = false;
-    this.state       = STATE.PLUNGE;
+    this.isPlunging      = true;
+    this.plungeHit       = false;
+    this.plungeBounceCount = 0;
+    this.state           = STATE.PLUNGE;
     this.attackCooldownTimer = ATTACK_COOLDOWN;
 
     // Slam downward at fixed speed — zero out per-body gravity so it doesn't accelerate
@@ -955,6 +960,16 @@ class PlayerEntity {
       return;
     }
 
+    // ── Cancel climb if on ladder ─────────────────────────────────────
+    if (this._isClimbing) {
+      this._isClimbing = false;
+      this._climbZone  = null;
+      this.sprite.body.setAllowGravity(true);
+      if (this.scene.playerPlatformCollider) {
+        this.scene.playerPlatformCollider.active = true;
+      }
+    }
+
     // ── Cancel plunge if active ────────────────────────────────────────
     if (this.isPlunging) {
       this.isPlunging = false;
@@ -1000,6 +1015,17 @@ class PlayerEntity {
 
   _die() {
     this.state = STATE.DEAD;
+
+    // Exit climb mode if on a ladder — re-enable gravity and platform collision
+    if (this._isClimbing) {
+      this._isClimbing = false;
+      this._climbZone  = null;
+      this.sprite.body.setAllowGravity(true);
+      if (this.scene.playerPlatformCollider) {
+        this.scene.playerPlatformCollider.active = true;
+      }
+    }
+
     this.sprite.body.setVelocity(0, 0);
     this.sprite.setTint(0xff0000);
     this._deactivateHitbox();

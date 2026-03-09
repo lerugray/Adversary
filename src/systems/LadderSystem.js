@@ -141,9 +141,9 @@ class LadderSystem {
 
     if (!player._isClimbing) {
       // ── Not yet climbing ─────────────────────────────────────────────
-      // Don't enter climb mode while ducking — holding Down to duck
-      // should not pull the player onto a ladder
-      if (zone && player.state !== 'duck') {
+      // Don't enter climb mode while ducking, during knockback, or while dead/hurt
+      if (zone && player.state !== 'duck' && player.state !== 'hurt' &&
+          player.state !== 'dead' && !player.knockbackActive) {
         // Player is horizontally aligned with a ladder
         if (input.isUpHeld() && midY > zone.topY) {
           // Initiate climb going up

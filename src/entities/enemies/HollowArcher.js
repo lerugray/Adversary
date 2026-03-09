@@ -162,10 +162,16 @@ class HollowArcher extends EnemyEntity {
         const hitH    = isDucking ? 5 : 9;
         const dy = Math.abs(arrowData.obj.y - centerY);
         if (dx < 5 && dy < hitH) {
-          player.takeDamage(this.damage, arrowData.obj.x);
-          this._destroyArrow(arrowData);
-          this.arrows.splice(i, 1);
-          continue;
+          // If the player is invincible (dodge i-frames, hit i-frames, etc.)
+          // the arrow passes through harmlessly — don't destroy it
+          if (player.isInvincible) {
+            // Arrow flies through — no damage, no destruction
+          } else {
+            player.takeDamage(this.damage, arrowData.obj.x);
+            this._destroyArrow(arrowData);
+            this.arrows.splice(i, 1);
+            continue;
+          }
         }
 
         // Jump-over bonus: player is airborne, horizontally close, and above the arrow

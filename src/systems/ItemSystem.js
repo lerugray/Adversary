@@ -193,7 +193,15 @@ class ItemSystem {
       }
       case 'accessory': {
         const acc = ACCESSORY_POOL[Math.floor(Math.random() * ACCESSORY_POOL.length)];
-        gs.accessory = { ...acc };
+        // Add to inventory if not already collected
+        const already = gs.accessoryInventory.some(a => a.name === acc.name);
+        if (!already) {
+          gs.accessoryInventory.push({ ...acc });
+        }
+        // Auto-equip if nothing equipped
+        if (!gs.accessory) {
+          gs.accessory = { ...acc };
+        }
         break;
       }
       case 'special': {
