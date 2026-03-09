@@ -223,20 +223,26 @@
   // LEVEL 2 — "Cresthollow" (Single Screen)
   //
   // DK 75m (Elevator Stage) inspired redesign.
-  // Two elevator shafts in the center: left goes UP, right goes DOWN.
-  // Small static platforms on the sides at different heights.
-  // NO LADDERS — elevators are the only way up.
-  // Bats fly across the screen as the primary hazard (replacing DK springs).
+  // Two elevator shafts: left goes UP, right goes DOWN.
+  // MOSTLY OPEN PIT — fall and you die. Small platforms are your
+  // only safe ground. Elevators are the only way up.
+  // Bats fly across as the primary hazard (replacing DK's springs).
   //
-  //   y=32  [============================]  Summit (checkpoint gate)
+  // Navigation (left elevator = main upward path):
+  //   Start bottom-left → hop on left elevator going UP →
+  //   jump off at left-mid → ride again to left-high →
+  //   ride to summit → jump onto summit platform
   //
-  //   y=75  [======]              [======]  Upper ledges (enemies)
-  //                  [====]                  Center stepping stone (y=90)
-  //              ↑(x=85)    ↓(x=171)        Elevator shafts
+  //   y=35  [========summit========]              Summit + checkpoint
   //
-  //   y=140 [=========]        [=========]  Mid landings
-  //              ↑                  ↓
-  //   y=218 [================================] GROUND
+  //   y=78  [=====]              [=====]          Upper ledges
+  //              ↑(x=80)    ↓(x=176)
+  //   y=120                 [=====]               Right mid (optional)
+  //   y=148 [========]                            Left mid (key stop)
+  //              ↑              ↓
+  //   y=200 [==========]  [=========]             Bottom platforms
+  //
+  //         ═══════ DEATH PIT (y>222) ═══════
   //   y=230 ════════════ HUD BAR ═══════════
   // ─────────────────────────────────────────────────────────────────────
 
@@ -244,53 +250,56 @@
   Level2Data.worldWidth = 256;
   Level2Data.worldHeight = 240;
 
-  Level2Data.playerSpawn = { x: 28, y: 212 };
+  Level2Data.playerSpawn = { x: 30, y: 194 };
 
-  Level2Data.checkpoint = { x: 200, y: 24, radius: 8, type: 'gate' };
+  Level2Data.checkpoint = { x: 170, y: 27, radius: 8, type: 'gate' };
+
+  // Flag for death pit (handled by override below)
+  Level2Data.deathPitY = 222;
 
   Level2Data.platforms = [
-    // Ground — full width
-    { x: 0,   y: 218, w: 256, h: 22,  tier: 0 },
+    // Bottom platforms — small islands, NOT full-width ground
+    { x: 0,   y: 200, w: 72,  h: 10,  tier: 0 },   // left start (spawn here)
+    { x: 184, y: 200, w: 72,  h: 10,  tier: 0 },   // right bottom
 
-    // Mid landings — jump off elevators here
-    { x: 0,   y: 140, w: 60,  h: 10,  tier: 1 },   // left landing
-    { x: 196, y: 140, w: 60,  h: 10,  tier: 1 },   // right landing
+    // Left mid — key landing from left elevator
+    { x: 0,   y: 148, w: 62,  h: 10,  tier: 1 },
 
-    // Center stepping stone — small, risky jump between shafts
-    { x: 113, y: 90,  w: 30,  h: 8,   tier: 2 },
+    // Right mid — optional platform, archer perch
+    { x: 194, y: 120, w: 62,  h: 10,  tier: 1 },
 
-    // Upper ledges — enemies guard these
-    { x: 0,   y: 75,  w: 55,  h: 10,  tier: 2 },   // left upper (archer)
-    { x: 201, y: 75,  w: 55,  h: 10,  tier: 2 },   // right upper (skeleton)
+    // Upper ledges — high stops before summit
+    { x: 0,   y: 78,  w: 52,  h: 10,  tier: 2 },   // left upper
+    { x: 204, y: 78,  w: 52,  h: 10,  tier: 2 },   // right upper
 
-    // Summit — full width, checkpoint gate
-    { x: 0,   y: 32,  w: 256, h: 10,  tier: 3 },
+    // Summit — NOT full width, centered. Must jump from elevator.
+    { x: 50,  y: 35,  w: 156, h: 10,  tier: 3 },
   ];
 
   // NO LADDERS — elevators are the only way up!
   Level2Data.ladders = [];
 
   // Two elevator shafts: left goes UP, right goes DOWN
-  // 3 platforms per shaft, evenly spaced across the vertical range
+  // 3 platforms per shaft, continuously cycling
   Level2Data.elevators = [
     {
-      x: 85,           // left-center shaft
+      x: 80,            // left shaft — main upward route
       w: 28,
       h: 6,
-      minY: 42,        // just below summit
-      maxY: 212,       // just above ground
-      speed: -38,      // going UP (negative = upward)
+      minY: 42,         // wraps just below summit
+      maxY: 206,        // wraps near bottom platforms
+      speed: -35,       // going UP
       count: 3,
       color: 0x5577aa,
       hlColor: 0x7799cc,
     },
     {
-      x: 171,          // right-center shaft
+      x: 176,           // right shaft — goes DOWN (danger/repositioning)
       w: 28,
       h: 6,
       minY: 42,
-      maxY: 212,
-      speed: 38,       // going DOWN (positive = downward)
+      maxY: 206,
+      speed: 35,        // going DOWN
       count: 3,
       color: 0x5577aa,
       hlColor: 0x7799cc,
@@ -298,32 +307,29 @@
   ];
 
   Level2Data.enemySpawns = [
-    // Ground — one soldier patrol (away from spawn)
-    { x: 180, y: 210, type: 'hollow_soldier' },
+    // Left mid — skeleton blocks the landing (reassembles once!)
+    { x: 30,  y: 140, type: 'skeleton' },
 
-    // Left mid landing — skeleton (reassembles once = extra danger)
-    { x: 30,  y: 132, type: 'skeleton' },
+    // Right mid — archer fires across the open pit toward left elevator
+    { x: 220, y: 112, type: 'hollow_archer' },
 
-    // Left upper ledge — archer fires across the elevator gap
-    { x: 25,  y: 67,  type: 'hollow_archer' },
-
-    // Right upper ledge — skeleton guards the approach to summit
-    { x: 225, y: 67,  type: 'skeleton' },
+    // Right upper — skeleton guards the high ground
+    { x: 225, y: 70,  type: 'skeleton' },
 
     // Summit — knight guards the checkpoint gate
-    { x: 130, y: 24,  type: 'hollow_knight' },
+    { x: 130, y: 27,  type: 'hollow_knight' },
   ];
 
   Level2Data.flyingHazard = {
-    interval: 3800,      // slightly faster than before — bats are the main hazard
+    interval: 3500,      // frequent — bats are the main hazard
     speed: 70,
     damage: 1,
     yOffset: [-30, 10],
   };
 
   Level2Data.breakables = [
-    { x: 240, y: 218, type: 'barrel' },   // ground far right
-    { x: 8,   y: 140, type: 'crate',      // left mid landing
+    { x: 55,  y: 200, type: 'barrel' },   // right edge of start platform
+    { x: 8,   y: 148, type: 'crate',      // left mid landing
       drops: [
         { type: 'heart',   chance: 0.50 },
         { type: 'weapon',  chance: 0.15 },
@@ -333,15 +339,17 @@
   ];
 
   Level2Data.decorations = [
-    // Elevator shaft backdrops (dark vertical strips)
-    { x: 77,  y: 42,  w: 16, h: 176, color: 0x141822, alpha: 0.4 },
-    { x: 163, y: 42,  w: 16, h: 176, color: 0x141822, alpha: 0.4 },
-    // Wall pillars
-    { x: 0,   y: 0,   w: 10, h: 75,  color: 0x1a2030, alpha: 0.5 },
-    { x: 246, y: 0,   w: 10, h: 75,  color: 0x1a2030, alpha: 0.5 },
-    // Distant ruin silhouettes
-    { x: 120, y: 0,   w: 16, h: 32,  color: 0x1a1822, alpha: 0.35 },
-    { x: 200, y: 0,   w: 10, h: 32,  color: 0x1a1822, alpha: 0.25 },
+    // Elevator shaft backdrops (dark vertical strips showing the shaft)
+    { x: 72,  y: 42,  w: 16, h: 170, color: 0x141822, alpha: 0.35 },
+    { x: 168, y: 42,  w: 16, h: 170, color: 0x141822, alpha: 0.35 },
+    // Wall pillars left/right
+    { x: 0,   y: 0,   w: 8,  h: 35,  color: 0x1a2030, alpha: 0.5 },
+    { x: 248, y: 0,   w: 8,  h: 35,  color: 0x1a2030, alpha: 0.5 },
+    // Distant ruin silhouettes (background atmosphere)
+    { x: 115, y: 0,   w: 14, h: 35,  color: 0x1a1822, alpha: 0.3 },
+    { x: 30,  y: 0,   w: 10, h: 35,  color: 0x1a1822, alpha: 0.2 },
+    // Pit darkness gradient at bottom (visual cue for danger)
+    { x: 0,   y: 212, w: 256, h: 18, color: 0x080410, alpha: 0.7 },
   ];
 
 
@@ -490,6 +498,46 @@
     { x: 176, y: 0,   w: 10, h: 48,  color: 0x3a3845, alpha: 0.3 },
     { x: 80,  y: 214, w: 96, h: 4,   color: 0x585668, alpha: 0.5 },
   ];
+
+
+  // ─────────────────────────────────────────────────────────────────────
+  // DEATH PIT — For levels with open pits (Level 2 elevator stage)
+  //
+  // If the level data has a `deathPitY` property, falling below that Y
+  // kills the player instantly. The world bottom boundary is disabled
+  // so the player actually falls into the pit instead of landing on
+  // an invisible floor.
+  // ─────────────────────────────────────────────────────────────────────
+
+  const _origGameSceneCreate = GameScene.prototype.create;
+  GameScene.prototype.create = function() {
+    _origGameSceneCreate.call(this);
+
+    // If this level has a death pit, disable the bottom world boundary
+    // so the player can fall through instead of landing on invisible floor.
+    // Also disable the player's collideWorldBounds so they actually fall out.
+    if (this.currentLevelData.deathPitY) {
+      this.physics.world.setBoundsCollision(true, true, false, false);
+      this.player.sprite.setCollideWorldBounds(false);
+    }
+  };
+
+  const _origGameSceneUpdate = GameScene.prototype.update;
+  GameScene.prototype.update = function(time, delta) {
+    _origGameSceneUpdate.call(this, time, delta);
+
+    // Death pit check — instant kill if player falls below threshold
+    const pitY = this.currentLevelData.deathPitY;
+    if (pitY && this.player && this.player.state !== 'dead') {
+      if (this.player.y > pitY) {
+        // Bypass invincibility — pits always kill
+        this.player.isInvincible = false;
+        this.player.takeDamage(999, this.player.x);
+      }
+    }
+  };
+
+  console.log('[SINGLE SCREEN] Death pit system active for levels with deathPitY');
 
 
   // ─────────────────────────────────────────────────────────────────────
