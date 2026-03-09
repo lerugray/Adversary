@@ -1,0 +1,342 @@
+ADVERSARY — Sprite Generation Guide
+=====================================
+
+Tool: Pixellab.ai (free, built for game pixel art)
+Backup: Microsoft Copilot Image Creator (free, uses DALL-E 3)
+Cleanup: Piskel (piskelapp.com, free, browser-based pixel editor)
+
+All sprites target the EARLY NES era (1983-1985) — Donkey Kong, Ice Climber,
+Wrecking Crew. Chunky proportions, big heads, stubby legs, 2-3 colors per
+sprite plus transparency, no anti-aliasing, no dithering, hard pixel edges.
+
+=======================================================================
+PROMPT 1 — Player Character (START HERE)
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 era, Donkey Kong / Ice Climber
+style), 16x16 pixels per frame, black background, grid layout. Small armored
+knight hero. Frames left to right: standing idle, walk frame 1 (left leg
+forward, right arm forward), walk frame 2 (right leg forward, left arm
+forward) — exaggerated Jumpman-style waddle with big arm/leg swings. Jumping
+with knees tucked up. Ducking/crouching low. Sword swing attack (arm extended
+with short sword). Air attack (sword pointing down mid-jump). Hurt/knockback
+(thrown backward, arms up). Death (crumpled on ground). Dodge roll (tucked
+ball shape). 3 colors plus transparency: dark steel blue body, silver for
+helmet and sword, peach skin tone. Chunky proportions, big head, stubby legs.
+No anti-aliasing, no dithering, hard pixel edges only.
+
+Frames: idle, walk1, walk2, jump, duck, attack, air attack, hurt, death,
+dodge roll (10 frames)
+
+=======================================================================
+PROMPT 2 — Hollow Soldier + Hollow Archer
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), 16x16 pixels per
+frame, black background, grid layout. Two enemy types for a dark fantasy
+platformer. TOP ROW — Hollow Soldier: shambling undead warrior in ragged
+armor. Frames: idle standing, walk frame 1, walk frame 2 (slow shuffling
+patrol), sword attack windup, sword attack swing, death (collapsing). BOTTOM
+ROW — Hollow Archer: stationary undead bowman. Frames: idle standing with
+bow, drawing bow back, firing arrow (arm extended), death (collapsing). Both
+enemies: 3 colors plus transparency — brownish-gray body, rusty orange for
+weapon/armor accents, dark red eyes. Chunky early NES proportions, big heads,
+simple shapes. No anti-aliasing, hard pixel edges only.
+
+Frames: Soldier 6, Archer 4 (10 total)
+
+=======================================================================
+PROMPT 3 — Hollow Knight + Skeleton
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), 16x16 pixels per
+frame, black background, grid layout. Two enemy types for a dark fantasy
+platformer. TOP ROW — Hollow Knight: larger armored undead soldier, bulkier
+than basic enemies, carries a big sword. Frames: idle, walk frame 1, walk
+frame 2, attack windup, attack swing, climbing a ladder, death. BOTTOM ROW —
+Skeleton: classic bare-bones skeleton warrior. Frames: idle, walk frame 1,
+walk frame 2, attack, death (bones scattering apart), reassembling (bones
+pulling back together into pile), fully reassembled standing. 3 colors plus
+transparency: Hollow Knight gets dark purple armor with silver trim; Skeleton
+gets pure white bones with gray shading. No anti-aliasing, hard pixel edges
+only.
+
+Frames: Knight 7, Skeleton 7 (14 total)
+
+=======================================================================
+PROMPT 4 — Gargoyle + Bat + Phantom
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), 16x16 pixels per
+frame, black background, grid layout. Three flying enemy types. TOP ROW —
+Gargoyle: stone winged demon, perched and menacing. Frames: flying/gliding
+with wings spread, wings up flap, wings down flap, swooping diagonally
+downward to attack, death (crumbling to pieces). MIDDLE ROW — Bat: small
+simple bat. Frames: wings up, wings down (2-frame flap cycle), death poof.
+BOTTOM ROW — Phantom: translucent ghostly specter, invincible pursuer.
+Frames: floating idle, moving/drifting forward, menacing lunge. Gargoyle:
+dark gray stone with red eyes, 3 colors. Bat: dark brown/black, 2 colors.
+Phantom: pale blue-white, ethereal and simple. No anti-aliasing, hard pixel
+edges only.
+
+Frames: Gargoyle 5, Bat 3, Phantom 3 (11 total)
+
+=======================================================================
+PROMPT 5 — Mimic + Chests + Breakables
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), 16x16 pixels per
+frame, black background, grid layout. Interactive objects for a dark fantasy
+platformer. TOP ROW — Treasure Chest: closed chest, lid opening halfway, lid
+fully open (empty inside). MIDDLE ROW — Mimic (chest monster): closed chest
+identical to normal chest, chest cracking open with fangs visible, fully
+transformed mimic (chest with legs and big teeth), mimic walking frame 1,
+mimic walking frame 2, mimic bite attack, mimic death. BOTTOM ROW —
+Breakable objects: intact wooden crate, crate smashed (debris pieces), intact
+wooden barrel, barrel smashed (debris pieces). Chests: brown wood with gold
+trim, 3 colors. Mimic transformed: brown with red mouth interior.
+Crate/barrel: brown wood tones. No anti-aliasing, hard pixel edges only.
+
+Frames: Chest 3, Mimic 7, Breakables 4 (14 total)
+
+=======================================================================
+PROMPT 6 — Boss: The Hollow King
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), black background,
+grid layout. Final boss character for a dark fantasy platformer. The Hollow
+King: a tall imposing dark knight, larger than normal enemies (16x24 pixels
+per frame). Deep purple armor with a tattered cape and a crown. Frames left
+to right: idle standing with greatsword, walking frame 1, walking frame 2,
+sword slash attack (big overhead swing), leaping into the air for jump
+attack, mid-charge dashing forward (horizontal lunge), shield bash (arm
+thrust forward with shield), staggered/stunned (reeling backward, exposed),
+death frame 1 (on knees), death frame 2 (collapsing/dissolving). 3 colors
+plus transparency: deep purple armor, gold crown and trim, pale ghostly skin.
+Intimidating but chunky early NES proportions. No anti-aliasing, hard pixel
+edges only.
+
+Frames: 10 total (16x24 each — taller than normal sprites)
+
+=======================================================================
+PROMPT 7 — Items, Pickups & Projectiles
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), small icons 8x8
+pixels each, black background, grid layout with labels. Pickup items and
+projectiles for a dark fantasy platformer. ROW 1 PICKUPS: red heart (health),
+blue diamond mana shard, rusty short sword (weapon tier 1), iron sword (tier
+2), shining saber (tier 3), brown leather vest (armor tier 1), gray chain
+mail (tier 2), silver plate armor (tier 3), glowing yellow-white soul orb.
+ROW 2 SPECIAL WEAPONS: throwing knife, spinning axe, holy water bottle,
+golden cross/crucifix, ornate skull-shaped key, flaming flask/bomb. ROW 3
+PROJECTILES: horizontal arrow (for archers), small dart (for traps), thrown
+knife in flight, spinning axe in arc, holy water ground fire (small flame
+puddle), cross boomerang spinning, spiraling skull key, ember flask explosion
+(small burst). Bright distinct colors per item so players can instantly
+identify them. No anti-aliasing, hard pixel edges only.
+
+Icons: 9 pickups, 6 special weapons, 8 projectiles (23 total, all 8x8)
+
+=======================================================================
+PROMPT 8 — HUD & UI Elements
+=======================================================================
+
+Early NES pixel art UI elements (1983-1985 Famicom era), black background,
+grid layout. For a dark fantasy platformer HUD. Elements: full red heart icon
+(8x8), empty/dark heart icon (8x8), mana bar segment full (blue), mana bar
+segment empty (dark), small directional arrow pointing right (for soul
+indicator — will be rotated in code), boss health bar segment full
+(red-orange), boss health bar segment critical (flashing yellow), XP icon
+(small yellow gem), "DANGER" warning text in pixel font (red, blocky
+NES-style letters), "LEVEL UP" text in pixel font (gold/yellow), skull icon
+for death counter. All icons 8x8 pixels, text elements proportional. 2-3
+colors per element. No anti-aliasing, hard pixel edges only.
+
+Elements: ~12 pieces
+
+=======================================================================
+PROMPT 9 — Level 1 Tileset: "The Ashen Hearth"
+=======================================================================
+
+Early NES pixel art tileset (1983-1985 Famicom era), 16x16 tiles each, black
+background, grid layout. Tileset for a ruined bonfire shrine level (inspired
+by Firelink Shrine in Dark Souls). Tiles needed: stone floor (top surface
+with edge), stone floor (solid fill), stone wall block, thin stone platform
+(can stand on), wooden ladder (vertical, 16px wide), bonfire/checkpoint
+(small lit fire on stone pedestal), stone pillar/column, crumbling arch
+background decoration, dark doorway background tile, stone head sculpture
+(spawns rolling hazards from its mouth). Warm amber and brown color palette —
+tan stone, dark brown shadows, orange-amber fire glow. 3-4 colors maximum
+per tile. No anti-aliasing, hard pixel edges only. Tiles should seamlessly
+connect when placed side by side.
+
+Tiles: ~10 pieces. Palette: warm amber/brown.
+
+=======================================================================
+PROMPT 10 — Level 2 Tileset: "Cresthollow"
+=======================================================================
+
+Early NES pixel art tileset (1983-1985 Famicom era), 16x16 tiles each, black
+background, grid layout. Tileset for a winding urban ruins level with fog
+(inspired by Undead Burg in Dark Souls). Tiles needed: cracked cobblestone
+floor (top surface), cobblestone fill, brick wall block, narrow stone ledge
+platform, wooden ladder, tower gate checkpoint (stone archway), broken window
+background, stone battlement/parapet background, fog wisp overlay decoration,
+crumbling brick wall edge. Cool gray and muted blue-green palette — gray
+stone, slate blue shadows, pale fog wisps. 3-4 colors maximum per tile. No
+anti-aliasing, hard pixel edges only. Tiles should connect seamlessly.
+
+Tiles: ~10 pieces. Palette: cool gray/blue-green.
+
+=======================================================================
+PROMPT 11 — Level 3 Tileset: "The Iron Passage"
+=======================================================================
+
+Early NES pixel art tileset (1983-1985 Famicom era), 16x16 tiles each, black
+background, grid layout. Tileset for a mechanical fortress with gears and
+traps (inspired by Sen's Fortress in Dark Souls). Tiles needed: iron plate
+floor (top surface with rivets), iron fill block, rusted metal wall, iron
+grate platform (can stand on, see-through), metal ladder with rungs, iron fog
+gate checkpoint, large gear background decoration (partially visible),
+pendulum blade (hanging from ceiling, blade pointing down), wall-mounted dart
+trap launcher (hole in wall), iron support beam, chain hanging decoration.
+Dark iron gray and rust orange palette — gunmetal gray, dark rust, dull
+orange-brown accents. 3-4 colors per tile. No anti-aliasing, hard pixel
+edges only.
+
+Tiles: ~11 pieces. Palette: gunmetal gray/rust orange.
+
+=======================================================================
+PROMPT 12 — Level 4 Tileset: "The Pale Spire"
+=======================================================================
+
+Early NES pixel art tileset (1983-1985 Famicom era), 16x16 tiles each, black
+background, grid layout. Tileset for a grand cathedral boss arena (inspired
+by Anor Londo in Dark Souls). Tiles needed: polished stone floor (top
+surface), stone fill, ornate cathedral wall with carved detail, wide stone
+platform, decorative pillar/column, tall gothic arched window background
+(with pale light), altar or throne background piece, boss arena weak point
+marker (glowing rune on wall, 4 needed in arena), grand staircase step
+tiles, cathedral ceiling vault decoration. Pale white and gold palette —
+ivory white stone, pale gold trim, cool blue-gray shadows. Grander and more
+ornate than other levels but still chunky early NES style. 3-4 colors per
+tile. No anti-aliasing, hard pixel edges only.
+
+Tiles: ~10 pieces. Palette: ivory white/pale gold.
+
+=======================================================================
+PROMPT 13 — Rolling Skulls + Pendulum + Dart + Trap Sprites
+=======================================================================
+
+Early NES pixel art sprite sheet (1983-1985 Famicom era), 16x16 pixels per
+frame, black background, grid layout. Trap and hazard sprites for a dark
+fantasy platformer. ROW 1 — Rolling skull: bone-white skull rolling (4
+rotation frames showing it tumbling), wild/enraged skull variant (same 4
+frames but reddish tint). ROW 2 — Pendulum blade: ceiling mount point
+(chain/rope anchor), blade swinging left position, blade center position,
+blade swinging right position. ROW 3 — Dart trap: wall-mounted launcher
+(stone face or hole in wall), dart projectile flying horizontally (small,
+pointed). ROW 4 — Stone head spawner: carved stone demon/gargoyle head
+mounted on wall with open mouth (skulls roll out of mouth). Skull: bone
+white with dark eye sockets. Wild skull: reddish-brown. Pendulum: silver
+blade, dark chain. Dart: dark gray. Stone head: gray-brown stone. No
+anti-aliasing, hard pixel edges only.
+
+Frames: skulls 8, pendulum 4, dart 2, stone head 1 (15 total)
+
+
+=======================================================================
+SUMMARY TABLE
+=======================================================================
+
+ #   Sheet                        Frames    Size
+ 1   Player character             10        16x16
+ 2   Hollow Soldier + Archer      10        16x16
+ 3   Hollow Knight + Skeleton     14        16x16
+ 4   Gargoyle + Bat + Phantom     11        16x16
+ 5   Mimic + Chests + Breakables  14        16x16
+ 6   Hollow King (boss)           10        16x24
+ 7   Items + Projectiles          23        8x8
+ 8   HUD & UI                     12        8x8
+ 9   Level 1 tileset              10        16x16
+10   Level 2 tileset              10        16x16
+11   Level 3 tileset              11        16x16
+12   Level 4 tileset              10        16x16
+13   Traps & Hazards              15        16x16
+                                 ---
+                          TOTAL: ~150 sprites/tiles
+
+
+=======================================================================
+CLEANUP STEPS (after AI generation)
+=======================================================================
+
+1. OPEN PISKEL (piskelapp.com) — free, browser-based pixel editor.
+
+2. IMPORT the AI-generated image into Piskel:
+   - File > Import > Open from computer
+   - Or paste/drag the image in
+
+3. SEPARATE FRAMES — If the AI gave you a sheet, use Piskel's "Import
+   spritesheet" option:
+   - Set frame width/height (16x16 or 8x8 depending on sheet)
+   - Piskel will split it into individual editable frames
+
+4. FIX STRAY PIXELS — Zoom in to 800%+ and clean up:
+   - Remove any anti-aliasing (smooth gradients between colors)
+   - Delete stray pixels that don't belong
+   - Sharpen edges — every pixel should be deliberate
+   - Make sure transparency is clean (no semi-transparent pixels)
+
+5. LOCK TO NES PALETTE — The NES had 54 hardware colors. You don't need
+   to use all of them, but every color in your sprite should be one of
+   these. The key colors you'll use most:
+
+   REDS:      #7C1F00  #BC2F00  #FC3838  #FCBCBC
+   ORANGES:   #A44000  #E47818  #FCC07C
+   YELLOWS:   #AC7C00  #FCC800  #FCF87C
+   GREENS:    #005800  #00A800  #00FC00  #B8F8B8
+   BLUES:     #0000A8  #0058F8  #3CBCFC  #A4E4FC
+   PURPLES:   #44009C  #6844FC  #B8B8F8
+   GRAYS:     #080808  #3C3C3C  #7C7C7C  #BCBCBC  #FCFCFC
+   SKIN:      #E4A484  #FCC4A8
+   BROWNS:    #503000  #8C4C18  #C89050
+
+   In Piskel, you can set up a custom palette with just these colors
+   so you don't accidentally use off-palette shades.
+
+6. CHECK FRAME SIZE — Make sure each frame is exactly the right pixel
+   dimensions (16x16, 16x24 for boss, 8x8 for items/UI). Resize canvas
+   in Piskel if the AI got it slightly wrong.
+
+7. TEST ANIMATION — Piskel has a live preview panel. Set the FPS to
+   about 8-10 (NES typically ran animations at 6-12 fps) and check:
+   - Does the walk cycle waddle look good?
+   - Are attack windups readable?
+   - Do death animations look clear?
+
+8. EXPORT — When a sheet is cleaned up:
+   - Export as PNG spritesheet (File > Export > PNG spritesheet)
+   - Set columns to match your frame count
+   - Save to the project's assets/ folder
+   - Name files clearly: player.png, hollow_soldier.png, tileset_L1.png, etc.
+
+9. REPEAT for each of the 13 prompt sheets.
+
+
+=======================================================================
+RECOMMENDED ORDER (biggest visual impact first)
+=======================================================================
+
+1. Prompt 1  — Player character (the waddle transforms the whole feel)
+2. Prompt 7  — Items & projectiles (small, quick wins, lots of variety)
+3. Prompt 2  — Hollow Soldier + Archer (most common enemies)
+4. Prompt 9  — Level 1 tileset (first thing players see)
+5. Prompt 13 — Traps & hazards (rolling skulls are iconic)
+6. Prompt 3  — Hollow Knight + Skeleton
+7. Prompt 4  — Gargoyle + Bat + Phantom
+8. Prompt 5  — Mimic + Chests + Breakables
+9. Prompt 6  — Boss: Hollow King
+10. Prompt 8 — HUD & UI
+11. Prompts 10-12 — Remaining level tilesets
