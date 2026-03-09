@@ -1,33 +1,44 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Single-screen variant: fix top-of-screen crowding on levels 1-3
+- Single-screen variant: bottom HUD, L3 pendulum fix, player shrink, tier redistribution
 
 ## What got done
 
-1. **Compact HUD override** (18px → 10px): The two-row HUD (hearts on row 1, MP/XP/LV/SP on row 2) was compressed to a single 10px-tall row. Hearts are smaller (4px instead of 6px), all stats on one line. Frees 8px of vertical space at the top. Boss health bar at the bottom is unchanged.
+1. **HUD moved to bottom of screen**: HUD bar now sits at y=230 (bottom 10px). Hearts are 4px, all stats on one compact row. Boss health bar (L4 only) repositioned just above the HUD bar at y=218. Debug text moved to top-right corner (6px font). This frees the entire top of the screen for gameplay.
 
-2. **Player shrunk further** (14px → 12px hitbox): Visual sprite is now 12x16 (was 12x18). Hitbox is 10x12 (was 10x14). Duck hitbox is 8 (was 9). This is close to the 10px Gargoyle — a proper small Jumpman-scale character. Archer arrow fire position lowered from sprite.y-7 to sprite.y-5 to compensate.
+2. **Tiers redistributed with 62px gaps**: With no HUD at top, summit moved from y=48 up to y=24, and all tiers respaced evenly:
+   - Summit: y=24 (was 48)
+   - Tier 2: y=86 (was 102)
+   - Tier 1: y=148 (was 156)
+   - Ground: y=210 (unchanged)
+   - 62px gaps between each tier (was 54px) — generous room for jumping and combat.
 
-3. **All tier positions lowered** for more summit headroom:
-   - Old: Summit=39, T2=96, T1=153, Ground=210 (57px gaps, 21px HUD clearance)
-   - New: Summit=48, T2=102, T1=156, Ground=210 (54px gaps, 38px HUD clearance)
-   - All enemy spawns, checkpoints, hazard spawners, trap positions, pendulum anchors, dart traps, breakables, and decorations updated to match the new tier positions across all 3 levels.
+3. **Player shrunk to 12px hitbox** (was 14px, originally 22px): Visual sprite is 12x16. Hitbox 10x12. Duck hitbox 8. Proper Jumpman scale. Archer arrows lowered to sprite.y-5.
 
-4. **Net headroom improvement**: A 22px Hollow Knight on the summit now has its head at y=26 — 16px clear of the HUD bar. Previously its head was at y=17, overlapping the HUD. The 12px player head is at y=36, with 26px of clean air above.
+4. **L3 Tier 1 pendulum bridge fixed**: Old pendulums were impassable — blade collision zone (7px radius) reached onto platform edges, hitting standing players. Fixes:
+   - Gaps widened: 28px → 36px
+   - Left platform: w=50 (was 58), right starts at x=178 (was 170)
+   - Pendulum anchors raised: y=102 (was 120) — blades now swing well above platform level
+   - Blade length shortened: 30 → 20
+   - Speed reduced: 1.1/1.0 → 0.8/0.7
+   - Blades only threaten mid-jump now, not standing players. Proper timing challenge.
+
+5. **Sprite generation guide** (SPRITE_GENERATION_GUIDE.txt): 13 AI prompts covering all game sprites, cleanup steps with NES palette.
 
 ### Key files changed
 - singlescreen.html (all changes self-contained, main game untouched)
+- SPRITE_GENERATION_GUIDE.txt (new)
 
 ## Current state
 - Main game fully intact and unchanged
-- Single-screen has compact HUD, smaller player, lowered tiers with big headroom
-- Level 4 (boss arena) unchanged — it was already fine
+- Single-screen has bottom HUD, 12px player, 62px tier gaps, fixed L3 pendulums
+- Level 4 (boss arena) unchanged
 - Needs playtesting to verify:
-  - Does 12px player feel right? (vs original 22px, vs previous 14px)
-  - Is the compact HUD readable? Are hearts too small at 4px?
-  - Do 54px tier gaps still feel good for jumping?
-  - Are archer arrows still dangerous at the lower fire position?
+  - Is the bottom HUD readable and not distracting?
+  - Does 12px player feel right?
+  - Are 62px tier gaps good for jumping?
+  - Are L3 pendulum gaps now passable with good timing?
 
 ## Discussion topics still open
 - Enemy freezing behavior (need specifics: which enemies, which levels)
@@ -35,10 +46,9 @@
 - DK "waddle" feel (waiting for Phase 8 sprites, or prototype Y-bob now?)
 - Checkpoints in levels 2-3 for main game (remove on loop 2+?)
 - Single-screen: does 3 tiers per level feel right, or should some levels have 4?
-- Sprite generation guide created (SPRITE_GENERATION_GUIDE.txt) — ready for AI art generation
 
 ## What's next
-- Playtest compact HUD + smaller player + lowered tiers
-- Continue single-screen refinement based on feedback
+- Playtest all single-screen changes
+- Continue refinement based on feedback
 - AI sprite generation (prompts ready in SPRITE_GENERATION_GUIDE.txt)
 - Phase 7: UI & Screens (pause/inventory polish, interludes, high score initials)
