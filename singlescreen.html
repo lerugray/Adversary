@@ -545,31 +545,31 @@
   // SHORTER PLAYER — DK-style proportions for single-screen
   //
   // Original player: 12x26 visual, 10x22 hitbox, 12 duck hitbox
-  // Single-screen:   12x20 visual, 10x16 hitbox, 10 duck hitbox
+  // Single-screen:   12x18 visual, 10x14 hitbox, 9 duck hitbox
   //
-  // ~6px shorter gives more headroom on every tier and feels more
+  // ~8px shorter gives more headroom on every tier and feels more
   // like a DK/classic-arcade character. Archer arrows are lowered
   // to compensate so they still threaten the shorter player.
   // ─────────────────────────────────────────────────────────────────────
 
   const SS_BODY_W = 10;
-  const SS_BODY_H = 16;
-  const SS_DUCK_H = 10;
+  const SS_BODY_H = 14;
+  const SS_DUCK_H = 9;
 
   // Override _buildSprite to draw a shorter player
   const _origBuildSprite = PlayerEntity.prototype._buildSprite;
   PlayerEntity.prototype._buildSprite = function(x, y) {
     const texW = SS_BODY_W + 2;  // 12
-    const texH = SS_BODY_H + 4;  // 20
+    const texH = SS_BODY_H + 4;  // 18
 
     const gfx = this.scene.add.graphics();
     gfx.fillStyle(0xeeeeee);
-    gfx.fillRect(1, 0, 10, 6);     // head (shorter)
+    gfx.fillRect(1, 0, 10, 5);     // head
     gfx.fillStyle(0xcccccc);
-    gfx.fillRect(1, 6, 10, 8);     // torso (shorter)
+    gfx.fillRect(1, 5, 10, 7);     // torso
     gfx.fillStyle(0x999999);
-    gfx.fillRect(1, 14, 4, 6);     // left leg
-    gfx.fillRect(7, 14, 4, 6);     // right leg
+    gfx.fillRect(1, 12, 4, 6);     // left leg
+    gfx.fillRect(7, 12, 4, 6);     // right leg
     gfx.generateTexture('player_placeholder', texW, texH);
     gfx.destroy();
 
@@ -643,8 +643,8 @@
 
   // Override archer arrow Y so it still hits shorter player.
   // Original: sprite.y - 13 (upper body of 18px archer).
-  // Shorter player stands ~6px lower relative to platform, so
-  // arrows need to fire lower to threaten them: sprite.y - 9.
+  // Shorter player stands ~8px lower relative to platform, so
+  // arrows need to fire lower to threaten them: sprite.y - 7.
   const _origFireArrow = HollowArcher.prototype._fireArrow;
   HollowArcher.prototype._fireArrow = function(player, shootDown) {
     this.fireCooldown = HA_FIRE_COOLDOWN;
@@ -656,7 +656,7 @@
     });
 
     const ax = this.sprite.x + this.facing * 8;
-    const ay = this.sprite.y - 9;  // lowered for shorter player
+    const ay = this.sprite.y - 7;  // lowered for shorter player
 
     const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
     this.scene.physics.add.existing(arrow);
@@ -679,7 +679,7 @@
     });
   };
 
-  console.log('[SINGLE SCREEN] Shorter player (16px hitbox) + lowered archer arrows');
+  console.log('[SINGLE SCREEN] Shorter player (14px hitbox) + lowered archer arrows');
 
 
   // ─────────────────────────────────────────────────────────────────────
