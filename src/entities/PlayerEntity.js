@@ -36,8 +36,8 @@ const JUMP_HOLD_MAX_FRAMES = 3;
 /** Gravity applied to the player body (px/s²). */
 const PLAYER_GRAVITY      = 650;
 
-/** Plunging attack downward velocity. */
-const PLUNGE_VELOCITY     = 160;
+/** Plunge bounce velocity (upward kick when hitting an enemy). */
+const PLUNGE_BOUNCE_VY    = -180;
 
 /** Knockback velocities on taking a hit. X is in the away-direction. */
 const KNOCKBACK_VX        = 60;
@@ -222,8 +222,12 @@ class PlayerEntity {
 
     // Input is ignored during knockback, plunge, and dodge
     if (!this.knockbackActive && !this.isPlunging && this.state !== STATE.DODGE) {
-      this._handleMovement(input);
-      this._handleJump(input);
+      // When climbing, LadderSystem handles movement and jump —
+      // skip them here so we don't consume the jump "just pressed" flag
+      if (!this._isClimbing) {
+        this._handleMovement(input);
+        this._handleJump(input);
+      }
       this._handleAttack(input);
       this._handlePause(input);
     } else if (this.state === STATE.DODGE) {
@@ -231,14 +235,10 @@ class PlayerEntity {
       this.sprite.body.setVelocityX(this.dodgeDir * DODGE_ROLL_SPEED);
       this._handlePause(input);
     } else if (this.isPlunging) {
-      // Only allow pause during plunge, no movement/attack
+      // Zelda 2 downthrust: fall with normal gravity, sword below.
+      // No horizontal input during plunge, but retain existing momentum.
+      // No forced velocity — gravity does the work.
       this._handlePause(input);
-      // Enforce constant plunge speed every frame (no drift from physics)
-      // After a bounce, maintain horizontal momentum; otherwise go straight down
-      if (!this.plungeHit) {
-        this.sprite.body.setVelocityX(0);
-      }
-      this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
     }
 
     // Update hitbox position to follow the sprite
@@ -552,12 +552,12 @@ class PlayerEntity {
     this.plungeHit       = false;
     this.plungeBounceCount = 0;
     this.state           = STATE.PLUNGE;
-    this.attackCooldownTimer = ATTACK_COOLDOWN;
+    // No attack cooldown — allows immediate re-plunge after bounce (Zelda 2 style)
+    this.attackCooldownTimer = 0;
 
-    // Slam downward at fixed speed — zero out per-body gravity so it doesn't accelerate
-    this.sprite.body.setGravityY(0);
-    this.sprite.body.setVelocityX(0);
-    this.sprite.body.setVelocityY(PLUNGE_VELOCITY);
+    // Zelda 2 downthrust: normal gravity, retain horizontal momentum,
+    // sword points down. No forced velocity — just fall naturally.
+    // (gravity stays at PLAYER_GRAVITY, already set)
 
     // Activate hitbox below the player — stays active for entire plunge
     this.hitbox.body.enable = true;
@@ -579,12 +579,26 @@ class PlayerEntity {
   _endPlunge() {
     this.isPlunging = false;
     this.state      = STATE.IDLE;
-    this.sprite.body.setGravityY(PLAYER_GRAVITY);
+    this.sprite.setTint(this._baseTint());
+    this._deactivateHitbox();
+  }
+
+  /**
+   * Called when the plunge attack connects with an enemy.
+   * Bounces the player upward (Zelda 2 pogo style) and ends the plunge
+   * so the player can immediately re-plunge on the way back down.
+   */
+  _plungeBounce() {
+    this.isPlunging = false;
+    this.plungeHit  = true;
+    this.state      = STATE.JUMP;
     this.sprite.setTint(this._baseTint());
     this._deactivateHitbox();
 
-    // Stub: brief bounce effect — when enemies exist, check plungeHit here
-    // and apply upward bounce velocity: this.sprite.body.setVelocityY(-150);
+    // Upward bounce — high enough to re-plunge
+    this.sprite.body.setVelocityY(PLUNGE_BOUNCE_VY);
+    // No attack cooldown so player can immediately Down+Attack again
+    this.attackCooldownTimer = 0;
   }
 
   _startSpecialAttack() {
@@ -973,7 +987,6 @@ class PlayerEntity {
     // ── Cancel plunge if active ────────────────────────────────────────
     if (this.isPlunging) {
       this.isPlunging = false;
-      this.sprite.body.setGravityY(PLAYER_GRAVITY);
       this._deactivateHitbox();
     }
 

@@ -485,8 +485,11 @@ class GameScene extends Phaser.Scene {
     // Reset phantom idle timer so it doesn't carry over from before death
     if (this.phantomSystem) this.phantomSystem.reset();
 
-    // Respawn fresh enemies from level data
+    // Respawn fresh enemies from level data — but with 0 XP to prevent death-farming
     this.enemyManager.spawn(data.enemySpawns, this.platforms, this.player);
+    for (const enemy of this.enemyManager.enemies) {
+      enemy.xpReward = 0;
+    }
   }
 
   // ── Soul clamping to platform geometry ─────────────────────────────────────
@@ -607,16 +610,14 @@ class GameScene extends Phaser.Scene {
         if (this.player.isPlunging) {
           this.player.plungeBounceCount++;
 
-          // Boss: only allow 2 bounces, then plunge falls through
+          // Boss: only allow 2 bounces, then plunge ends without bounce
           const isBoss = enemy instanceof HollowKingBoss;
           if (isBoss && this.player.plungeBounceCount > 2) {
-            // Too many bounces — end plunge, don't bounce
-            this.player.plungeHit = true;
+            this.player._endPlunge();
           } else {
-            // Bounce upward, maintaining horizontal direction of travel
-            this.player.plungeHit = true;
-            this.player.body.setVelocityY(-150);
-            this.player.body.setVelocityX(this.player.facing * 30);
+            // Zelda 2 pogo bounce — ends plunge, kicks player up,
+            // allows immediate re-plunge on the way back down
+            this.player._plungeBounce();
           }
         }
       }

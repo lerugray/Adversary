@@ -1,52 +1,54 @@
 # ADVERSARY — Session Notes
 
 ## What we worked on
-- Single-screen variant: bottom HUD, tier redistribution, L3 pendulum fix, player sizing
-- Sprite generation guide for AI art
+- Single-screen fixes: bugs, balance, plunge rework, tier positioning
 
 ## What got done
 
-1. **HUD moved to bottom of screen** (y=230): Frees entire top for gameplay. Compact single-row layout with 4px hearts, all stats on one line. Boss health bar (L4) repositioned above HUD at y=218. Required fixing a `const` reassignment error on PHANTOM_BASE_TRIGGER_TIME that was blocking the entire override script — overrode `_calcTriggerTime()` method instead.
+1. **Jumping off ladders fixed**: PlayerEntity was consuming the "jump just pressed" input before LadderSystem could read it. Now movement/jump input is skipped in PlayerEntity when climbing, so LadderSystem gets first dibs.
 
-2. **Tiers redistributed with 62px gaps**: With no HUD at top, tiers now at:
-   - Summit: y=24, T2: y=86, T1: y=148, Ground: y=210
-   - 62px gaps (was 54px) — generous jump/combat room
+2. **Plunging near ladders fixed**: Ladder entry guard now blocks plunge and dodge states — holding Down during a plunge no longer grabs you onto a ladder mid-flight.
 
-3. **Player at 14px hitbox** (12x18 visual, 10x14 hitbox, 9 duck): This is where it should stay — user never saw 14px before due to the const error blocking all overrides. Was briefly changed to 12px but reverted. Archer arrows fire at sprite.y-7.
+3. **Plunge attack reworked to Zelda 2 downthrust style**:
+   - Normal gravity fall (no more forced 160px/s dive bomb)
+   - Retain horizontal momentum from before the plunge
+   - Bounce actually works now — hitting an enemy kicks you upward (-180 velocity) and properly ends the plunge. Before, bounce was completely broken (forced velocity overwrote it every frame)
+   - No cooldown after bounce — immediate re-plunge for "jackhammer" pogo chains
+   - Boss still capped at 2 bounces
 
-4. **L3 Tier 1 pendulum bridge fixed**:
-   - Gaps widened: 28px → 36px
-   - Pendulum anchors raised to y=102 (was 120), length shortened 30→20, speed reduced 1.1/1.0→0.8/0.7
-   - Blades now only threaten mid-jump, not standing players
+4. **All levels shifted down 8px** for better visibility at summit:
+   - Summit: y=32, T2: y=94, T1: y=156, Ground: y=218
+   - 62px gaps preserved, ground platform height reduced to 22px
+   - HUD stays at y=230, boss health bar at y=224
+   - Top world bound disabled so player can hop above screen briefly (like DK)
+   - Boss spawn overridden to y=208 to match new ground
 
-5. **Debug text override** moves it to top-right (y=2, x=252, right-aligned, 6px font) — BUT user reports it's still showing at bottom. Needs investigation — override code looks correct, may be a remaining issue.
+5. **Level-up XP farming fix**: Respawned enemies (after death) give 0 XP. Prevents death-cycle XP exploitation that was causing 6 HP by level 3.
 
-6. **Sprite generation guide** (SPRITE_GENERATION_GUIDE.txt): 13 AI prompts for Pixellab.ai covering all game sprites, cleanup steps, NES palette reference.
+6. **Level 2**: Ground→T1 ladder moved from x=230 (platform edge) to x=210 (centered).
 
-### Known issues to fix
-- Debug text still appearing at bottom instead of top-right — needs debugging
-- L3 pendulums need playtesting to confirm they're now passable
-- 14px player needs real playtesting (first time actually visible)
+7. **Level 3 pendulum bridge rework**:
+   - Gaps narrowed from 36px to 20px (quick hop, not long jump)
+   - Platforms widened (64/72/80px)
+   - Pendulum arms shortened (16px) and slowed (0.6 speed)
+   - Still threatening but passable with timing
+
+8. **Debug text**: Gamepad debug text moved to top-left in single-screen (was overlapping bottom HUD).
 
 ### Key files changed
-- singlescreen.html (all changes self-contained, main game untouched)
-- SPRITE_GENERATION_GUIDE.txt (new)
+- `src/entities/PlayerEntity.js` — ladder input fix, plunge rework
+- `src/systems/LadderSystem.js` — plunge/dodge guard on ladder entry
+- `src/scenes/GameScene.js` — plunge bounce method, respawn XP fix
+- `src/entities/EnemyEntity.js` — xpReward 0 handling (was falsy-defaulting to 10)
+- `singlescreen.html` — all level geometry shifts, debug text, world bounds, boss spawn
 
 ## Current state
-- Main game fully intact and unchanged
-- Single-screen has bottom HUD, 14px player, 62px tier gaps, fixed L3 pendulums
-- Level 4 (boss arena) unchanged
-
-## Discussion topics still open
-- Enemy freezing behavior (need specifics: which enemies, which levels)
-- Double-jump accessory ("Cat Ring")
-- DK "waddle" feel (waiting for Phase 8 sprites, or prototype Y-bob now?)
-- Checkpoints in levels 2-3 for main game (remove on loop 2+?)
-- Single-screen: does 3 tiers per level feel right, or should some levels have 4?
+- Main game core files changed (plunge rework, ladder fixes, XP farming fix apply to both)
+- Single-screen has shifted tiers, reworked L3 pendulums, fixed ladders
 
 ## What's next
-- Fix debug text position
-- Playtest bottom HUD + 14px player + L3 pendulums
-- Continue single-screen refinement based on feedback
-- AI sprite generation (prompts in SPRITE_GENERATION_GUIDE.txt)
+- User wants to try one more change after context clear
+- L2 may still need difficulty tuning (feels easier than L1)
+- L3 pendulums need playtesting to confirm passable
+- Plunge attack needs playtesting (Zelda 2 feel check)
 - Phase 7: UI & Screens (pause/inventory polish, interludes, high score initials)

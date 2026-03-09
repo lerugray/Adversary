@@ -44,7 +44,7 @@ class EnemyEntity {
     this.hp          = config.hp          || 1;
     this.maxHp       = config.hp          || 1;
     this.damage      = config.damage      || 1;
-    this.xpReward    = config.xpReward    || 10;
+    this.xpReward    = config.xpReward != null ? config.xpReward : 10;
     this.scoreReward = config.scoreReward || 50;
 
     // ── State machine ───────────────────────────────────────────────────
