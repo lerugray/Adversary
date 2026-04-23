@@ -26,8 +26,9 @@ npm-debug.log*
 .env
 .env.local
 
-# Claude Code
-.claude/
+# Claude Code (track skills, ignore settings/state)
+.claude/*
+!.claude/skills/
 
 # Temp files
 *.tmp
