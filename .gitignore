@@ -33,3 +33,10 @@ npm-debug.log*
 # Temp files
 *.tmp
 *.bak
+
+# 2026-04-24 overnight-bot sanity cleanup — untracked artifacts that were blocking GS dispatcher clean-tree preflight
+oryx_8-bit_remaster/
+oryx_8-bit_sounds/
+oryx_roguelike_2.0/
+singlescreen_openAI.html
+
