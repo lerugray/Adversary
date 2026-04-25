@@ -1,46 +1,50 @@
-# ADVERSARY — Session Notes
+﻿# ADVERSARY - Session Notes
 
 ## What we worked on
-- Level 2 single-screen redesign (DK 75m elevator stage)
+- Graphical pass using available Oryx assets
+- Permanent Level 1-4 layout pass based on `.claude/skills/adversary-aesthetic.md`
+- Work was done on the `cursor` branch, not `main`
 
 ## What got done
 
-1. **ElevatorSystem created** (`src/systems/ElevatorSystem.js`):
-   - Velocity-based movement (not manual position) so Phaser Arcade collision actually works
-   - One-way platforms (collide top only) — player can jump up through them
-   - Downward elevator ride detection (manually nudges player since Arcade won't pull down)
-   - Shaft blockers: static platforms placed inside elevator shafts that force the player off
-   - Wrapping: platforms teleport from top→bottom or bottom→top when they leave the shaft
+1. **Oryx visual swaps added**:
+   - Player now uses the Oryx knight sprite instead of the generated rectangle body
+   - Common enemies now use Oryx character sprites where there was a reasonable match
+   - The Hollow King now uses an Oryx boss/lord sprite
+   - Rolling skulls, bats, arrows/darts, crates, barrels, bonfires, and gates now use Oryx sprites where possible
+   - Placeholder fallback drawing still exists if an Oryx texture is missing
 
-2. **Level 2 redesigned as DK 75m elevator stage**:
-   - Two elevator shafts: left (x=80, UP), right (x=176, DOWN)
-   - Mostly open pit — falling below y=222 = instant death (bypasses invincibility)
-   - Small scattered platforms on left/right sides at different heights
-   - Center stepping stone (y=120) for risky cross-shaft jumps
-   - **Shaft blockers force zigzag traversal** — can't ride one elevator to the top:
-     - Left shaft blocked at y=132 and y=55
-     - Right shaft blocked at y=165 and y=90
-   - Required path: left elev UP → jump to left-mid → cross to center/right → right side up → cross to left-upper → left elev to summit
-   - NO LADDERS — elevators only
-   - Bats every 3.5s as primary hazard while riding
+2. **Camera returned to single-screen discipline**:
+   - `GameScene` now keeps the camera fixed at the 256x240 screen instead of following the player
+   - Level data can choose a per-level background color and platform palette
+   - Level data can place image decorations and choose boss spawn position
 
-3. **Death pit mechanic** (singlescreen override):
-   - Levels with `deathPitY` disable bottom world bounds + player collideWorldBounds
-   - Update check: if player.y > deathPitY, bypass invincibility and deal 999 damage
-   - Dark visual strip at bottom as danger cue
+3. **Permanent level files rebuilt around the aesthetic plan**:
+   - Level 1, "The Ashen Hearth": warm shrine climb with bonfire goal, one soldier, one barrel, and rolling skull hazard
+   - Level 2, "Cresthollow": cold ruined-city layout with a fog band and two archer threats
+   - Level 3, "The Iron Passage": quiet trap-timing level with two pendulums and one elevator
+   - Level 4, "The Pale Spire": flat cathedral boss arena with columns, stained-glass shapes, altar glow, and Hollow King spawn near center
 
-### Key files changed
-- `src/systems/ElevatorSystem.js` — rewritten: velocity-based movement + shaft blockers
-- `src/scenes/GameScene.js` — elevator system hooks (create, update, cleanup)
-- `singlescreen.html` — L2 data + death pit override
+4. **Verification performed**:
+   - JavaScript syntax checked with `node --check` for all changed files
+   - Cursor linter reported no errors in `src`
+   - `index.html` and `singlescreen.html` local script tags still point to existing files
+   - I did not run an actual browser playtest from Cursor
 
-## Current state
-- L2 single-screen is an elevator platforming challenge with death pits and forced traversal
-- Other levels unchanged
+## Commits made on `cursor`
+- `3aa8c52` - Swap placeholders for available Oryx sprites
+- `b25b217` - Implement single-screen level layouts
+
+## Known gaps / TODOs
+- Level 3 calls for a crushing gear; the current engine does not have a gear hazard system yet
+- Trap timings are still millisecond-based in `TrapSystem`; the aesthetic plan asks for frame-count timing
+- Level 4 calls for a post-boss altar checkpoint; current game flow advances directly after boss defeat
+- True custom NES-locked sprites/tilesets are still needed for exact Ashen Hearth, Cresthollow, Iron Passage, and Pale Spire art direction
+- Browser playtest still needed for jump spacing, archer pressure, checkpoint feel, and boss arena spacing
 
 ## What's next
-- Playtest L2: elevator feel, shaft blocker placement, difficulty
-- May need tuning: elevator speed, blocker positions, platform sizes
-- L3 pendulums need playtesting
-- Plunge attack needs playtesting (Zelda 2 feel check)
-- Phase 7: UI & Screens (pause/inventory, interludes, high score initials)
+- Playtest all four levels in-browser from `index.html`
+- Tune Level 1 skull rhythm and jump gaps
+- Tune Level 2 archer positions and fog readability
+- Decide whether Level 3 gets a real crushing gear system now or waits for a later hazard pass
+- Decide whether Level 4 should add the post-boss altar interaction before or after boss tuning
