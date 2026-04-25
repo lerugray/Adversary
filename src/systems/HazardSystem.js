@@ -155,8 +155,9 @@ class HazardSystem {
       .filter(p => p.tier && p.tier > 0)
       .sort((a, b) => b.y - a.y); // lowest tiers first (closest to player)
 
-    // Place a skull on the four lowest tiers (closest to player spawn)
-    const count = Math.min(4, tiers.length);
+    // Place a small number of skulls so the hazard is visible immediately
+    // without crowding the opening seconds of compact single-screen levels.
+    const count = Math.min(this._config.preRolledCount ?? 4, tiers.length);
     for (let i = 0; i < count; i++) {
       const plat = tiers[i];
       // Random X somewhere in the middle of the platform
