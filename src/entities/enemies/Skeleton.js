@@ -31,6 +31,7 @@ class Skeleton extends EnemyEntity {
       width:       10,
       height:      18,
       color:       0xbbbb88,  // bone-yellow
+      assetKey:    'oryx_skeleton',
       hp:          1,
       damage:      1,
       xpReward:    20,

@@ -36,6 +36,7 @@ class Gargoyle extends EnemyEntity {
       width:       14,
       height:      10,
       color:       0x4a6644,
+      assetKey:    'oryx_gargoyle',
       hp:          2,
       damage:      1,
       xpReward:    20,

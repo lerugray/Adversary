@@ -30,6 +30,7 @@ class HollowSoldier extends EnemyEntity {
       width:       10,
       height:      18,
       color:       0xcc5544,  // rusty red
+      assetKey:    'oryx_hollow_soldier',
       hp:          1,
       damage:      1,
       xpReward:    10,

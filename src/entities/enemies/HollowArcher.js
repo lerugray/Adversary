@@ -27,6 +27,7 @@ class HollowArcher extends EnemyEntity {
       width:       8,
       height:      18,
       color:       0x6688aa,  // blue-grey
+      assetKey:    'oryx_hollow_archer',
       hp:          1,
       damage:      1,
       xpReward:    15,
@@ -37,6 +38,7 @@ class HollowArcher extends EnemyEntity {
     this.fireCooldown = HA_FIRE_COOLDOWN * 0.5; // shorter initial delay
     this.arrows = [];  // track active arrow projectiles
     this.canShootDown = (spawnData && spawnData.canShootDown) || false;
+    this.invulnerable = (spawnData && spawnData.invulnerable) || false;
   }
 
   getDropTable() {
@@ -102,7 +104,9 @@ class HollowArcher extends EnemyEntity {
     const ax = this.sprite.x + this.facing * 8;
     const ay = this.sprite.y - 13; // upper-body height (duckable at same tier)
 
-    const arrow = this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
+    const arrow = this.scene.textures.exists('oryx_arrow')
+      ? this.scene.add.image(ax, ay, 'oryx_arrow')
+      : this.scene.add.rectangle(ax, ay, 8, 3, 0xddddaa);
     this.scene.physics.add.existing(arrow);
     arrow.body.setAllowGravity(false);
 

@@ -80,6 +80,7 @@ class HollowKingBoss extends EnemyEntity {
       width:       16,
       height:      26,
       color:       0x8844aa,  // bright purple — the Dark Knight
+      assetKey:    'oryx_hollow_king',
       hp:          hp,
       damage:      BOSS_BASE_DAMAGE + (loop - 1) * BOSS_DAMAGE_PER_LOOP,
       xpReward:    BOSS_XP_REWARD,

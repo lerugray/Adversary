@@ -33,6 +33,7 @@ class HollowKnight extends EnemyEntity {
       width:       12,
       height:      22,
       color:       0x885588,  // dark purple
+      assetKey:    'oryx_hollow_knight',
       hp:          3,
       damage:      2,
       xpReward:    30,

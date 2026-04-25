@@ -90,6 +90,8 @@ class FlyingHazardSystem {
   // ── Bat texture (simple wing-flap sprite) ──────────────────────────────
 
   _buildTexture() {
+    if (this.scene.textures.exists('oryx_bat')) return;
+
     // Frame 1: wings up
     if (!this.scene.textures.exists('fh_bat_1')) {
       const s = this.scene.add.graphics();
@@ -183,7 +185,8 @@ class FlyingHazardSystem {
     // All attempts blocked — skip this spawn cycle
     if (startY === null) return;
 
-    const sprite = this.scene.add.sprite(startX, startY, 'fh_bat_1');
+    const textureKey = this.scene.textures.exists('oryx_bat') ? 'oryx_bat' : 'fh_bat_1';
+    const sprite = this.scene.add.sprite(startX, startY, textureKey);
     sprite.setOrigin(0.5, 0.5);
     sprite.setDepth(7);
     // Flip sprite to face direction of travel
@@ -245,7 +248,9 @@ class FlyingHazardSystem {
       if (bat.wingTimer >= FH_WING_SPEED) {
         bat.wingTimer -= FH_WING_SPEED;
         bat.wingFrame = bat.wingFrame === 1 ? 2 : 1;
-        bat.sprite.setTexture('fh_bat_' + bat.wingFrame);
+        if (!this.scene.textures.exists('oryx_bat')) {
+          bat.sprite.setTexture('fh_bat_' + bat.wingFrame);
+        }
       }
 
       // Despawn if off the other side of the screen

@@ -58,9 +58,9 @@ const SPECIAL_MANA_COST   = 1;
 /** Width of the standing hitbox. */
 const BODY_W = 10;
 /** Height of the standing hitbox. */
-const BODY_H = 22;
+const BODY_H = 14;
 /** Height of the ducking hitbox. */
-const DUCK_H = 12;
+const DUCK_H = 9;
 
 /** Dodge roll constants. */
 const DODGE_ROLL_SPEED    = 90;    // px/s during roll
@@ -147,24 +147,32 @@ class PlayerEntity {
 
   // ── Construction helpers ───────────────────────────────────────────────
 
-  /** Create the player's visual rectangle and physics body. */
+  /** Create the player's visual sprite and physics body. */
   _buildSprite(x, y) {
-    const texW = BODY_W + 2;  // 12
-    const texH = BODY_H + 4;  // 26
+    let textureKey = 'oryx_player_knight';
+    this.usesOryxSprite = this.scene.textures.exists(textureKey);
 
-    const gfx = this.scene.add.graphics();
-    // Draw within positive coordinates so generateTexture captures it
-    gfx.fillStyle(0xeeeeee);
-    gfx.fillRect(1, 0, 10, 8);     // head
-    gfx.fillStyle(0xcccccc);
-    gfx.fillRect(1, 8, 10, 12);    // torso
-    gfx.fillStyle(0x999999);
-    gfx.fillRect(1, 20, 4, 6);     // left leg
-    gfx.fillRect(7, 20, 4, 6);     // right leg
-    gfx.generateTexture('player_placeholder', texW, texH);
-    gfx.destroy();
+    if (!this.usesOryxSprite) {
+      textureKey = 'player_placeholder';
+      if (!this.scene.textures.exists(textureKey)) {
+        const texW = BODY_W + 2;  // 12
+        const texH = BODY_H + 4;  // 18
 
-    this.sprite = this.scene.physics.add.sprite(x, y, 'player_placeholder');
+        const gfx = this.scene.add.graphics();
+        // Draw within positive coordinates so generateTexture captures it.
+        gfx.fillStyle(0xeeeeee);
+        gfx.fillRect(1, 0, 10, 5);     // head
+        gfx.fillStyle(0xcccccc);
+        gfx.fillRect(1, 5, 10, 7);     // torso
+        gfx.fillStyle(0x999999);
+        gfx.fillRect(1, 12, 4, 6);     // left leg
+        gfx.fillRect(7, 12, 4, 6);     // right leg
+        gfx.generateTexture(textureKey, texW, texH);
+        gfx.destroy();
+      }
+    }
+
+    this.sprite = this.scene.physics.add.sprite(x, y, textureKey);
     this.sprite.setOrigin(0.5, 1);  // pivot at feet for clean platform landing
     this.sprite.setCollideWorldBounds(true);
 
@@ -1155,6 +1163,7 @@ class PlayerEntity {
 
   /** Returns the correct base tint depending on whether the soul is out. */
   _baseTint() {
+    if (this.usesOryxSprite && !GameState.soul) return 0xffffff;
     return GameState.soul ? TINT_SOULLESS : TINT_NORMAL;
   }
 

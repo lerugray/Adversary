@@ -31,7 +31,7 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, data.worldWidth, data.worldHeight);
 
     // ── Level geometry ────────────────────────────────────────────────
-    this._buildDecorations(data.decorations);
+    this._buildDecorations(data.decorations || []);
     this._buildPlatforms(data.platforms);
 
     // ── Ladder system ─────────────────────────────────────────────────
@@ -61,8 +61,7 @@ class GameScene extends Phaser.Scene {
 
     // ── Camera ────────────────────────────────────────────────────────
     this.cameras.main.setBounds(0, 0, data.worldWidth, data.worldHeight);
-    this.cameras.main.startFollow(this.player.gameObject, true, 0.12, 0.12);
-    this.cameras.main.setDeadzone(40, 30);
+    this.cameras.main.setScroll(0, 0);
 
     // ── Pause / resume events ─────────────────────────────────────────
     this.scene.get('PauseScene').events.on('resume-game', () => {
@@ -196,6 +195,13 @@ class GameScene extends Phaser.Scene {
 
   _buildDecorations(defs) {
     defs.forEach(def => {
+      if (def.assetKey && this.textures.exists(def.assetKey)) {
+        this.add.image(def.x, def.y, def.assetKey)
+          .setDepth(def.depth ?? 1)
+          .setAlpha(def.alpha !== undefined ? def.alpha : 1.0);
+        return;
+      }
+
       this.add.rectangle(
         def.x + def.w / 2,
         def.y + def.h / 2,
@@ -207,7 +213,8 @@ class GameScene extends Phaser.Scene {
   }
 
   _buildPlatforms(defs) {
-    const TIER_COLORS = [
+    const palette = this.currentLevelData.platformPalette;
+    const TIER_COLORS = palette || [
       0x2e2830,  // 0
       0x3a3035,  // 1
       0x403840,  // 2
@@ -221,7 +228,7 @@ class GameScene extends Phaser.Scene {
     this.platforms = this.physics.add.staticGroup();
 
     defs.forEach(def => {
-      const color = TIER_COLORS[def.tier] ?? TIER_COLORS[1];
+      const color = def.color || TIER_COLORS[def.tier] || TIER_COLORS[1];
 
       const rect = this.add.rectangle(
         def.x + def.w / 2,
@@ -234,7 +241,7 @@ class GameScene extends Phaser.Scene {
         def.x + def.w / 2,
         def.y + 1,
         def.w, 2,
-        Phaser.Display.Color.IntegerToColor(color).lighten(15).color
+        def.highlightColor || Phaser.Display.Color.IntegerToColor(color).lighten(15).color
       ).setDepth(3);
 
       this.platforms.add(rect);
@@ -246,12 +253,23 @@ class GameScene extends Phaser.Scene {
   // ── Checkpoint (bonfire) ──────────────────────────────────────────────────
 
   _buildCheckpoint(def) {
-    this.checkpointGlow = this.add.circle(def.x, def.y, def.radius + 4, 0xff6a00, 0.35)
+    const assetKey = def.assetKey || (def.type === 'gate' || def.type === 'iron_gate' ? 'oryx_gate_iron' : 'oryx_bonfire_1');
+
+    if (this.textures.exists(assetKey)) {
+      this.checkpointGlow = this.add.circle(def.x, def.y, def.radius + 6, 0xff6a00, 0.18)
+        .setDepth(4);
+      this.checkpointFlame = this.add.image(def.x, def.y, assetKey)
+        .setDepth(6);
+      this.checkpointCore = this.add.circle(def.x, def.y, Math.max(2, Math.floor(def.radius * 0.25)), 0xfcfcfc, 1.0)
+        .setDepth(7);
+    } else {
+      this.checkpointGlow = this.add.circle(def.x, def.y, def.radius + 4, 0xff6a00, 0.35)
       .setDepth(4);
-    this.checkpointFlame = this.add.circle(def.x, def.y, def.radius, 0xff8c00, 1.0)
-      .setDepth(5);
-    this.checkpointCore = this.add.circle(def.x, def.y, Math.floor(def.radius * 0.45), 0xffdd44, 1.0)
-      .setDepth(6);
+      this.checkpointFlame = this.add.circle(def.x, def.y, def.radius, 0xff8c00, 1.0)
+        .setDepth(5);
+      this.checkpointCore = this.add.circle(def.x, def.y, Math.floor(def.radius * 0.45), 0xffdd44, 1.0)
+        .setDepth(6);
+    }
 
     this.tweens.add({
       targets: this.checkpointGlow,

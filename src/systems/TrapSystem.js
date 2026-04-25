@@ -152,10 +152,12 @@ class TrapSystem {
   }
 
   _fireDart(trap) {
-    const sprite = this.scene.add.rectangle(
-      trap.x + trap.dir * 6, trap.y,
-      DART_W, DART_H, 0xdddd44
-    ).setDepth(7);
+    const sprite = this.scene.textures.exists('oryx_arrow')
+      ? this.scene.add.image(trap.x + trap.dir * 6, trap.y, 'oryx_arrow').setDepth(7)
+      : this.scene.add.rectangle(
+          trap.x + trap.dir * 6, trap.y,
+          DART_W, DART_H, 0xdddd44
+        ).setDepth(7);
 
     // Brief flash on launcher
     trap.launcher.setFillStyle(0xffaa00);

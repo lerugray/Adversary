@@ -91,6 +91,7 @@ class HazardSystem {
 
   _buildTexture() {
     const key = 'hazard_skull';
+    if (this.scene.textures.exists('oryx_skull')) return;
     if (this.scene.textures.exists(key)) return;
 
     const s = HAZARD_SIZE;
@@ -166,7 +167,8 @@ class HazardSystem {
       // Alternate direction: odd tiers roll right, even roll left
       const dir = (plat.tier % 2 === 1) ? 1 : -1;
 
-      const sprite = this.scene.add.sprite(x, y - HAZARD_SIZE / 2, 'hazard_skull');
+      const textureKey = this.scene.textures.exists('oryx_skull') ? 'oryx_skull' : 'hazard_skull';
+      const sprite = this.scene.add.sprite(x, y - HAZARD_SIZE / 2, textureKey);
       sprite.setOrigin(0.5, 0.5);
       sprite.setDepth(5);
 
@@ -311,7 +313,9 @@ class HazardSystem {
     const speed = this._getSpeed();
     const isWild = Math.random() < this._getWildChance();
 
-    const textureKey = isWild ? 'hazard_skull_wild' : 'hazard_skull';
+    const textureKey = this.scene.textures.exists('oryx_skull')
+      ? 'oryx_skull'
+      : (isWild ? 'hazard_skull_wild' : 'hazard_skull');
 
     // Visual sprite (rendering only — no physics body)
     const sprite = this.scene.add.sprite(c.x, c.y - HAZARD_SIZE / 2, textureKey);

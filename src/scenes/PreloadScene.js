@@ -33,6 +33,7 @@ class PreloadScene extends Phaser.Scene {
 
     // ── Asset loads ───────────────────────────────────────────────────────
     this._loadPlaceholderAssets();
+    this._loadOryxAssets();
 
     // ── Phase 8: Real asset loads ─────────────────────────────────────────
     // this._loadSpritesheets();
@@ -94,6 +95,32 @@ class PreloadScene extends Phaser.Scene {
     // this.load.audio('bgm_level1',     'assets/audio/level1.ogg');
     // this.load.audio('sfx_jump',       'assets/audio/jump.ogg');
     // this.load.tilemapTiledJSON('level1', 'assets/maps/level1.json');
+  }
+
+  /**
+   * Existing Oryx pack art used as a first graphical pass.
+   * These are direct sliced PNGs from the local packs, so no build step is needed.
+   */
+  _loadOryxAssets() {
+    const remaster = 'oryx_8-bit_remaster/Sliced';
+
+    this.load.image('oryx_player_knight', `${remaster}/Character/knight_idle_r_1.png`);
+    this.load.image('oryx_hollow_soldier', `${remaster}/Character/zombie_idle_r_1.png`);
+    this.load.image('oryx_hollow_archer', `${remaster}/Character/archer_idle_r_1.png`);
+    this.load.image('oryx_hollow_knight', `${remaster}/Character/knight_idle_r_1.png`);
+    this.load.image('oryx_skeleton', `${remaster}/Character/skel_idle_r_1.png`);
+    this.load.image('oryx_gargoyle', `${remaster}/Character/demon_idle_r_1.png`);
+    this.load.image('oryx_bat', `${remaster}/Character/bat_idle_r_1.png`);
+    this.load.image('oryx_phantom', `${remaster}/Character/ghost_idle_r_1.png`);
+    this.load.image('oryx_hollow_king', `${remaster}/Bosses/lord_idle_r_1.png`);
+
+    this.load.image('oryx_bonfire_1', `${remaster}/World/scenery_firepit_lit_1.png`);
+    this.load.image('oryx_bonfire_2', `${remaster}/World/scenery_firepit_lit_2.png`);
+    this.load.image('oryx_gate_iron', `${remaster}/World/door_iron_closed.png`);
+    this.load.image('oryx_crate', `${remaster}/World/scenery_crate.png`);
+    this.load.image('oryx_barrel', `${remaster}/World/scenery_barrel.png`);
+    this.load.image('oryx_skull', `${remaster}/World/object_skull_grey.png`);
+    this.load.image('oryx_arrow', `${remaster}/FX/arrow_x.png`);
   }
 
   // ── Phase 8 stubs ─────────────────────────────────────────────────────────

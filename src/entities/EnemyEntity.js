@@ -46,6 +46,7 @@ class EnemyEntity {
     this.damage      = config.damage      || 1;
     this.xpReward    = config.xpReward != null ? config.xpReward : 10;
     this.scoreReward = config.scoreReward || 50;
+    this.invulnerable = config.invulnerable === true;
 
     // ── State machine ───────────────────────────────────────────────────
     this.state    = ENEMY_STATE.IDLE;
@@ -67,8 +68,12 @@ class EnemyEntity {
     const h = config.height || 20;
     const color = config.color || 0xff4444;
 
-    // Generate a simple colored rectangle texture
-    const key = `enemy_${color}_${w}x${h}`;
+    let key = config.assetKey;
+
+    // Generate a simple colored rectangle texture if no loaded sprite fits.
+    if (!key || !this.scene.textures.exists(key)) {
+      key = `enemy_${color}_${w}x${h}`;
+    }
     if (!this.scene.textures.exists(key)) {
       const gfx = this.scene.add.graphics();
       gfx.fillStyle(color);
@@ -107,6 +112,11 @@ class EnemyEntity {
    */
   takeDamage(amount, sourceX) {
     if (this._dead || this.state === ENEMY_STATE.HURT) return;
+    if (this.invulnerable) {
+      this.sprite.setTint(0xffffff);
+      this.scene.time.delayedCall(80, () => this._restoreTint());
+      return;
+    }
 
     this.hp -= amount;
 

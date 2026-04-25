@@ -49,11 +49,13 @@ class BreakableSystem {
 
       // Main body
       const color = isCrate ? 0x8b6914 : 0x6b4c1e;
-      const body = this.scene.add.rectangle(def.x, def.y - h / 2, w, h, color)
-        .setDepth(5);
+      const assetKey = isCrate ? 'oryx_crate' : 'oryx_barrel';
+      const body = this.scene.textures.exists(assetKey)
+        ? this.scene.add.image(def.x, def.y - h / 2, assetKey).setDepth(5)
+        : this.scene.add.rectangle(def.x, def.y - h / 2, w, h, color).setDepth(5);
 
       // Detail lines
-      if (isCrate) {
+      if (isCrate && body.type !== 'Image') {
         // Cross slats on crate
         this.scene.add.rectangle(def.x, def.y - h / 2, w, 1, 0x5a4010, 0.7)
           .setDepth(5);
@@ -62,7 +64,7 @@ class BreakableSystem {
         // Highlight edge
         this.scene.add.rectangle(def.x, def.y - h + 1, w, 2, 0xaa8830, 0.5)
           .setDepth(5);
-      } else {
+      } else if (body.type !== 'Image') {
         // Barrel bands
         this.scene.add.rectangle(def.x, def.y - h + 3, w, 2, 0x444444, 0.8)
           .setDepth(5);
@@ -112,7 +114,11 @@ class BreakableSystem {
     container.broken = true;
 
     // Flash white then fade
-    container.body.setFillStyle(0xffffff);
+    if (container.body.setFillStyle) {
+      container.body.setFillStyle(0xffffff);
+    } else {
+      container.body.setTint(0xffffff);
+    }
     this.scene.tweens.add({
       targets: container.body,
       alpha: 0,
