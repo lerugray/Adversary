@@ -3,6 +3,7 @@
 ## What we worked on
 - Graphical pass using available Oryx assets
 - Permanent Level 1-4 layout pass based on `.claude/skills/adversary-aesthetic.md`
+- Level 1 opening cleanup after preview feedback
 - Work was done on the `cursor` branch, not `main`
 
 ## What got done
@@ -31,9 +32,17 @@
    - `index.html` and `singlescreen.html` local script tags still point to existing files
    - I did not run an actual browser playtest from Cursor
 
+5. **Level 1 opening cleaned up**:
+   - Removed the cramped low platform beside the player start
+   - Removed the decorative barrel from the spawn area
+   - Made the first action a clearer ground-run-to-ladder path
+   - Reduced starting skull clutter so the level does not feel messy immediately
+
 ## Commits made on `cursor`
 - `3aa8c52` - Swap placeholders for available Oryx sprites
 - `b25b217` - Implement single-screen level layouts
+- `2665b5d` - Update session notes after aesthetic pass
+- `3249933` - Clean up the Level 1 opening
 
 ## Known gaps / TODOs
 - Level 3 calls for a crushing gear; the current engine does not have a gear hazard system yet
