@@ -25,7 +25,7 @@ class GameScene extends Phaser.Scene {
     this.currentLevelData = data; // public — enemies read this for edge detection
 
     // ── Background ────────────────────────────────────────────────────
-    this.cameras.main.setBackgroundColor('#0d0a0f');
+    this.cameras.main.setBackgroundColor(data.backgroundColor || '#0d0a0f');
 
     // ── World bounds ──────────────────────────────────────────────────
     this.physics.world.setBounds(0, 0, data.worldWidth, data.worldHeight);
@@ -380,8 +380,9 @@ class GameScene extends Phaser.Scene {
   _triggerBoss() {
     this._bossTriggered = true;
 
-    // Spawn boss on arena floor (right side of arena)
-    this.boss = new HollowKingBoss(this, 200, 200);
+    // Spawn boss on the level-authored arena floor.
+    const spawn = this.currentLevelData.bossSpawn || { x: 200, y: 200 };
+    this.boss = new HollowKingBoss(this, spawn.x, spawn.y);
     this.physics.add.collider(this.boss.gameObject, this.platforms);
     this.enemyManager.enemies.push(this.boss);
 
