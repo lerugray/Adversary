@@ -194,9 +194,25 @@ class PlayerEntity {
     this.hitbox.body.setAllowGravity(false);
     this.hitbox.body.enable = false;
 
-    // Visible sword slash rectangle (shown during attacks)
-    this._slashVisual = this.scene.add.rectangle(0, 0, 16, 4, 0xffffff)
-      .setDepth(8).setVisible(false).setAlpha(0.9);
+    this._buildSwordVisual();
+  }
+
+  _buildSwordVisual() {
+    if (!this.scene.textures.exists('player_sword_swipe')) {
+      const gfx = this.scene.add.graphics();
+      gfx.fillStyle(0xfcfcfc);
+      gfx.fillRect(0, 1, 9, 2);
+      gfx.fillStyle(0xbcbcbc);
+      gfx.fillRect(1, 3, 6, 1);
+      gfx.fillStyle(0x503000);
+      gfx.fillRect(0, 0, 2, 4);
+      gfx.generateTexture('player_sword_swipe', 9, 4);
+      gfx.destroy();
+    }
+
+    this._slashVisual = this.scene.add.image(0, 0, 'player_sword_swipe')
+      .setDepth(8)
+      .setVisible(false);
   }
 
   /**
@@ -573,11 +589,12 @@ class PlayerEntity {
     this.hitboxTimer = 0; // don't use the auto-expire timer
     this._positionHitbox();
 
-    // Show plunge slash visual (stays visible until landing)
+    // Show plunge sword visual (stays visible until landing)
     if (this._slashVisual) {
-      this._slashVisual.setSize(10, 8);
       this._slashVisual.setVisible(true);
-      this._slashVisual.setFillStyle(0xff8800, 0.9);
+      this._slashVisual.setTint(0xff8800);
+      this._slashVisual.setRotation(Math.PI / 2);
+      this._slashVisual.setFlipX(false);
     }
 
     // Tint orange to signal plunge
@@ -890,23 +907,24 @@ class PlayerEntity {
     this.hitboxTimer = HITBOX_DURATION;
     this._positionHitbox();
 
-    // Show sword slash visual
+    // Show a compact sword visual. The hitbox can be a little forgiving,
+    // but the art should still read like a short NES blade.
     if (this._slashVisual) {
-      this._slashVisual.setSize(w, h);
       this._slashVisual.setVisible(true);
-      // Color based on attack type
-      if (this.isPlunging) {
-        this._slashVisual.setFillStyle(0xff8800, 0.9); // orange for plunge
-      } else {
-        this._slashVisual.setFillStyle(0xffffff, 0.9); // white for normal
-      }
+      this._slashVisual.clearTint();
+      this._slashVisual.setRotation(0);
+      this._slashVisual.setFlipX(this.facing < 0);
     }
   }
 
   _deactivateHitbox() {
     this.hitbox.body.enable = false;
     this.hitboxTimer = 0;
-    if (this._slashVisual) this._slashVisual.setVisible(false);
+    if (this._slashVisual) {
+      this._slashVisual.setVisible(false);
+      this._slashVisual.clearTint();
+      this._slashVisual.setRotation(0);
+    }
   }
 
   /**
@@ -935,7 +953,14 @@ class PlayerEntity {
 
     this.hitbox.setPosition(hx, hy);
     if (this._slashVisual && this._slashVisual.visible) {
-      this._slashVisual.setPosition(hx, hy);
+      if (this.isPlunging) {
+        this._slashVisual.setPosition(this.sprite.x, this.sprite.y - 3);
+      } else {
+        this._slashVisual.setPosition(
+          this.sprite.x + this.facing * 11,
+          this.state === STATE.DUCK ? this.sprite.y - 6 : this.sprite.y - 10
+        );
+      }
     }
   }
 

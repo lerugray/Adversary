@@ -88,7 +88,10 @@ class EnemyEntity {
 
     // Physics body
     this.sprite.body.setSize(w, h);
-    this.sprite.body.setOffset(0, 0);
+    this.sprite.body.setOffset(
+      (this.sprite.width - w) / 2,
+      this.sprite.height - h
+    );
     this.sprite.body.setGravityY(config.gravity ?? 600);
 
     // Store reference back to entity for collision callbacks

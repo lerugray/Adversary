@@ -29,12 +29,12 @@ const Level1Data = {
   hazardSpawner: {
     x: 88,
     y: 48,
-    speed: 48,
-    interval: 2000,
-    initialDelay: 1200,
+    speed: 42,
+    interval: 3500,
+    initialDelay: 4200,
     initialDirection: 1,
     damage: 1,
-    preRolledCount: 1,
+    preRolledCount: 0,
   },
 
   platforms: [

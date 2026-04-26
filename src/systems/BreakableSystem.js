@@ -50,8 +50,9 @@ class BreakableSystem {
       // Main body
       const color = isCrate ? 0x8b6914 : 0x6b4c1e;
       const assetKey = isCrate ? 'oryx_crate' : 'oryx_barrel';
+      const assetYOffset = isCrate ? -5 : -4;
       const body = this.scene.textures.exists(assetKey)
-        ? this.scene.add.image(def.x, def.y - h / 2, assetKey).setDepth(5)
+        ? this.scene.add.image(def.x, def.y + assetYOffset, assetKey).setDepth(5)
         : this.scene.add.rectangle(def.x, def.y - h / 2, w, h, color).setDepth(5);
 
       // Detail lines
