@@ -59,15 +59,24 @@ const Level3Data = {
     dartTraps: [],
   },
 
-  // TODO: Add a crushing gear hazard system; current engine only supports pendulums, darts, skulls, bats, and elevators.
+  // The middle ladder is the gear lesson: wait for the teeth to sleep, then climb.
+  gearHazards: [
+    {
+      x: 136,
+      y: 132,
+      radius: 8,
+      rotationRate: 4,
+      damage: 1,
+      crushingRhythm: { cycleFrames: 120, dangerFrames: 60, phaseFrames: 30 },
+    },
+  ],
+
   enemySpawns: [],
 
   breakables: [],
 
   decorations: [
     { x: 128, y: 24, w: 32, h: 16, color: 0xfcfcfc },
-    { x: 80,  y: 128, w: 16, h: 16, color: 0xcc6800 },
-    { x: 84,  y: 132, w: 8,  h: 8,  color: 0x503000 },
     { x: 4,   y: 0,   w: 12, h: 144, color: 0x747474 },
     { x: 240, y: 0,   w: 12, h: 176, color: 0x747474 },
     { x: 32,  y: 88,  w: 28, h: 4,   color: 0x503000 },
