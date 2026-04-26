@@ -99,6 +99,9 @@ class GameScene extends Phaser.Scene {
     // ── Trap System (pendulums, dart traps — Sen's Fortress style) ────
     this.trapSystem = new TrapSystem(this);
 
+    // ── Gear Hazard System (frame-timed crushing gears) ────────────────
+    this.gearHazardSystem = new GearHazardSystem(this, data.gearHazards);
+
     // ── Breakable System (destructible containers) ──────────────────────
     this.breakableSystem = new BreakableSystem(this);
 
@@ -312,6 +315,7 @@ class GameScene extends Phaser.Scene {
     this.enemyManager.destroyAll();
     if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
+    if (this.gearHazardSystem) this.gearHazardSystem.destroyAll();
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
     if (this.elevatorSystem) this.elevatorSystem.destroyAll();
     if (this.phantomSystem) this.phantomSystem.reset();
@@ -467,6 +471,7 @@ class GameScene extends Phaser.Scene {
     this.enemyManager.destroyAll();
     if (this.hazardSystem) this.hazardSystem.destroyAll();
     if (this.trapSystem) this.trapSystem.destroyAll();
+    if (this.gearHazardSystem) this.gearHazardSystem.destroyAll();
     if (this.flyingHazardSystem) this.flyingHazardSystem.destroyAll();
     if (this.elevatorSystem) this.elevatorSystem.destroyAll();
     if (this.phantomSystem) this.phantomSystem.reset();
@@ -840,6 +845,9 @@ class GameScene extends Phaser.Scene {
 
     // Traps (pendulums, darts)
     this.trapSystem.update(delta, this.player);
+
+    // Crushing gears
+    if (this.gearHazardSystem) this.gearHazardSystem.update(this.player, delta);
 
     // Phantom
     this.phantomSystem.update(delta, this.player);
