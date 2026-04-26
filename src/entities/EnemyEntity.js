@@ -69,9 +69,10 @@ class EnemyEntity {
     const color = config.color || 0xff4444;
 
     let key = config.assetKey;
+    const usesAssetSprite = key && this.scene.textures.exists(key);
 
     // Generate a simple colored rectangle texture if no loaded sprite fits.
-    if (!key || !this.scene.textures.exists(key)) {
+    if (!usesAssetSprite) {
       key = `enemy_${color}_${w}x${h}`;
     }
     if (!this.scene.textures.exists(key)) {
@@ -86,11 +87,14 @@ class EnemyEntity {
     this.sprite.setOrigin(0.5, 1);  // pivot at feet
     this.sprite.setCollideWorldBounds(false);
 
+    const bodyW = usesAssetSprite ? Math.min(w, this.sprite.width) : w;
+    const bodyH = usesAssetSprite ? Math.min(h, this.sprite.height) : h;
+
     // Physics body
-    this.sprite.body.setSize(w, h);
+    this.sprite.body.setSize(bodyW, bodyH);
     this.sprite.body.setOffset(
-      (this.sprite.width - w) / 2,
-      this.sprite.height - h
+      (this.sprite.width - bodyW) / 2,
+      this.sprite.height - bodyH
     );
     this.sprite.body.setGravityY(config.gravity ?? 600);
 

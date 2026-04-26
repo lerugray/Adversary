@@ -136,23 +136,27 @@ class LadderSystem {
     const py  = sprite.y;            // feet (origin is at feet)
     const midY = body ? body.center.y : py - 11;  // actual body centre
 
-    // Check which zone the player's body centre is inside
-    const zone = this.getZoneAt(px, midY);
+    // Check body centre for normal climbing, and feet for stepping down
+    // from the top platform onto a ladder.
+    const bodyZone = this.getZoneAt(px, midY);
+    const footZone = input.isDownHeld() ? this.getZoneAt(px, py) : null;
+    const zone = bodyZone || footZone;
 
     if (!player._isClimbing) {
       // ── Not yet climbing ─────────────────────────────────────────────
       // Don't enter climb mode while ducking, plunging, dodging, during knockback, or while dead/hurt
-      if (zone && player.state !== 'duck' && player.state !== 'hurt' &&
+      const canStepDownFromDuck = player.state === 'duck' && input.isDownHeld() && footZone;
+      if (zone && (player.state !== 'duck' || canStepDownFromDuck) && player.state !== 'hurt' &&
           player.state !== 'dead' && player.state !== 'plunge' &&
           player.state !== 'dodge' && !player.knockbackActive &&
           !player.isPlunging) {
         // Player is horizontally aligned with a ladder
         if (input.isUpHeld() && midY > zone.topY) {
           // Initiate climb going up
-          this._enterClimb(player, zone);
+          this._enterClimb(player, zone, -1);
         } else if (input.isDownHeld() && midY < zone.bottomY - 4) {
           // Initiate climb going down (step off platform edge onto ladder)
-          this._enterClimb(player, zone);
+          this._enterClimb(player, zone, 1);
         }
       }
     } else {
@@ -226,11 +230,15 @@ class LadderSystem {
    * @param {PlayerEntity}  player
    * @param {Object}        zone
    */
-  _enterClimb(player, zone) {
+  _enterClimb(player, zone, climbDir) {
     player._isClimbing  = true;
     player._climbZone   = zone;
 
     const body = player.body;
+
+    if (player.state === 'duck' && player._exitDuck) {
+      player._exitDuck();
+    }
 
     // Disable gravity while on ladder
     body.setAllowGravity(false);
@@ -243,6 +251,12 @@ class LadderSystem {
 
     // Snap X to ladder centre for visual cleanliness
     player.gameObject.setX(zone.x);
+
+    // When stepping down from a platform, move far enough onto the ladder
+    // that the body centre is inside the zone on the next frame.
+    if (climbDir > 0 && player.gameObject.y <= zone.topY + 2) {
+      player.gameObject.setY(zone.topY + body.height / 2 + 2);
+    }
   }
 
   /**

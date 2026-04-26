@@ -26,10 +26,10 @@ const Level4Data = {
   bossSpawn: { x: 120, y: 198 },
 
   weakPoints: [
-    { x: 24,  y: 200, radius: 6 },
-    { x: 232, y: 200, radius: 6 },
-    { x: 72,  y: 176, radius: 6 },
-    { x: 184, y: 176, radius: 6 },
+    { x: 24,  y: 198, radius: 6 },
+    { x: 232, y: 198, radius: 6 },
+    { x: 80,  y: 198, radius: 6 },
+    { x: 176, y: 198, radius: 6 },
   ],
 
   platforms: [

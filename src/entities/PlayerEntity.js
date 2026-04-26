@@ -201,12 +201,12 @@ class PlayerEntity {
     if (!this.scene.textures.exists('player_sword_swipe')) {
       const gfx = this.scene.add.graphics();
       gfx.fillStyle(0xfcfcfc);
-      gfx.fillRect(0, 1, 9, 2);
+      gfx.fillRect(2, 1, 10, 2);
       gfx.fillStyle(0xbcbcbc);
-      gfx.fillRect(1, 3, 6, 1);
+      gfx.fillRect(3, 3, 7, 1);
       gfx.fillStyle(0x503000);
-      gfx.fillRect(0, 0, 2, 4);
-      gfx.generateTexture('player_sword_swipe', 9, 4);
+      gfx.fillRect(0, 0, 3, 5);
+      gfx.generateTexture('player_sword_swipe', 12, 5);
       gfx.destroy();
     }
 
@@ -914,6 +914,7 @@ class PlayerEntity {
       this._slashVisual.clearTint();
       this._slashVisual.setRotation(0);
       this._slashVisual.setFlipX(this.facing < 0);
+      this._slashVisual.setOrigin(this.facing > 0 ? 0 : 1, 0.5);
     }
   }
 
@@ -924,6 +925,7 @@ class PlayerEntity {
       this._slashVisual.setVisible(false);
       this._slashVisual.clearTint();
       this._slashVisual.setRotation(0);
+      this._slashVisual.setOrigin(0.5, 0.5);
     }
   }
 
@@ -954,10 +956,11 @@ class PlayerEntity {
     this.hitbox.setPosition(hx, hy);
     if (this._slashVisual && this._slashVisual.visible) {
       if (this.isPlunging) {
+        this._slashVisual.setOrigin(0.5, 0.5);
         this._slashVisual.setPosition(this.sprite.x, this.sprite.y - 3);
       } else {
         this._slashVisual.setPosition(
-          this.sprite.x + this.facing * 11,
+          this.sprite.x + this.facing * 5,
           this.state === STATE.DUCK ? this.sprite.y - 6 : this.sprite.y - 10
         );
       }
