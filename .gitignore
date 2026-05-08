@@ -40,3 +40,6 @@ oryx_8-bit_sounds/
 oryx_roguelike_2.0/
 singlescreen_openAI.html
 
+
+# GS state mirror junction (canonical state in generalstaff-private/)
+state/
